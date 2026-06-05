@@ -1,10 +1,10 @@
 import Component from "@glimmer/component";
 import { inject as service } from "@ember/service";
-import cooked from "discourse/helpers/cooked";
 import { i18n } from "discourse-i18n";
 import dButton from "discourse/components/d-button";
 import dIcon from "discourse-common/helpers/d-icon";
 import { on } from "@ember/modifier";
+import { trustHTML } from "@ember/template";
 
 export default class QuizResultDisplay extends Component {
   @service siteSettings;
@@ -38,7 +38,7 @@ export default class QuizResultDisplay extends Component {
 
       {{#if this.args.result.explanation}}
         <div class="result-explanation">
-          {{cooked this.args.result.explanation}}
+          {{trustHTML this.args.result.explanation}}
         </div>
       {{/if}}
 

@@ -1,10 +1,10 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import cooked from "discourse/helpers/cooked";
 import { i18n } from "discourse-i18n";
 import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
+import { trustHTML } from "@ember/template";
 
 export default class QuizQuestionDisplay extends Component {
   @tracked selectedIndex = null;
@@ -33,7 +33,7 @@ export default class QuizQuestionDisplay extends Component {
   <template>
     <div class="quiz-question-display">
       <div class="quiz-question-text">
-        {{cooked @question.question_text}}
+        {{trustHTML @question.question_text}}
       </div>
 
       <div class="quiz-options-list">
