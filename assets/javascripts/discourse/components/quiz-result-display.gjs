@@ -3,6 +3,8 @@ import { inject as service } from "@ember/service";
 import cooked from "discourse/helpers/cooked";
 import { i18n } from "discourse-i18n";
 import dButton from "discourse/components/d-button";
+import dIcon from "discourse-common/helpers/d-icon";
+import { on } from "@ember/modifier";
 
 export default class QuizResultDisplay extends Component {
   @service siteSettings;
@@ -23,7 +25,7 @@ export default class QuizResultDisplay extends Component {
             {{dIcon "check-circle"}}
           {{else}}
             {{dIcon "times-circle"}}
-          {{endif}}
+          {{/if}}
         </span>
         <span class="result-text">
           {{#if this.isCorrect}}
@@ -42,13 +44,13 @@ export default class QuizResultDisplay extends Component {
 
       <div class="result-actions">
         {{#if this.showSource}}
-          <a href="/t/{{@question.source_topic_id}}" class="btn btn-default quiz-source-link" target="_blank">
+          <a href="/t/{{@question.source_topic_id}}" class="btn btn-default quiz-source-link" target="_blank" rel="noopener noreferrer">
             {{dIcon "external-link-alt"}}
             {{i18n "gamified_quiz.source_link"}}
           </a>
         {{/if}}
 
-        <button class="btn btn-primary quiz-next-btn" {{on "click" @onNext}}>
+        <button class="btn btn-primary quiz-next-btn" type="button" {{on "click" @onNext}}>
           {{i18n "gamified_quiz.next"}}
         </button>
       </div>

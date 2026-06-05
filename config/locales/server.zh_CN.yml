@@ -13,6 +13,9 @@ zh_CN:
   gamified_quiz:
     title: "社区竞答"
     admin_title: "竞答管理"
+  js:
+    gamified_quiz:
+      admin_title: "竞答管理"
     errors:
       invalid_options: "选项必须是一个非空的数组。"
       invalid_correct_index: "正确答案索引必须在选项数组范围内。"

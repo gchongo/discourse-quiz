@@ -3,6 +3,8 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import cooked from "discourse/helpers/cooked";
 import { i18n } from "discourse-i18n";
+import { fn } from "@ember/helper";
+import { on } from "@ember/modifier";
 
 export default class QuizQuestionDisplay extends Component {
   @tracked selectedIndex = null;
@@ -20,6 +22,14 @@ export default class QuizQuestionDisplay extends Component {
     }
   }
 
+  get isSubmitDisabled() {
+    return this.selectedIndex === null || this.args.disabled;
+  }
+
+  isSelected(index) {
+    return this.selectedIndex === index;
+  }
+
   <template>
     <div class="quiz-question-display">
       <div class="quiz-question-text">
@@ -28,11 +38,11 @@ export default class QuizQuestionDisplay extends Component {
 
       <div class="quiz-options-list">
         {{#each @question.options as |option index|}}
-          <label class="quiz-option-item {{if (eq this.selectedIndex index) 'is-selected'}} {{if @disabled 'is-disabled'}}">
+          <label class="quiz-option-item {{if (this.isSelected index) 'is-selected'}} {{if @disabled 'is-disabled'}}">
             <input
               type="radio"
               name="quiz-option"
-              checked={{eq this.selectedIndex index}}
+              checked={{this.isSelected index}}
               disabled={{@disabled}}
               {{on "change" (fn this.selectOption index)}}
             />
@@ -44,7 +54,7 @@ export default class QuizQuestionDisplay extends Component {
       <div class="quiz-actions">
         <button
           class="btn btn-primary quiz-submit-btn"
-          disabled={{or (eq this.selectedIndex null) @disabled}}
+          disabled={{this.isSubmitDisabled}}
           {{on "click" this.submit}}
         >
           {{i18n "gamified_quiz.submit"}}

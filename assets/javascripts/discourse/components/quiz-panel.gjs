@@ -4,6 +4,8 @@ import { action } from "@ember/object";
 import dButton from "discourse/components/d-button";
 import { i18n } from "discourse-i18n";
 import { htmlSafe } from "@ember/template";
+import dIcon from "discourse-common/helpers/d-icon";
+import { on } from "@ember/modifier";
 import QuizQuestionDisplay from "./quiz-question-display";
 import QuizResultDisplay from "./quiz-result-display";
 import QuizPaywall from "./quiz-paywall";
@@ -36,13 +38,41 @@ export default class QuizPanel extends Component {
     return classes.join(" ");
   }
 
+  get isLearningMode() {
+    return this.quiz.status?.mode === "learning_only";
+  }
+
+  get isPaywallMode() {
+    return this.quiz.status?.mode === "paywall";
+  }
+
+  get isReadyState() {
+    return this.quiz.state === "ready";
+  }
+
+  get isSubmittingState() {
+    return this.quiz.state === "submitting";
+  }
+
+  get isResultState() {
+    return this.quiz.state === "result";
+  }
+
+  get isErrorState() {
+    return this.quiz.state === "error";
+  }
+
+  get isLoadingState() {
+    return this.quiz.state === "loading";
+  }
+
   <template>
     {{#if this.quiz.isEnabled}}
       <div class={{this.containerClass}} style={{this.panelStyles}}>
         <div class="quiz-panel-header">
           <span class="quiz-panel-title">
             {{i18n "gamified_quiz.panel_title"}}
-            {{#if (eq this.quiz.status.mode "learning_only")}}
+            {{#if this.isLearningMode}}
               <span class="learning-mode-badge" title={{i18n "gamified_quiz.learning_mode"}}>
                 {{dIcon "graduation-cap"}}
               </span>
@@ -73,30 +103,30 @@ export default class QuizPanel extends Component {
         </div>
         <div class="quiz-panel-content">
           {{#unless this.quiz.isMinimized}}
-            {{#if (eq this.quiz.status.mode "paywall")}}
+            {{#if this.isPaywallMode}}
               <QuizPaywall @status={{this.quiz.status}} />
-            {{else if (eq this.quiz.state "loading")}}
+            {{else if this.isLoadingState}}
               <div class="quiz-loading">
                 <div class="spinner"></div>
                 <p>{{i18n "gamified_quiz.loading"}}</p>
               </div>
-            {{else if (eq this.quiz.state "ready")}}
+            {{else if this.isReadyState}}
               <QuizQuestionDisplay
                 @question={{this.quiz.currentQuestion}}
                 @onSubmit={{this.quiz.submitAnswer}}
               />
-            {{else if (eq this.quiz.state "submitting")}}
+            {{else if this.isSubmittingState}}
               <QuizQuestionDisplay
                 @question={{this.quiz.currentQuestion}}
                 @disabled={{true}}
               />
-            {{else if (eq this.quiz.state "result")}}
+            {{else if this.isResultState}}
               <QuizResultDisplay
                 @question={{this.quiz.currentQuestion}}
                 @result={{this.quiz.lastResult}}
                 @onNext={{this.quiz.nextQuestion}}
               />
-            {{else if (eq this.quiz.state "error")}}
+            {{else if this.isErrorState}}
               <div class="quiz-error">
                 {{dIcon "exclamation-triangle"}}
                 <p>{{i18n "gamified_quiz.error"}}</p>
