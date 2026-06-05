@@ -29,9 +29,9 @@ acceptance("Gamified Quiz - Basic Flow", function (needs) {
 
   test("clicking quiz button opens the panel", async function (assert) {
     await visit("/");
-    assert.dom(".quiz-button").exists("header button exists");
-    
-    await click(".quiz-button");
+    assert.dom(".quiz-header-icon").exists("header icon exists");
+
+    await click(".quiz-header-icon .btn");
     assert.dom(".quiz-panel-container").hasClass("is-visible", "panel becomes visible");
     assert.dom(".quiz-question-text").hasText("Test Question", "shows loaded question");
   });

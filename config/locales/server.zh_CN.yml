@@ -1,4 +1,7 @@
 zh_CN:
+  discourse_quiz:
+    admin:
+      title: "社区竞答"
   site_settings:
     quiz_plugin_enabled: "启用社区竞答插件。"
     quiz_categories: "启用竞答的分类 ID 列表，多个 ID 用英文逗号分隔。"

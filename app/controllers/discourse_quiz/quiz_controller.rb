@@ -5,55 +5,64 @@ module DiscourseQuiz
     requires_plugin DiscourseQuiz::PLUGIN_NAME
 
     before_action :ensure_enabled
-    before_action :ensure_can_play, only: %i[next_question submit_answer]
+    before_action :ensure_can_play, only: %i[next submit]
 
-    def next_question
+    def next
       picker = QuizQuestionPicker.new(current_user)
       question = picker.pick_next
 
-      if question
-        status_service = QuizStatusService.new(current_user, session[:quiz_guest_attempts])
-        render json: {
+      unless question
+        return(
+          render_json_dump(
+            { error: I18n.t("gamified_quiz.errors.no_active_questions") },
+            status: 404,
+          )
+        )
+      end
+
+      status_service = QuizStatusService.new(current_user, session[:quiz_guest_attempts])
+      render_json_dump(
+        {
           id: question.id,
           question_text: question.question_text,
           options: question.options,
           category_name: question.category_name,
           source_topic_id: question.source_topic_id,
           status: status_service.get_status,
-        }
-      else
-        render json: { error: I18n.t("gamified_quiz.errors.no_active_questions") }, status: 404
-      end
+        },
+      )
     end
 
-    def submit_answer
+    def submit
       ensure_not_rate_limited!
       return if performed?
 
       question = QuizQuestion.active.find_by(id: params[:question_id])
       unless question
-        return render json: { error: I18n.t("gamified_quiz.errors.question_not_found") }, status: 404
+        return(
+          render_json_dump(
+            { error: I18n.t("gamified_quiz.errors.question_not_found") },
+            status: 404,
+          )
+        )
       end
 
-      submission_service = QuizSubmissionService.new(
-        current_user,
-        question,
-        params[:answer_index],
-      )
+      submission_service =
+        QuizSubmissionService.new(current_user, question, params[:answer_index], guardian:)
 
       result = submission_service.submit
-      return render json: result, status: submission_service.status_code if submission_service.failed?
+      return render_json_dump(result, status: submission_service.status_code) if submission_service.failed?
 
       unless current_user
         session[:quiz_guest_attempts] = (session[:quiz_guest_attempts] || 0) + 1
       end
 
-      render json: result
+      render_json_dump(result)
     end
 
     def status
       status_service = QuizStatusService.new(current_user, session[:quiz_guest_attempts])
-      render json: status_service.get_status
+      render_json_dump(status_service.get_status)
     end
 
     private
@@ -66,8 +75,8 @@ module DiscourseQuiz
       status_service = QuizStatusService.new(current_user, session[:quiz_guest_attempts])
       return if status_service.can_play?
 
-      render(
-        json: {
+      render_json_dump(
+        {
           error: I18n.t("gamified_quiz.errors.paywall_reached"),
           status: status_service.get_status,
         },

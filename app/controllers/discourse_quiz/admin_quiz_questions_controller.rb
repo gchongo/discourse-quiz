@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-module ::Admin::Quiz
-  class QuestionsController < Admin::AdminController
+module DiscourseQuiz
+  class AdminQuizQuestionsController < ::Admin::AdminController
     requires_plugin DiscourseQuiz::PLUGIN_NAME
 
     def index
-      questions = DiscourseQuiz::QuizQuestion.order(created_at: :desc)
+      questions = QuizQuestion.order(created_at: :desc)
 
       if params[:category_name].present?
         questions = questions.where(category_name: params[:category_name])
@@ -18,14 +18,23 @@ module ::Admin::Quiz
 
     def stats
       render_json_dump(
-        total_questions: DiscourseQuiz::QuizQuestion.count,
-        active_questions: DiscourseQuiz::QuizQuestion.where(active: true).count,
-        total_attempts: DiscourseQuiz::QuizUserAttempt.count,
+        total_questions: QuizQuestion.count,
+        active_questions: QuizQuestion.where(active: true).count,
+        total_attempts: QuizUserAttempt.count,
+      )
+    end
+
+    def audit
+      questions = QuizQuestion.where.not(source_topic_id: nil).order(:id)
+
+      render_json_dump(
+        questions: serialize_data(questions.to_a, AdminQuizQuestionSerializer),
+        audited_at: Time.zone.now,
       )
     end
 
     def create
-      question = DiscourseQuiz::QuizQuestion.new(question_params)
+      question = QuizQuestion.new(question_params)
       if question.save
         render_serialized(question, AdminQuizQuestionSerializer, root: false)
       else
@@ -34,7 +43,7 @@ module ::Admin::Quiz
     end
 
     def update
-      question = DiscourseQuiz::QuizQuestion.find(params[:id])
+      question = QuizQuestion.find(params[:id])
       if question.update(question_params)
         render_serialized(question, AdminQuizQuestionSerializer, root: false)
       else
@@ -43,7 +52,7 @@ module ::Admin::Quiz
     end
 
     def destroy
-      question = DiscourseQuiz::QuizQuestion.find(params[:id])
+      question = QuizQuestion.find(params[:id])
       question.destroy!
       head :no_content
     end

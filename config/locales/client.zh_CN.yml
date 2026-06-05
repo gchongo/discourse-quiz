@@ -55,3 +55,5 @@ zh_CN:
         audit:
           ok: "正常"
           errors: "发现异常"
+          refresh: "查看源帖审计"
+          last_checked: "最近审计"

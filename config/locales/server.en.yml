@@ -1,4 +1,7 @@
 en:
+  discourse_quiz:
+    admin:
+      title: "Community quiz"
   site_settings:
     quiz_plugin_enabled: "Enable the gamified quiz plugin."
     quiz_categories: "Comma-separated list of category IDs where quizzes are enabled."

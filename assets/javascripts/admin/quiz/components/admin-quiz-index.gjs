@@ -13,6 +13,7 @@ import AdminQuizEdit from "discourse/plugins/discourse-quiz/admin/quiz/component
 export default class AdminQuizIndex extends Component {
   @tracked questions = [];
   @tracked stats = null;
+  @tracked auditData = null;
   @tracked editingQuestion = null;
   @tracked loading = true;
 
@@ -73,6 +74,15 @@ export default class AdminQuizIndex extends Component {
   }
 
   @action
+  async loadAudit() {
+    try {
+      this.auditData = await ajax("/admin/quiz/audit.json");
+    } catch (e) {
+      popupAjaxError(e);
+    }
+  }
+
+  @action
   async deleteQuestion(id) {
     if (confirm(i18n("admin.gamified_quiz.confirm_delete"))) {
       try {
@@ -112,7 +122,20 @@ export default class AdminQuizIndex extends Component {
           @action={{fn this.editQuestion null}}
           class="btn-primary"
         />
+        <dButton
+          @icon="shield-alt"
+          @label="admin.gamified_quiz.audit.refresh"
+          @action={{this.loadAudit}}
+          class="btn-default"
+        />
       </div>
+
+      {{#if this.auditData}}
+        <p class="audit-summary">
+          {{i18n "admin.gamified_quiz.audit.last_checked"}}:
+          {{this.auditData.audited_at}}
+        </p>
+      {{/if}}
 
       {{#if this.editingQuestion}}
         <AdminQuizEdit

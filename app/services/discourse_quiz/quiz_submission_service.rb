@@ -4,10 +4,11 @@ module DiscourseQuiz
   class QuizSubmissionService
     attr_reader :status_code, :failed
 
-    def initialize(user, question, answer_index)
+    def initialize(user, question, answer_index, guardian: nil)
       @user = user
       @question = question
       @answer_index = answer_index
+      @guardian = guardian
       @status_code = 200
       @failed = false
     end
@@ -22,22 +23,19 @@ module DiscourseQuiz
       is_correct = @question.correct_index == @answer_index.to_i
 
       if @user
-        attempt = QuizUserAttempt.create!(
-          user_id: @user.id,
-          question_id: @question.id,
-          is_correct: is_correct,
-          created_at: Time.zone.now,
-        )
+        attempt =
+          QuizUserAttempt.create!(
+            user_id: @user.id,
+            question_id: @question.id,
+            is_correct: is_correct,
+            created_at: Time.zone.now,
+          )
 
-        QuizPointsService.award_points(@user, @question, attempt) if is_correct
+        PointsAwarder.call(params: { user: @user, question: @question, attempt: attempt }) if is_correct
       end
 
       result = { correct: is_correct }
-
-      if is_correct
-        result[:explanation] = formatted_explanation
-      end
-
+      result[:explanation] = formatted_explanation if is_correct
       result
     end
 

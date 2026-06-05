@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-describe Admin::Quiz::QuestionsController do
+describe DiscourseQuiz::AdminQuizQuestionsController do
   let(:admin) { Fabricate(:admin) }
   let!(:question) do
     DiscourseQuiz::QuizQuestion.create!(
@@ -31,6 +31,17 @@ describe Admin::Quiz::QuestionsController do
       get "/admin/quiz/stats.json"
       expect(response.status).to eq(200)
       expect(response.parsed_body["total_questions"]).to eq(1)
+    end
+  end
+
+  describe "#audit" do
+    it "returns questions with source topics" do
+      question.update!(source_topic_id: 1, validation_errors: ["topic_not_found"])
+
+      get "/admin/quiz/audit.json"
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["questions"].length).to eq(1)
+      expect(response.parsed_body["audited_at"]).to be_present
     end
   end
 
