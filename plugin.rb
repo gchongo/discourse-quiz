@@ -4,13 +4,13 @@
 # about: A gamified quiz plugin for Discourse to increase community engagement.
 # meta_topic_id: TODO
 # version: 0.0.1
-# authors: howhy.day
-# url: https://github.com/howhy-day/discourse-quiz
+# authors: gchongo
+# url: https://github.com/gchongo/discourse-quiz
 # required_version: 2.7.0
 
 enabled_site_setting :quiz_plugin_enabled
 
-register_asset "stylesheets/common/gamified-quiz.scss"
+register_asset "stylesheets/common/quiz.scss"
 
 after_initialize do
   # Phase 1: Site Settings & i18n Skeleton.
@@ -32,7 +32,7 @@ after_initialize do
   end
 
   # Admin Routes
-  add_admin_route "js.gamified_quiz.admin_title", "discourse-quiz"
+  add_admin_route "js.quiz.admin_title", "discourse-quiz"
 
   Discourse::Application.routes.append do
     mount ::DiscourseQuiz::Engine, at: "/quiz"
