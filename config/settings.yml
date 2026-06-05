@@ -1,0 +1,31 @@
+plugins:
+  quiz_plugin_enabled:
+    default: false
+    client: true
+  quiz_categories:
+    default: ""
+    client: true
+  quiz_points_per_question:
+    default: 10
+    client: true
+  quiz_daily_max_points:
+    default: 100
+    client: true
+  quiz_enable_guest_demo:
+    default: true
+    client: true
+  quiz_guest_attempt_limit:
+    default: 3
+    client: true
+  quiz_guest_paywall_message:
+    default: "You've reached the guest limit. Please log in or sign up to continue playing and save your progress!"
+    client: true
+  quiz_desktop_sidebar_width:
+    default: "300px"
+    client: true
+  quiz_show_source_link:
+    default: true
+    client: true
+  quiz_submit_cooldown_seconds:
+    default: 5
+    client: true

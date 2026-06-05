@@ -1,0 +1,55 @@
+en:
+  js:
+    gamified_quiz:
+      title: "Quiz"
+      admin_title: "Gamified Quiz"
+      enabled_label: "Quiz Enabled"
+      points: "Points"
+      correct_answer: "Correct!"
+      wrong_answer: "Incorrect. Try again!"
+      guest_limit_reached: "Guest Limit Reached"
+      button_title: "Open Gamified Quiz"
+      panel_title: "Community Quiz"
+      close_panel: "Close"
+      dock_panel: "Dock to Side"
+      undock_panel: "Float Panel"
+      minimize: "Minimize"
+      expand: "Expand"
+      loading: "Loading question..."
+      submit: "Submit Answer"
+      next: "Next Question"
+      correct: "Correct!"
+      incorrect: "Incorrect"
+      learning_mode: "Learning Mode (Daily limit reached)"
+      error: "An error occurred. Please try again."
+      source_link: "Source Topic"
+      login_to_continue: "Log In to Continue"
+      signup_to_continue: "Sign Up to Continue"
+      too_many_requests: "Slow down! You are submitting answers too quickly. Please wait a few seconds."
+    admin:
+      gamified_quiz:
+        title: "Gamified Quiz"
+        stats:
+          total_questions: "Total Questions"
+          active_questions: "Active Questions"
+          total_attempts: "Total Attempts"
+        table:
+          question: "Question"
+          category: "Category"
+          active: "Active"
+          audit: "Audit Status"
+          actions: "Actions"
+        form:
+          question_text: "Question Text"
+          options: "Options (One per line)"
+          correct_index: "Correct Option Index (0-based)"
+          explanation: "Explanation"
+          source_topic_id: "Source Topic ID"
+          active: "Is Active"
+          save: "Save Question"
+          create: "Create Question"
+          cancel: "Cancel"
+        audit:
+          ok: "OK"
+          errors: "Errors Found"
+
