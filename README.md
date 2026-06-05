@@ -1,6 +1,5 @@
 # discourse-quiz
 
-
 A gamified quiz plugin for Discourse to increase community engagement by providing interactive quizzes with a scoring system.
 
 ## Features
@@ -21,7 +20,7 @@ A gamified quiz plugin for Discourse to increase community engagement by providi
        - exec:
            cd: $home/plugins
            cmd:
-             - git clone https://github.com/howhy-day/discourse-gamified-quiz.git
+             - git clone https://github.com/gchongo/discourse-quiz.git
    ```
 2. Rebuild your Discourse instance:
    ```bash
@@ -30,7 +29,7 @@ A gamified quiz plugin for Discourse to increase community engagement by providi
 
 ## Configuration
 
-Settings are available in `Admin -> Settings -> Plugins -> discourse-gamified-quiz`:
+Settings are available in `Admin -> Settings -> Plugins -> discourse-quiz`:
 
 - `quiz_plugin_enabled`: Main toggle to enable the plugin.
 - `quiz_points_per_question`: Points awarded for each correct answer.
@@ -41,7 +40,7 @@ Settings are available in `Admin -> Settings -> Plugins -> discourse-gamified-qu
 
 ## Admin Usage
 
-Access the management interface at `/admin/plugins/gamified-quiz`. From here you can:
+Access the management interface at `/admin/plugins/discourse-quiz`. From here you can:
 - Create, edit, and delete quiz questions.
 - Enable or disable specific questions.
 - View audit results for source topics.
@@ -53,7 +52,7 @@ Access the management interface at `/admin/plugins/gamified-quiz`. From here you
 ```bash
 bin/rake autospec
 # or
-bin/rspec plugins/discourse-gamified-quiz
+bin/rspec plugins/discourse-quiz
 ```
 
 ### Running JavaScript Tests
