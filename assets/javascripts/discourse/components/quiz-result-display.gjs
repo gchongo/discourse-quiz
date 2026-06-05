@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { i18n } from "discourse-i18n";
 import dIcon from "discourse-common/helpers/d-icon";
 import { on } from "@ember/modifier";
