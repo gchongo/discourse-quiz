@@ -63,7 +63,7 @@ class SeedDefaultQuizQuestions < ActiveRecord::Migration[7.0]
 
   def up
     return unless table_exists?(:discourse_quiz_questions)
-    return if DB.query_single("SELECT 1 FROM discourse_quiz_questions LIMIT 1").present?
+    return if select_value("SELECT 1 FROM discourse_quiz_questions LIMIT 1")
 
     SEED_QUESTIONS.each { |question| insert_question(question) }
   end
@@ -72,33 +72,32 @@ class SeedDefaultQuizQuestions < ActiveRecord::Migration[7.0]
     return unless table_exists?(:discourse_quiz_questions)
 
     SEED_QUESTIONS.each do |question|
-      execute <<~SQL
-        DELETE FROM discourse_quiz_questions
-        WHERE question_text = #{quote(question[:question_text])}
-      SQL
+      execute(
+        sanitize_sql_array(
+          ["DELETE FROM discourse_quiz_questions WHERE question_text = ?", question[:question_text]],
+        ),
+      )
     end
   end
 
   private
 
   def insert_question(question)
-    execute <<~SQL
-      INSERT INTO discourse_quiz_questions
-        (category_name, question_text, options, correct_index, explanation, active, created_at, updated_at)
-      VALUES (
-        #{quote(question[:category_name])},
-        #{quote(question[:question_text])},
-        #{quote(question[:options].to_json)}::jsonb,
-        #{question[:correct_index].to_i},
-        #{quote(question[:explanation])},
-        true,
-        NOW(),
-        NOW()
-      )
-    SQL
-  end
-
-  def quote(value)
-    ActiveRecord::Base.connection.quote(value)
+    execute(
+      sanitize_sql_array(
+        [
+          <<~SQL.squish,
+            INSERT INTO discourse_quiz_questions
+              (category_name, question_text, options, correct_index, explanation, active, created_at, updated_at)
+            VALUES (?, ?, ?::jsonb, ?, ?, true, NOW(), NOW())
+          SQL
+          question[:category_name],
+          question[:question_text],
+          question[:options].to_json,
+          question[:correct_index],
+          question[:explanation],
+        ],
+      ),
+    )
   end
 end
