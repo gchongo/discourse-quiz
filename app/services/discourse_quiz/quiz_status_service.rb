@@ -32,7 +32,7 @@ module DiscourseQuiz
         is_guest: false,
         points_today: points_today,
         daily_max_reached: points_today >= daily_max,
-        mode: mode
+        mode: mode,
       }
     end
 
@@ -48,7 +48,7 @@ module DiscourseQuiz
         is_guest: true,
         attempts_left: [0, limit - @guest_attempts_count].max,
         mode: mode,
-        paywall_message: mode == :paywall ? SiteSetting.quiz_guest_paywall_message : nil
+        paywall_message: mode == :paywall ? SiteSetting.quiz_guest_paywall_message : nil,
       }
     end
   end
