@@ -9,6 +9,7 @@ zh_CN:
       wrong_answer: "回答错误，再试一次吧！"
       guest_limit_reached: "达到试玩上限"
       button_title: "打开社区竞答"
+      sidebar_title: "社区竞答"
       panel_title: "社区有奖竞答"
       close_panel: "关闭"
       dock_panel: "固定到侧边"

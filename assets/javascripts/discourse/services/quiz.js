@@ -27,6 +27,15 @@ export default class QuizService extends Service {
   }
 
   @action
+  async openPanel() {
+    if (!this.panelVisible) {
+      this.panelVisible = true;
+      this.isMinimized = false;
+      await this.loadInitialData();
+    }
+  }
+
+  @action
   async togglePanel() {
     this.panelVisible = !this.panelVisible;
     if (this.panelVisible) {

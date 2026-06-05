@@ -9,6 +9,7 @@ en:
       wrong_answer: "Incorrect. Try again!"
       guest_limit_reached: "Guest limit reached"
       button_title: "Open gamified quiz"
+      sidebar_title: "Community quiz"
       panel_title: "Community quiz"
       close_panel: "Close"
       dock_panel: "Dock to side"

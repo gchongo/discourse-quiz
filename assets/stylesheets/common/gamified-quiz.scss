@@ -337,10 +337,13 @@
   }
 }
 
+.quiz-header-icon,
 .quiz-button {
   .d-icon {
     color: var(--primary-medium);
   }
+
+  .btn.active .d-icon,
   &:hover .d-icon {
     color: var(--primary);
   }
