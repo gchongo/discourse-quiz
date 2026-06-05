@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module DiscourseGamifiedQuiz
+module DiscourseQuiz
   class QuizController < ::ApplicationController
     before_action :ensure_enabled
     before_action :ensure_can_play, only: [:next_question, :submit_answer]

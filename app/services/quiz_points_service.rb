@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module DiscourseGamifiedQuiz
+module DiscourseQuiz
   class QuizPointsService
     def self.award_points(user, question, attempt)
       return unless user && SiteSetting.quiz_plugin_enabled

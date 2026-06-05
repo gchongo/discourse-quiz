@@ -7,7 +7,7 @@ module Jobs
     def execute(args)
       return unless SiteSetting.quiz_plugin_enabled
 
-      DiscourseGamifiedQuiz::QuizQuestion.active.find_each do |question|
+      DiscourseQuiz::QuizQuestion.active.find_each do |question|
         errors = []
         topic_id = question.source_topic_id
 

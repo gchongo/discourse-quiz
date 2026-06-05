@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Admin::GamifiedQuiz
+module Admin::Quiz
   class QuizQuestionSerializer < ApplicationSerializer
     attributes :id,
                :category_name,

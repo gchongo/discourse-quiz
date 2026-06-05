@@ -1,4 +1,4 @@
-# discourse-gamified-quiz
+# discourse-quiz
 
 
 A gamified quiz plugin for Discourse to increase community engagement by providing interactive quizzes with a scoring system.

@@ -6,8 +6,8 @@ import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
 import dButton from "discourse/components/d-button";
 import { fn } from "@ember/helper";
-import AdminQuizRow from "./admin-quiz-row";
-import AdminQuizEdit from "./admin-quiz-edit";
+import AdminQuizRow from "discourse/plugins/discourse-quiz/admin/quiz/components/admin-quiz-row";
+import AdminQuizEdit from "discourse/plugins/discourse-quiz/admin/quiz/components/admin-quiz-edit";
 
 export default class AdminQuizIndex extends Component {
   @tracked questions = [];
@@ -24,8 +24,8 @@ export default class AdminQuizIndex extends Component {
     this.loading = true;
     try {
       const [questions, stats] = await Promise.all([
-        ajax("/admin/gamified_quiz/questions.json"),
-        ajax("/admin/gamified_quiz/stats.json")
+        ajax("/admin/quiz/questions.json"),
+        ajax("/admin/quiz/stats.json")
       ]);
       this.questions = questions.questions;
       this.stats = stats;
@@ -54,8 +54,8 @@ export default class AdminQuizIndex extends Component {
   async saveQuestion(questionData) {
     const isNew = !questionData.id;
     const url = isNew 
-      ? "/admin/gamified_quiz/questions.json" 
-      : `/admin/gamified_quiz/questions.json/${questionData.id}`;
+      ? "/admin/quiz/questions.json" 
+      : `/admin/quiz/questions.json/${questionData.id}`;
     
     try {
       await ajax(url, {
@@ -72,7 +72,7 @@ export default class AdminQuizIndex extends Component {
   @action
   async deleteQuestion(id) {
     if (confirm(i18n("js.admin.gamified_quiz.confirm_delete"))) {
-      await ajax(`/admin/gamified_quiz/questions.json/${id}`, { type: "DELETE" });
+      await ajax(`/admin/quiz/questions.json/${id}`, { type: "DELETE" });
       this.loadData();
     }
   }

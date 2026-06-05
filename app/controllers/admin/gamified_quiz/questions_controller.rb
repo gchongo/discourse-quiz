@@ -1,45 +1,45 @@
 # frozen_string_literal: true
 
-module Admin::GamifiedQuiz
+module Admin::Quiz
   class QuestionsController < Admin::AdminController
     def index
-      questions = DiscourseGamifiedQuiz::QuizQuestion.order(created_at: :desc)
+      questions = DiscourseQuiz::QuizQuestion.order(created_at: :desc)
       
       if params[:category_name].present?
         questions = questions.where(category_name: params[:category_name])
       end
 
-      render_serialized(questions, Admin::GamifiedQuiz::QuizQuestionSerializer)
+      render_serialized(questions, Admin::Quiz::QuizQuestionSerializer)
     end
 
     def stats
       render json: {
-        total_questions: DiscourseGamifiedQuiz::QuizQuestion.count,
-        active_questions: DiscourseGamifiedQuiz::QuizQuestion.where(active: true).count,
-        total_attempts: DiscourseGamifiedQuiz::QuizUserAttempt.count
+        total_questions: DiscourseQuiz::QuizQuestion.count,
+        active_questions: DiscourseQuiz::QuizQuestion.where(active: true).count,
+        total_attempts: DiscourseQuiz::QuizUserAttempt.count
       }
     end
 
     def create
-      question = DiscourseGamifiedQuiz::QuizQuestion.new(question_params)
+      question = DiscourseQuiz::QuizQuestion.new(question_params)
       if question.save
-        render_serialized(question, Admin::GamifiedQuiz::QuizQuestionSerializer)
+        render_serialized(question, Admin::Quiz::QuizQuestionSerializer)
       else
         render_json_error(question)
       end
     end
 
     def update
-      question = DiscourseGamifiedQuiz::QuizQuestion.find(params[:id])
+      question = DiscourseQuiz::QuizQuestion.find(params[:id])
       if question.update(question_params)
-        render_serialized(question, Admin::GamifiedQuiz::QuizQuestionSerializer)
+        render_serialized(question, Admin::Quiz::QuizQuestionSerializer)
       else
         render_json_error(question)
       end
     end
 
     def destroy
-      question = DiscourseGamifiedQuiz::QuizQuestion.find(params[:id])
+      question = DiscourseQuiz::QuizQuestion.find(params[:id])
       question.destroy
       render json: success_json
     end

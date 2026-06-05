@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module DiscourseGamifiedQuiz
+module DiscourseQuiz
   class QuizQuestionPicker
     def initialize(user)
       @user = user

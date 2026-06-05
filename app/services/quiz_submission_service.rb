@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module DiscourseGamifiedQuiz
+module DiscourseQuiz
   class QuizSubmissionService
     def initialize(user, question, answer_index)
       @user = user
