@@ -4,8 +4,7 @@ import { action } from "@ember/object";
 import { i18n } from "discourse-i18n";
 import dButton from "discourse/components/d-button";
 import { on } from "@ember/modifier";
-import { Input } from "@ember/component";
-import Textarea from "@ember/component/textarea";
+import { fn } from "@ember/helper";
 
 export default class AdminQuizEdit extends Component {
   @tracked categoryName = this.args.question.category_name;
@@ -15,6 +14,11 @@ export default class AdminQuizEdit extends Component {
   @tracked explanation = this.args.question.explanation;
   @tracked sourceTopicId = this.args.question.source_topic_id;
   @tracked active = !!this.args.question.active;
+
+  @action
+  updateField(field, event) {
+    this[field] = event.target.value;
+  }
 
   @action
   updateActive(event) {
@@ -41,32 +45,59 @@ export default class AdminQuizEdit extends Component {
       <div class="edit-form">
         <div class="control-group">
           <label>{{i18n "js.admin.gamified_quiz.form.category"}}</label>
-          <Input @value={{this.categoryName}} class="form-control" />
+          <input
+            type="text"
+            value={{this.categoryName}}
+            class="form-control"
+            {{on "input" (fn this.updateField "categoryName")}}
+          />
         </div>
 
         <div class="control-group">
           <label>{{i18n "js.admin.gamified_quiz.form.question_text"}}</label>
-          <Textarea @value={{this.questionText}} class="form-control" />
+          <textarea
+            value={{this.questionText}}
+            class="form-control"
+            {{on "input" (fn this.updateField "questionText")}}
+          ></textarea>
         </div>
 
         <div class="control-group">
           <label>{{i18n "js.admin.gamified_quiz.form.options"}}</label>
-          <Textarea @value={{this.optionsString}} class="form-control" />
+          <textarea
+            value={{this.optionsString}}
+            class="form-control"
+            {{on "input" (fn this.updateField "optionsString")}}
+          ></textarea>
         </div>
 
         <div class="control-group">
           <label>{{i18n "js.admin.gamified_quiz.form.correct_index"}}</label>
-          <Input @type="number" @value={{this.correctIndex}} class="form-control" />
+          <input
+            type="number"
+            value={{this.correctIndex}}
+            class="form-control"
+            {{on "input" (fn this.updateField "correctIndex")}}
+          />
         </div>
 
         <div class="control-group">
           <label>{{i18n "js.admin.gamified_quiz.form.explanation"}}</label>
-          <Textarea @value={{this.explanation}} class="form-control" />
+          <textarea
+            value={{this.explanation}}
+            class="form-control"
+            {{on "input" (fn this.updateField "explanation")}}
+          ></textarea>
         </div>
 
         <div class="control-group">
           <label>{{i18n "js.admin.gamified_quiz.form.source_topic_id"}}</label>
-          <Input @type="number" @value={{this.sourceTopicId}} class="form-control" />
+          <input
+            type="number"
+            value={{this.sourceTopicId}}
+            class="form-control"
+            {{on "input" (fn this.updateField "sourceTopicId")}}
+          />
         </div>
 
         <div class="control-group">
