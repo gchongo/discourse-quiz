@@ -2,8 +2,8 @@
 
 require "rails_helper"
 
-describe Jobs::QuizSourceTopicChecker do
-  let(:job) { Jobs::QuizSourceTopicChecker.new }
+describe Jobs::DiscourseQuiz::QuizSourceTopicChecker do
+  let(:job) { Jobs::DiscourseQuiz::QuizSourceTopicChecker.new }
 
   before do
     SiteSetting.quiz_plugin_enabled = true

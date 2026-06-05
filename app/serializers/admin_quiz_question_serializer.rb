@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AdminQuizQuestionSerializer < ApplicationSerializer
+class ::AdminQuizQuestionSerializer < ApplicationSerializer
   attributes :id,
              :category_name,
              :question_text,

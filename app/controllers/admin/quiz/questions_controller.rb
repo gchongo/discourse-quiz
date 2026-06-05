@@ -1,18 +1,8 @@
 # frozen_string_literal: true
 
-module Admin::Quiz
+module ::Admin::Quiz
   class QuestionsController < Admin::AdminController
     requires_plugin DiscourseQuiz::PLUGIN_NAME
-
-    rescue_from StandardError do |e|
-      raise if e.is_a?(ApplicationController::PluginDisabled)
-      raise if e.is_a?(ActiveRecord::RecordNotFound)
-
-      Rails.logger.error(
-        "[DiscourseQuiz] #{action_name} failed: #{e.class}: #{e.message}\n#{e.backtrace.first(8).join("\n")}",
-      )
-      render_json_dump({ error: e.class.name, message: e.message }, status: 500)
-    end
 
     def index
       questions = DiscourseQuiz::QuizQuestion.order(created_at: :desc)
