@@ -1,24 +1,3 @@
 en:
-  discourse_quiz:
-    admin:
-      title: "Community quiz"
   site_settings:
-    quiz_plugin_enabled: "Enable the gamified quiz plugin."
-    quiz_categories: "Comma-separated list of category IDs where quizzes are enabled."
-    quiz_points_per_question: "Number of points awarded for each correct answer."
-    quiz_daily_max_points: "Maximum number of points a user can earn per day from quizzes."
-    quiz_enable_guest_demo: "Allow guests to try a limited number of quiz questions."
-    quiz_guest_attempt_limit: "Number of questions a guest can attempt before being prompted to log in."
-    quiz_guest_paywall_message: "Message shown to guests when they reach the attempt limit."
-    quiz_desktop_sidebar_width: "Width of the quiz sidebar on desktop (e.g., 300px, 25%)."
-    quiz_show_source_link: "Show a link to the source/topic for each quiz question."
-    quiz_submit_cooldown_seconds: "Number of seconds a user must wait between quiz submissions."
-  gamified_quiz:
-    guest_explanation_masked_suffix: "Log in to see full explanation"
-    errors:
-      invalid_options: "Options must be a non-empty array."
-      invalid_correct_index: "Correct index must be within the bounds of the options array."
-      invalid_answer_index: "Answer index must be within the bounds of the options array."
-      question_not_found: "Question not found."
-      no_active_questions: "No active questions available."
-      paywall_reached: "Paywall reached."
+    quiz_plugin_enabled: "Enable the quiz panel entry and show/hide UI."

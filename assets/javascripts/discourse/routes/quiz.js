@@ -5,9 +5,9 @@ export default class QuizRoute extends Route {
   @service quiz;
   @service router;
 
-  async beforeModel() {
+  beforeModel() {
     if (this.quiz.isEnabled) {
-      await this.quiz.openPanel();
+      this.quiz.openPanel();
     }
 
     this.router.transitionTo("discovery.latest");
