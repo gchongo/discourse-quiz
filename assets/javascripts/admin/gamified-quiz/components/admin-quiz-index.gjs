@@ -5,6 +5,7 @@ import { inject as service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
 import dButton from "discourse/components/d-button";
+import { fn } from "@ember/helper";
 import AdminQuizRow from "./admin-quiz-row";
 import AdminQuizEdit from "./admin-quiz-edit";
 

@@ -3,17 +3,23 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { i18n } from "discourse-i18n";
 import dButton from "discourse/components/d-button";
+import { on } from "@ember/modifier";
 import { Input } from "@ember/component";
 import Textarea from "@ember/component/textarea";
 
 export default class AdminQuizEdit extends Component {
   @tracked categoryName = this.args.question.category_name;
   @tracked questionText = this.args.question.question_text;
-  @tracked optionsString = this.args.question.options.join("\n");
+  @tracked optionsString = (this.args.question.options || []).join("\n");
   @tracked correctIndex = this.args.question.correct_index;
   @tracked explanation = this.args.question.explanation;
   @tracked sourceTopicId = this.args.question.source_topic_id;
-  @tracked active = this.args.question.active;
+  @tracked active = !!this.args.question.active;
+
+  @action
+  updateActive(event) {
+    this.active = event.target.checked;
+  }
 
   @action
   save() {
@@ -65,7 +71,11 @@ export default class AdminQuizEdit extends Component {
 
         <div class="control-group">
           <label>
-            <Input @type="checkbox" @checked={{this.active}} />
+            <input
+              type="checkbox"
+              checked={{this.active}}
+              {{on "change" this.updateActive}}
+            />
             {{i18n "js.admin.gamified_quiz.form.active"}}
           </label>
         </div>

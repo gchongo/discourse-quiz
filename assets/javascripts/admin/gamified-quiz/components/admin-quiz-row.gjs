@@ -1,10 +1,19 @@
 import Component from "@glimmer/component";
 import { i18n } from "discourse-i18n";
 import dButton from "discourse/components/d-button";
+import dIcon from "discourse-common/helpers/d-icon";
 
 export default class AdminQuizRow extends Component {
   get auditStatusClass() {
-    return this.args.question.validation_errors.length > 0 ? "status-error" : "status-ok";
+    return (this.args.question.validation_errors || []).length > 0 ? "status-error" : "status-ok";
+  }
+
+  get hasErrors() {
+    return (this.args.question.validation_errors || []).length > 0;
+  }
+
+  get errorCount() {
+    return (this.args.question.validation_errors || []).length;
   }
 
   <template>
@@ -20,9 +29,9 @@ export default class AdminQuizRow extends Component {
       </td>
       <td>
         <span class="audit-badge {{this.auditStatusClass}}">
-          {{#if (gt @question.validation_errors.length 0)}}
+          {{#if this.hasErrors}}
             {{dIcon "exclamation-triangle"}}
-            {{@question.validation_errors.length}}
+            {{this.errorCount}}
           {{else}}
             {{i18n "js.admin.gamified_quiz.audit.ok"}}
           {{/if}}
