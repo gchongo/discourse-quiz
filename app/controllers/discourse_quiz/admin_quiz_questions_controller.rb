@@ -11,7 +11,7 @@ class DiscourseQuiz::AdminQuizQuestionsController < Admin::AdminController
     end
 
     render json: {
-      questions: serialize_data(questions, AdminQuizQuestionSerializer),
+      questions: serialize_data(questions.to_a, AdminQuizQuestionSerializer),
     }
   end
 
@@ -30,6 +30,9 @@ class DiscourseQuiz::AdminQuizQuestionsController < Admin::AdminController
     else
       render_json_error(question)
     end
+  rescue => e
+    Rails.logger.error("[DiscourseQuiz] create failed: #{e.class}: #{e.message}\n#{e.backtrace.first(10).join("\n")}")
+    render json: { error: e.class.name, message: e.message }, status: 500
   end
 
   def update
