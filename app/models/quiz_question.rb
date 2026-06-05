@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module DiscourseQuiz
-  class QuizQuestion < ApplicationRecord
+  class QuizQuestion < ::ActiveRecord::Base
     self.table_name = "discourse_quiz_questions"
 
     validates :category_name, presence: true

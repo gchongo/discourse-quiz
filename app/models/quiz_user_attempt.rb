@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module DiscourseQuiz
-  class QuizUserAttempt < ApplicationRecord
+  class QuizUserAttempt < ::ActiveRecord::Base
     self.table_name = "discourse_quiz_user_attempts"
 
     validates :user_id, presence: true
