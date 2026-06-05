@@ -26,10 +26,12 @@ export default class AdminQuizIndex extends Component {
     try {
       const [questions, stats] = await Promise.all([
         ajax("/admin/quiz/questions.json"),
-        ajax("/admin/quiz/stats.json")
+        ajax("/admin/quiz/stats.json"),
       ]);
       this.questions = questions.questions;
       this.stats = stats;
+    } catch (e) {
+      popupAjaxError(e);
     } finally {
       this.loading = false;
     }

@@ -13,7 +13,10 @@ describe Admin::Quiz::QuestionsController do
     )
   end
 
-  before { sign_in(admin) }
+  before do
+    SiteSetting.quiz_plugin_enabled = true
+    sign_in(admin)
+  end
 
   describe "#index" do
     it "returns list of questions" do
@@ -50,7 +53,7 @@ describe Admin::Quiz::QuestionsController do
 
   describe "#update" do
     it "updates existing question" do
-      put "/admin/quiz/questions.json/#{question.id}",
+      put "/admin/quiz/questions/#{question.id}.json",
           params: {
             question: {
               question_text: "Updated text",
@@ -63,7 +66,7 @@ describe Admin::Quiz::QuestionsController do
 
   describe "#destroy" do
     it "deletes a question" do
-      delete "/admin/quiz/questions.json/#{question.id}"
+      delete "/admin/quiz/questions/#{question.id}.json"
       expect(response.status).to eq(204)
       expect(DiscourseQuiz::QuizQuestion.count).to eq(0)
     end
