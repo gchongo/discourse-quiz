@@ -33,7 +33,7 @@ export default class AdminQuizRow extends Component {
             {{dIcon "exclamation-triangle"}}
             {{this.errorCount}}
           {{else}}
-            {{i18n "js.admin.gamified_quiz.audit.ok"}}
+            {{i18n "admin.gamified_quiz.audit.ok"}}
           {{/if}}
         </span>
       </td>

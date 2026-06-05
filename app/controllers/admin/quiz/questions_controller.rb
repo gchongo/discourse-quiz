@@ -4,26 +4,28 @@ module Admin::Quiz
   class QuestionsController < Admin::AdminController
     def index
       questions = DiscourseQuiz::QuizQuestion.order(created_at: :desc)
-      
+
       if params[:category_name].present?
         questions = questions.where(category_name: params[:category_name])
       end
 
-      render_serialized(questions, Admin::Quiz::QuizQuestionSerializer)
+      render json: {
+        questions: serialize_data(questions, Admin::Quiz::QuizQuestionSerializer),
+      }
     end
 
     def stats
       render json: {
         total_questions: DiscourseQuiz::QuizQuestion.count,
         active_questions: DiscourseQuiz::QuizQuestion.where(active: true).count,
-        total_attempts: DiscourseQuiz::QuizUserAttempt.count
+        total_attempts: DiscourseQuiz::QuizUserAttempt.count,
       }
     end
 
     def create
       question = DiscourseQuiz::QuizQuestion.new(question_params)
       if question.save
-        render_serialized(question, Admin::Quiz::QuizQuestionSerializer)
+        render_serialized(question, Admin::Quiz::QuizQuestionSerializer, root: false)
       else
         render_json_error(question)
       end
@@ -32,7 +34,7 @@ module Admin::Quiz
     def update
       question = DiscourseQuiz::QuizQuestion.find(params[:id])
       if question.update(question_params)
-        render_serialized(question, Admin::Quiz::QuizQuestionSerializer)
+        render_serialized(question, Admin::Quiz::QuizQuestionSerializer, root: false)
       else
         render_json_error(question)
       end
@@ -40,8 +42,8 @@ module Admin::Quiz
 
     def destroy
       question = DiscourseQuiz::QuizQuestion.find(params[:id])
-      question.destroy
-      render json: success_json
+      question.destroy!
+      head :no_content
     end
 
     private
@@ -54,7 +56,7 @@ module Admin::Quiz
         :explanation,
         :source_topic_id,
         :active,
-        options: []
+        options: [],
       )
     end
   end

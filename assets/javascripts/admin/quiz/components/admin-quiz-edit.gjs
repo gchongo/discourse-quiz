@@ -44,7 +44,7 @@ export default class AdminQuizEdit extends Component {
     <div class="admin-quiz-edit-modal">
       <div class="edit-form">
         <div class="control-group">
-          <label>{{i18n "js.admin.gamified_quiz.form.category"}}</label>
+          <label>{{i18n "admin.gamified_quiz.form.category"}}</label>
           <input
             type="text"
             value={{this.categoryName}}
@@ -54,7 +54,7 @@ export default class AdminQuizEdit extends Component {
         </div>
 
         <div class="control-group">
-          <label>{{i18n "js.admin.gamified_quiz.form.question_text"}}</label>
+          <label>{{i18n "admin.gamified_quiz.form.question_text"}}</label>
           <textarea
             value={{this.questionText}}
             class="form-control"
@@ -63,7 +63,7 @@ export default class AdminQuizEdit extends Component {
         </div>
 
         <div class="control-group">
-          <label>{{i18n "js.admin.gamified_quiz.form.options"}}</label>
+          <label>{{i18n "admin.gamified_quiz.form.options"}}</label>
           <textarea
             value={{this.optionsString}}
             class="form-control"
@@ -72,7 +72,7 @@ export default class AdminQuizEdit extends Component {
         </div>
 
         <div class="control-group">
-          <label>{{i18n "js.admin.gamified_quiz.form.correct_index"}}</label>
+          <label>{{i18n "admin.gamified_quiz.form.correct_index"}}</label>
           <input
             type="number"
             value={{this.correctIndex}}
@@ -82,7 +82,7 @@ export default class AdminQuizEdit extends Component {
         </div>
 
         <div class="control-group">
-          <label>{{i18n "js.admin.gamified_quiz.form.explanation"}}</label>
+          <label>{{i18n "admin.gamified_quiz.form.explanation"}}</label>
           <textarea
             value={{this.explanation}}
             class="form-control"
@@ -91,7 +91,7 @@ export default class AdminQuizEdit extends Component {
         </div>
 
         <div class="control-group">
-          <label>{{i18n "js.admin.gamified_quiz.form.source_topic_id"}}</label>
+          <label>{{i18n "admin.gamified_quiz.form.source_topic_id"}}</label>
           <input
             type="number"
             value={{this.sourceTopicId}}
@@ -107,18 +107,18 @@ export default class AdminQuizEdit extends Component {
               checked={{this.active}}
               {{on "change" this.updateActive}}
             />
-            {{i18n "js.admin.gamified_quiz.form.active"}}
+            {{i18n "admin.gamified_quiz.form.active"}}
           </label>
         </div>
 
         <div class="form-actions">
           <dButton
-            @label="js.admin.gamified_quiz.form.save"
+            @label="admin.gamified_quiz.form.save"
             @action={{this.save}}
             class="btn-primary"
           />
           <dButton
-            @label="js.admin.gamified_quiz.form.cancel"
+            @label="admin.gamified_quiz.form.cancel"
             @action={{@onCancel}}
             class="btn-default"
           />

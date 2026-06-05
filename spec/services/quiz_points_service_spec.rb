@@ -2,10 +2,10 @@
 
 require "rails_helper"
 
-describe DiscourseGamifiedQuiz::QuizPointsService do
+describe DiscourseQuiz::QuizPointsService do
   let(:user) { Fabricate(:user) }
   let(:question) { 
-    DiscourseGamifiedQuiz::QuizQuestion.create!(
+    DiscourseQuiz::QuizQuestion.create!(
       category_name: "General",
       question_text: "Test?",
       options: ["A", "B"],
@@ -13,7 +13,7 @@ describe DiscourseGamifiedQuiz::QuizPointsService do
     )
   }
   let(:attempt) {
-    DiscourseGamifiedQuiz::QuizUserAttempt.create!(
+    DiscourseQuiz::QuizUserAttempt.create!(
       user_id: user.id,
       question_id: question.id,
       is_correct: true
@@ -28,28 +28,28 @@ describe DiscourseGamifiedQuiz::QuizPointsService do
 
   describe ".award_points" do
     it "does not award points if gamification is not active" do
-      expect(DiscourseGamifiedQuiz::QuizPointsService.award_points(user, question, attempt)).to be_nil
+      expect(DiscourseQuiz::QuizPointsService.award_points(user, question, attempt)).to be_nil
       expect(attempt.reload.score_awarded).to eq(false)
     end
 
     context "when gamification is active" do
       before do
         # Mocking gamification active
-        allow(DiscourseGamifiedQuiz::QuizPointsService).to receive(:gamification_active?).and_return(true)
+        allow(DiscourseQuiz::QuizPointsService).to receive(:gamification_active?).and_return(true)
       end
 
       it "awards points and updates attempt" do
         # Mocking the actual award logic since we don't want to depend on the other plugin's DB state in this test
-        allow(DiscourseGamifiedQuiz::QuizPointsService).to receive(:award_via_gamification).and_return(true)
+        allow(DiscourseQuiz::QuizPointsService).to receive(:award_via_gamification).and_return(true)
 
-        DiscourseGamifiedQuiz::QuizPointsService.award_points(user, question, attempt)
+        DiscourseQuiz::QuizPointsService.award_points(user, question, attempt)
         expect(attempt.reload.score_awarded).to eq(true)
       end
 
       it "does not award points if daily limit is reached" do
         # Simulate 10 correct attempts today (10 * 10 = 100)
         10.times do |i|
-          DiscourseGamifiedQuiz::QuizUserAttempt.create!(
+          DiscourseQuiz::QuizUserAttempt.create!(
             user_id: user.id,
             question_id: question.id + i + 1,
             is_correct: true,
@@ -58,20 +58,20 @@ describe DiscourseGamifiedQuiz::QuizPointsService do
           )
         end
 
-        DiscourseGamifiedQuiz::QuizPointsService.award_points(user, question, attempt)
+        DiscourseQuiz::QuizPointsService.award_points(user, question, attempt)
         expect(attempt.reload.score_awarded).to eq(false)
       end
 
       it "does not award points if already awarded for this question" do
         # Simulate previous correct attempt with score awarded
-        DiscourseGamifiedQuiz::QuizUserAttempt.create!(
+        DiscourseQuiz::QuizUserAttempt.create!(
           user_id: user.id,
           question_id: question.id,
           is_correct: true,
           score_awarded: true
         )
 
-        DiscourseGamifiedQuiz::QuizPointsService.award_points(user, question, attempt)
+        DiscourseQuiz::QuizPointsService.award_points(user, question, attempt)
         expect(attempt.reload.score_awarded).to eq(false)
       end
     end

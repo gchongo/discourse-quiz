@@ -71,7 +71,7 @@ export default class AdminQuizIndex extends Component {
 
   @action
   async deleteQuestion(id) {
-    if (confirm(i18n("js.admin.gamified_quiz.confirm_delete"))) {
+    if (confirm(i18n("admin.gamified_quiz.confirm_delete"))) {
       await ajax(`/admin/quiz/questions.json/${id}`, { type: "DELETE" });
       this.loadData();
     }
@@ -79,20 +79,20 @@ export default class AdminQuizIndex extends Component {
 
   <template>
     <div class="admin-gamified-quiz">
-      <h1>{{i18n "js.admin.gamified_quiz.title"}}</h1>
+      <h1>{{i18n "admin.gamified_quiz.title"}}</h1>
 
       {{#if this.stats}}
         <div class="quiz-stats-cards">
           <div class="stats-card">
-            <span class="label">{{i18n "js.admin.gamified_quiz.stats.total_questions"}}</span>
+            <span class="label">{{i18n "admin.gamified_quiz.stats.total_questions"}}</span>
             <span class="value">{{this.stats.total_questions}}</span>
           </div>
           <div class="stats-card">
-            <span class="label">{{i18n "js.admin.gamified_quiz.stats.active_questions"}}</span>
+            <span class="label">{{i18n "admin.gamified_quiz.stats.active_questions"}}</span>
             <span class="value">{{this.stats.active_questions}}</span>
           </div>
           <div class="stats-card">
-            <span class="label">{{i18n "js.admin.gamified_quiz.stats.total_attempts"}}</span>
+            <span class="label">{{i18n "admin.gamified_quiz.stats.total_attempts"}}</span>
             <span class="value">{{this.stats.total_attempts}}</span>
           </div>
         </div>
@@ -101,7 +101,7 @@ export default class AdminQuizIndex extends Component {
       <div class="admin-actions">
         <dButton
           @icon="plus"
-          @label="js.admin.gamified_quiz.form.create"
+          @label="admin.gamified_quiz.form.create"
           @action={{fn this.editQuestion null}}
           class="btn-primary"
         />
@@ -118,11 +118,11 @@ export default class AdminQuizIndex extends Component {
       <table class="quiz-questions-table table">
         <thead>
           <tr>
-            <th>{{i18n "js.admin.gamified_quiz.table.question"}}</th>
-            <th>{{i18n "js.admin.gamified_quiz.table.category"}}</th>
-            <th>{{i18n "js.admin.gamified_quiz.table.active"}}</th>
-            <th>{{i18n "js.admin.gamified_quiz.table.audit"}}</th>
-            <th>{{i18n "js.admin.gamified_quiz.table.actions"}}</th>
+            <th>{{i18n "admin.gamified_quiz.table.question"}}</th>
+            <th>{{i18n "admin.gamified_quiz.table.category"}}</th>
+            <th>{{i18n "admin.gamified_quiz.table.active"}}</th>
+            <th>{{i18n "admin.gamified_quiz.table.audit"}}</th>
+            <th>{{i18n "admin.gamified_quiz.table.actions"}}</th>
           </tr>
         </thead>
         <tbody>

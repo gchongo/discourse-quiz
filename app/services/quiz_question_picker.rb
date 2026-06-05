@@ -17,22 +17,37 @@ module DiscourseQuiz
     private
 
     def pick_for_logged_in_user
-      # Prefer questions the user hasn't answered correctly yet
-      answered_correctly_ids = QuizUserAttempt.where(user_id: @user.id, is_correct: true)
-                                              .pluck(:question_id)
+      answered_correctly_ids =
+        QuizUserAttempt.where(user_id: @user.id, is_correct: true).pluck(:question_id)
 
-      question = QuizQuestion.where(active: true)
-                             .where.not(id: answered_correctly_ids)
-                             .order("RANDOM()")
-                             .first
+      question =
+        active_questions_scope
+          .where.not(id: answered_correctly_ids)
+          .order(Arel.sql("RANDOM()"))
+          .first
 
-      # If all questions answered correctly, just pick a random active one
-      question ||= pick_random_active
-      question
+      question || pick_random_active
     end
 
     def pick_random_active
-      QuizQuestion.where(active: true).order("RANDOM()").first
+      active_questions_scope.order(Arel.sql("RANDOM()")).first
+    end
+
+    def active_questions_scope
+      scope = QuizQuestion.where(active: true)
+      category_names = enabled_category_names
+      scope = scope.where(category_name: category_names) if category_names.present?
+      scope
+    end
+
+    def enabled_category_names
+      setting = SiteSetting.quiz_categories.to_s
+      return [] if setting.blank?
+
+      category_ids = setting.split(",").map(&:strip).map(&:to_i).reject(&:zero?)
+      return [] if category_ids.empty?
+
+      Category.where(id: category_ids).pluck(:name)
     end
   end
 end

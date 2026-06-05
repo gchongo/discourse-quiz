@@ -11,7 +11,7 @@ describe Jobs::QuizSourceTopicChecker do
 
   it "identifies deleted topics" do
     topic = Fabricate(:topic, deleted_at: Time.zone.now)
-    question = DiscourseGamifiedQuiz::QuizQuestion.create!(
+    question = DiscourseQuiz::QuizQuestion.create!(
       category_name: "General",
       question_text: "Test?",
       options: ["A", "B"],
@@ -28,7 +28,7 @@ describe Jobs::QuizSourceTopicChecker do
   end
 
   it "identifies missing topics" do
-    question = DiscourseGamifiedQuiz::QuizQuestion.create!(
+    question = DiscourseQuiz::QuizQuestion.create!(
       category_name: "General",
       question_text: "Test?",
       options: ["A", "B"],
@@ -45,7 +45,7 @@ describe Jobs::QuizSourceTopicChecker do
 
   it "clears errors for valid topics" do
     topic = Fabricate(:topic)
-    question = DiscourseGamifiedQuiz::QuizQuestion.create!(
+    question = DiscourseQuiz::QuizQuestion.create!(
       category_name: "General",
       question_text: "Test?",
       options: ["A", "B"],

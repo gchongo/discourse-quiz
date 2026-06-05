@@ -4,14 +4,15 @@ import { action } from "@ember/object";
 import { i18n } from "discourse-i18n";
 import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
-import { trustHTML } from "@ember/template";
 
 export default class QuizQuestionDisplay extends Component {
   @tracked selectedIndex = null;
 
   @action
   selectOption(index) {
-    if (this.args.disabled) return;
+    if (this.args.disabled) {
+      return;
+    }
     this.selectedIndex = index;
   }
 
@@ -33,7 +34,7 @@ export default class QuizQuestionDisplay extends Component {
   <template>
     <div class="quiz-question-display">
       <div class="quiz-question-text">
-        {{trustHTML @question.question_text}}
+        {{@question.question_text}}
       </div>
 
       <div class="quiz-options-list">

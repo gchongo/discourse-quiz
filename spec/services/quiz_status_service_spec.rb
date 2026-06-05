@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-describe DiscourseGamifiedQuiz::QuizStatusService do
+describe DiscourseQuiz::QuizStatusService do
   let(:user) { Fabricate(:user) }
 
   before do
@@ -15,14 +15,14 @@ describe DiscourseGamifiedQuiz::QuizStatusService do
 
   describe "guest status" do
     it "returns normal mode when under limit" do
-      service = DiscourseGamifiedQuiz::QuizStatusService.new(nil, 1)
+      service = DiscourseQuiz::QuizStatusService.new(nil, 1)
       status = service.get_status
       expect(status[:mode]).to eq(:normal)
       expect(status[:attempts_left]).to eq(1)
     end
 
     it "returns paywall mode when over limit" do
-      service = DiscourseGamifiedQuiz::QuizStatusService.new(nil, 2)
+      service = DiscourseQuiz::QuizStatusService.new(nil, 2)
       status = service.get_status
       expect(status[:mode]).to eq(:paywall)
       expect(status[:attempts_left]).to eq(0)
@@ -33,7 +33,7 @@ describe DiscourseGamifiedQuiz::QuizStatusService do
     it "returns learning_only when daily max reached" do
       # Mock 2 awarded questions today (2 * 10 = 20 > 15)
       2.times do |i|
-        DiscourseGamifiedQuiz::QuizUserAttempt.create!(
+        DiscourseQuiz::QuizUserAttempt.create!(
           user_id: user.id,
           question_id: i + 100,
           is_correct: true,
@@ -42,7 +42,7 @@ describe DiscourseGamifiedQuiz::QuizStatusService do
         )
       end
 
-      service = DiscourseGamifiedQuiz::QuizStatusService.new(user)
+      service = DiscourseQuiz::QuizStatusService.new(user)
       status = service.get_status
       expect(status[:mode]).to eq(:learning_only)
     end

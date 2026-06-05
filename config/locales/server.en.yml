@@ -11,12 +11,11 @@ en:
     quiz_show_source_link: "Show a link to the source/topic for each quiz question."
     quiz_submit_cooldown_seconds: "Number of seconds a user must wait between quiz submissions."
   gamified_quiz:
-    title: "Gamified Quiz"
-    admin_title: "Gamified Quiz"
-  js:
-    gamified_quiz:
-      admin_title: "Gamified Quiz"
+    guest_explanation_masked_suffix: "Log in to see full explanation"
     errors:
       invalid_options: "Options must be a non-empty array."
       invalid_correct_index: "Correct index must be within the bounds of the options array."
-    guest_paywall_default_message: "You've reached the guest limit. Please log in or sign up to continue playing and save your progress!"
+      invalid_answer_index: "Answer index must be within the bounds of the options array."
+      question_not_found: "Question not found."
+      no_active_questions: "No active questions available."
+      paywall_reached: "Paywall reached."

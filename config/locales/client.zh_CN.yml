@@ -29,6 +29,7 @@ zh_CN:
     admin:
       gamified_quiz:
         title: "竞答管理"
+        confirm_delete: "确定要删除这道题目吗？"
         stats:
           total_questions: "总题目数"
           active_questions: "已启用题目"
@@ -40,6 +41,7 @@ zh_CN:
           audit: "源帖检查"
           actions: "操作"
         form:
+          category: "分类"
           question_text: "题干内容"
           options: "选项（每行一个）"
           correct_index: "正确选项索引（从 0 开始）"

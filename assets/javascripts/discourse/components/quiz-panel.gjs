@@ -6,6 +6,7 @@ import { i18n } from "discourse-i18n";
 import { htmlSafe } from "@ember/template";
 import dIcon from "discourse-common/helpers/d-icon";
 import { on } from "@ember/modifier";
+import { or } from "discourse/truth-helpers";
 import QuizQuestionDisplay from "./quiz-question-display";
 import QuizResultDisplay from "./quiz-result-display";
 import QuizPaywall from "./quiz-paywall";
@@ -129,7 +130,7 @@ export default class QuizPanel extends Component {
             {{else if this.isErrorState}}
               <div class="quiz-error">
                 {{dIcon "exclamation-triangle"}}
-                <p>{{i18n "gamified_quiz.error"}}</p>
+                <p>{{(or this.quiz.errorMessage (i18n "gamified_quiz.error"))}}</p>
                 <button class="btn btn-default" {{on "click" this.quiz.loadInitialData}}>
                   {{dIcon "sync"}}
                   {{i18n "gamified_quiz.next"}}
