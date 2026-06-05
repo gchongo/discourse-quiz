@@ -31,8 +31,8 @@ after_initialize do
 
     namespace :admin, constraints: AdminConstraint.new do
       namespace :quiz do
-        resources :questions
         get "/stats" => "questions#stats"
+        resources :questions
       end
     end
   end
