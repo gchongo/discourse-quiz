@@ -29,11 +29,12 @@ after_initialize do
     get "/admin/plugins/discourse-quiz" => "admin/plugins#index",
         constraints: AdminConstraint.new
 
-    namespace :admin, constraints: AdminConstraint.new do
-      namespace :quiz do
-        get "/stats" => "questions#stats"
-        resources :questions
-      end
+    scope "/admin/quiz", constraints: AdminConstraint.new do
+      get "/stats" => "discourse_quiz/admin_quiz_questions#stats"
+      get "/questions" => "discourse_quiz/admin_quiz_questions#index"
+      post "/questions" => "discourse_quiz/admin_quiz_questions#create"
+      put "/questions/:id" => "discourse_quiz/admin_quiz_questions#update"
+      delete "/questions/:id" => "discourse_quiz/admin_quiz_questions#destroy"
     end
   end
 end
