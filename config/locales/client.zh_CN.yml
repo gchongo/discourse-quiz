@@ -48,9 +48,8 @@ zh_CN:
       home_mode_unseen: "未做题"
       home_mode_login_hint: "登录后可使用错题巩固和未做题模式。"
       user_summary:
-        today_correct: "今日答对"
-        today_incorrect: "今日答错"
-        wrong_pending: "待巩固错题"
+        lifetime_correct: "累计答对"
+        wrong_questions: "错题数"
       current_range: "当前范围：%{category}"
       current_range_multi: "当前范围：%{categories}"
       current_range_count: "当前范围：%{count} 个分类"

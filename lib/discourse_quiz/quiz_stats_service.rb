@@ -11,11 +11,15 @@ module DiscourseQuiz
 
       scope = scoped_questions(category_names)
       scope_ids = scope.pluck(:id)
-      today = QuizUserAttempt.today_counts_for(@user.id)
-      wrong_ids = QuizUserAttempt.latest_wrong_question_ids_for(@user.id)
       attempted_ids = QuizUserAttempt.attempted_question_ids_for(@user.id)
+      never_correct_ids = QuizUserAttempt.never_correct_question_ids_for(@user.id)
+      wrong_ids = QuizUserAttempt.latest_wrong_question_ids_for(@user.id)
+      today = QuizUserAttempt.today_counts_for(@user.id)
 
       {
+        lifetime_correct:
+          QuizUserAttempt.lifetime_correct_count_for(@user.id, question_ids: scope_ids),
+        wrong_questions: (never_correct_ids & scope_ids).size,
         today_correct: today[:correct],
         today_incorrect: today[:incorrect],
         wrong_pending: (wrong_ids & scope_ids).size,

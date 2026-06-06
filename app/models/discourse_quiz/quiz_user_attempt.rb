@@ -54,6 +54,21 @@ module DiscourseQuiz
       { correct: today.where(is_correct: true).count, incorrect: today.where(is_correct: false).count }
     end
 
+    def self.lifetime_correct_count_for(user_id, question_ids: nil)
+      return 0 unless table_ready?
+
+      scope = where(user_id: user_id, is_correct: true)
+      scope = scope.where(question_id: question_ids) if question_ids.present?
+      scope.count
+    end
+
+    def self.never_correct_question_ids_for(user_id)
+      return [] unless table_ready?
+
+      attempted_question_ids_for(user_id) -
+        where(user_id: user_id, is_correct: true).distinct.pluck(:question_id)
+    end
+
     def self.table_ready?
       ActiveRecord::Base.connection.table_exists?(:discourse_quiz_user_attempts)
     end

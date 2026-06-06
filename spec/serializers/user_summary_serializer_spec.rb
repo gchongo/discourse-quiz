@@ -34,9 +34,8 @@ describe UserSummarySerializer do
 
       stats = serializer.as_json[:quiz_summary_stats]
 
-      expect(stats[:today_correct]).to eq(0)
-      expect(stats[:today_incorrect]).to eq(1)
-      expect(stats[:wrong_pending]).to eq(1)
+      expect(stats[:lifetime_correct]).to eq(0)
+      expect(stats[:wrong_questions]).to eq(1)
     end
 
     it "is omitted when viewing another user's summary" do

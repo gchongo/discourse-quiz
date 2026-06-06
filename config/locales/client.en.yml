@@ -48,9 +48,8 @@ en:
       home_mode_unseen: "Unseen"
       home_mode_login_hint: "Log in to unlock wrong-answer and unseen modes."
       user_summary:
-        today_correct: "Quiz correct today"
-        today_incorrect: "Quiz wrong today"
-        wrong_pending: "Wrong answers to review"
+        lifetime_correct: "Quiz correct (all time)"
+        wrong_questions: "Questions never answered correctly"
       current_range: "Range: %{category}"
       current_range_multi: "Range: %{categories}"
       current_range_count: "Range: %{count} categories"

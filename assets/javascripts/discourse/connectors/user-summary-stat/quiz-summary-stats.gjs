@@ -2,7 +2,8 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
-import DUserStat from "discourse/ui-kit/d-user-stat";
+import dNumber from "discourse/ui-kit/helpers/d-number";
+import { i18n } from "discourse-i18n";
 
 export default class QuizSummaryStats extends Component {
   @service siteSettings;
@@ -38,26 +39,25 @@ export default class QuizSummaryStats extends Component {
 
   <template>
     {{#if this.enabled}}
-      <li class="user-summary-stat-outlet quiz-today-correct">
-        <DUserStat
-          @value={{this.stats.today_correct}}
-          @label="discourse_quiz.user_summary.today_correct"
-          @icon="circle-check"
-        />
+      <li class="user-summary-stat-outlet quiz-lifetime-correct">
+        <div class="user-stat">
+          <span
+            class="value"
+            title={{i18n "discourse_quiz.user_summary.lifetime_correct"}}
+          >
+            {{dNumber this.stats.lifetime_correct}}
+          </span>
+        </div>
       </li>
-      <li class="user-summary-stat-outlet quiz-today-incorrect">
-        <DUserStat
-          @value={{this.stats.today_incorrect}}
-          @label="discourse_quiz.user_summary.today_incorrect"
-          @icon="circle-xmark"
-        />
-      </li>
-      <li class="user-summary-stat-outlet quiz-wrong-pending">
-        <DUserStat
-          @value={{this.stats.wrong_pending}}
-          @label="discourse_quiz.user_summary.wrong_pending"
-          @icon="circle-question"
-        />
+      <li class="user-summary-stat-outlet quiz-wrong-questions">
+        <div class="user-stat">
+          <span
+            class="value"
+            title={{i18n "discourse_quiz.user_summary.wrong_questions"}}
+          >
+            {{dNumber this.stats.wrong_questions}}
+          </span>
+        </div>
       </li>
     {{/if}}
   </template>

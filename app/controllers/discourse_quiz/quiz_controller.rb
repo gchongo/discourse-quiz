@@ -81,9 +81,8 @@ module DiscourseQuiz
 
       render_json_dump(
         quiz_summary_stats: {
-          today_correct: summary[:today_correct],
-          today_incorrect: summary[:today_incorrect],
-          wrong_pending: summary[:wrong_pending],
+          lifetime_correct: summary[:lifetime_correct],
+          wrong_questions: summary[:wrong_questions],
         },
       )
     end
