@@ -37,14 +37,24 @@ export default class QuizQuestionDisplay extends Component {
     }
 
     if (this.isMultipleChoice) {
-      return this.selectedIndices.length > 0;
+      return this.normalizedSelectedIndices.length > 0;
     }
 
     return this.selectedIndex !== null;
   }
 
-  isSelected(index) {
-    return this.selectedIndices.includes(index);
+  get normalizedSelectedIndices() {
+    return Array.isArray(this.selectedIndices) ? this.selectedIndices : [];
+  }
+
+  get multipleChoiceOptions() {
+    const selected = new Set(this.normalizedSelectedIndices);
+
+    return (this.question.options || []).map((option, index) => ({
+      option,
+      index,
+      selected: selected.has(index),
+    }));
   }
 
   @action
@@ -60,10 +70,12 @@ export default class QuizQuestionDisplay extends Component {
 
   @action
   toggleOption(index) {
-    if (this.isSelected(index)) {
-      this.selectedIndices = this.selectedIndices.filter((value) => value !== index);
+    const current = this.normalizedSelectedIndices;
+
+    if (current.includes(index)) {
+      this.selectedIndices = current.filter((value) => value !== index);
     } else {
-      this.selectedIndices = [...this.selectedIndices, index].sort((a, b) => a - b);
+      this.selectedIndices = [...current, index].sort((a, b) => a - b);
     }
   }
 
@@ -74,7 +86,7 @@ export default class QuizQuestionDisplay extends Component {
     }
 
     if (this.isMultipleChoice) {
-      this.quiz.submitAnswer(null, this.selectedIndices);
+      this.quiz.submitAnswer(null, this.normalizedSelectedIndices);
       return;
     }
 
@@ -108,19 +120,23 @@ export default class QuizQuestionDisplay extends Component {
       {{/if}}
 
       <ul class="quiz-options-list">
-        {{#each this.question.options as |option index|}}
-          <li>
-            {{#if this.isMultipleChoice}}
-              <label class="quiz-option-btn quiz-option-check {{if (this.isSelected index) 'is-selected'}}">
+        {{#if this.isMultipleChoice}}
+          {{#each this.multipleChoiceOptions as |entry|}}
+            <li>
+              <label class="quiz-option-btn quiz-option-check {{if entry.selected 'is-selected'}}">
                 <input
                   type="checkbox"
-                  checked={{this.isSelected index}}
+                  checked={{entry.selected}}
                   disabled={{this.quiz.submitting}}
-                  {{on "change" (fn this.toggleOption index)}}
+                  {{on "change" (fn this.toggleOption entry.index)}}
                 />
-                <span>{{option}}</span>
+                <span>{{entry.option}}</span>
               </label>
-            {{else}}
+            </li>
+          {{/each}}
+        {{else}}
+          {{#each this.question.options as |option index|}}
+            <li>
               <button
                 type="button"
                 class="quiz-option-btn {{if (eq this.selectedIndex index) 'is-selected'}}"
@@ -129,9 +145,9 @@ export default class QuizQuestionDisplay extends Component {
               >
                 {{option}}
               </button>
-            {{/if}}
-          </li>
-        {{/each}}
+            </li>
+          {{/each}}
+        {{/if}}
       </ul>
 
       <DButton

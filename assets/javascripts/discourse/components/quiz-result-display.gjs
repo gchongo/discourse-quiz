@@ -38,26 +38,27 @@ export default class QuizResultDisplay extends Component {
     return i18n("discourse_quiz.incorrect", { answer: this.result.correct_option });
   }
 
-  isCorrectIndex(index) {
-    return (this.result.correct_indices || []).includes(index);
-  }
+  get multipleChoiceResultOptions() {
+    const correctIndices = new Set(this.result.correct_indices || []);
+    const submittedIndices = new Set(this.quiz.submittedAnswerIndices || []);
 
-  isSubmittedIndex(index) {
-    return (this.quiz.submittedAnswerIndices || []).includes(index);
-  }
+    return (this.question.options || []).map((option, index) => {
+      const classes = ["quiz-option-btn", "is-locked"];
 
-  optionClass(index) {
-    const classes = ["quiz-option-btn", "is-locked"];
+      if (correctIndices.has(index)) {
+        classes.push("is-correct");
+      }
 
-    if (this.isCorrectIndex(index)) {
-      classes.push("is-correct");
-    }
+      if (submittedIndices.has(index) && !this.result.correct) {
+        classes.push("is-incorrect");
+      }
 
-    if (this.isSubmittedIndex(index) && !this.result.correct) {
-      classes.push("is-incorrect");
-    }
-
-    return classes.join(" ");
+      return {
+        option,
+        index,
+        className: classes.join(" "),
+      };
+    });
   }
 
   @action
@@ -94,13 +95,17 @@ export default class QuizResultDisplay extends Component {
 
         {{#if this.question.options}}
           <ul class="quiz-options-list">
-            {{#each this.question.options as |option index|}}
-              <li>
-                {{#if this.isMultipleChoice}}
-                  <span class={{this.optionClass index}}>
-                    {{option}}
+            {{#if this.isMultipleChoice}}
+              {{#each this.multipleChoiceResultOptions as |entry|}}
+                <li>
+                  <span class={{entry.className}}>
+                    {{entry.option}}
                   </span>
-                {{else}}
+                </li>
+              {{/each}}
+            {{else}}
+              {{#each this.question.options as |option index|}}
+              <li>
                   <span
                     class="quiz-option-btn is-locked
                       {{if (eq index this.result.correct_index) 'is-correct'}}
@@ -108,9 +113,9 @@ export default class QuizResultDisplay extends Component {
                   >
                     {{option}}
                   </span>
-                {{/if}}
               </li>
-            {{/each}}
+              {{/each}}
+            {{/if}}
           </ul>
         {{/if}}
 
