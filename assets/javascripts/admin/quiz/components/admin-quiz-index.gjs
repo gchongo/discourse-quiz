@@ -143,6 +143,7 @@ export default class AdminQuizIndex extends Component {
     this.modal.show(QuizQuestionEditModal, {
       model: {
         question,
+        categories: this.categories,
         onSaved: () => this.loadQuestions(),
       },
     });

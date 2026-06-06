@@ -39,6 +39,17 @@ export default class QuizQuestionEditModal extends Component {
       .filter(Boolean);
   }
 
+  get categoryOptions() {
+    const categories = [...(this.args.model.categories || [])];
+    const current = this.categoryName?.trim();
+
+    if (current && !categories.includes(current)) {
+      categories.push(current);
+    }
+
+    return categories.sort((a, b) => a.localeCompare(b, "zh-CN"));
+  }
+
   @action
   updateCategory(event) {
     this.categoryName = event.target.value;
@@ -111,7 +122,17 @@ export default class QuizQuestionEditModal extends Component {
         <div class="quiz-admin-form">
           <label class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.category"}}</span>
-            <input type="text" value={{this.categoryName}} {{on "input" this.updateCategory}} />
+            {{#if this.categoryOptions.length}}
+              <select {{on "change" this.updateCategory}}>
+                {{#each this.categoryOptions as |category|}}
+                  <option value={{category}} selected={{eq this.categoryName category}}>
+                    {{category}}
+                  </option>
+                {{/each}}
+              </select>
+            {{else}}
+              <input type="text" value={{this.categoryName}} {{on "input" this.updateCategory}} />
+            {{/if}}
           </label>
 
           <label class="quiz-admin-form__field">
