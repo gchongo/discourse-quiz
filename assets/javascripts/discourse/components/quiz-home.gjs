@@ -24,13 +24,9 @@ export default class QuizHome extends Component {
 
   <template>
     <div class="quiz-home">
-      <div class="quiz-home-header">
-        <p class="quiz-home-subtitle">{{i18n "discourse_quiz.home_subtitle"}}</p>
-      </div>
-
       <div class="quiz-home-modes">
         <span class="quiz-home-modes__label">{{i18n "discourse_quiz.home_question_type"}}</span>
-        <div class="quiz-home-modes__buttons" role="group">
+        <div class="quiz-home-modes__buttons quiz-home-modes__buttons--triple" role="group">
           <button
             type="button"
             class="btn btn-default quiz-home-mode-btn {{if this.quiz.typeFilterSingleChoice 'active'}}"
@@ -53,12 +49,11 @@ export default class QuizHome extends Component {
             {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
           </button>
         </div>
-        <p class="quiz-status-hint">{{i18n "discourse_quiz.home_question_type_hint"}}</p>
       </div>
 
       <div class="quiz-home-modes">
         <span class="quiz-home-modes__label">{{i18n "discourse_quiz.home_practice_mode"}}</span>
-        <div class="quiz-home-modes__buttons quiz-home-modes__buttons--nowrap" role="group">
+        <div class="quiz-home-modes__buttons quiz-home-modes__buttons--triple" role="group">
           <button
             type="button"
             class="btn btn-default quiz-home-mode-btn {{if (eq this.quiz.practiceMode 'normal') 'active'}}"
