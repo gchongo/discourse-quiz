@@ -346,8 +346,6 @@ export default class AdminQuizIndex extends Component {
 
   <template>
     <div class="admin-discourse-quiz">
-      <h1>{{i18n "discourse_quiz.admin.title"}}</h1>
-
       <section class="quiz-admin-import">
         <h2>{{i18n "discourse_quiz.admin.import_title"}}</h2>
         <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.import_hint"}}</p>
@@ -446,9 +444,11 @@ export default class AdminQuizIndex extends Component {
         <h2>{{i18n "discourse_quiz.admin.category_manage_title"}}</h2>
         <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.category_manage_hint"}}</p>
         <div class="quiz-admin-category-rename">
-          <label>
-            {{i18n "discourse_quiz.admin.rename_from"}}
-            <select {{on "change" this.onRenameFromChange}}>
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-rename-from">
+              {{i18n "discourse_quiz.admin.rename_from"}}
+            </label>
+            <select id="quiz-rename-from" class="quiz-admin-field__control" {{on "change" this.onRenameFromChange}}>
               <option value="" selected={{eq this.renameFrom ""}}>
                 {{i18n "discourse_quiz.admin.rename_select"}}
               </option>
@@ -458,16 +458,24 @@ export default class AdminQuizIndex extends Component {
                 </option>
               {{/each}}
             </select>
-          </label>
-          <label>
-            {{i18n "discourse_quiz.admin.rename_to"}}
-            <input type="text" value={{this.renameTo}} {{on "input" this.onRenameToChange}} />
-          </label>
+          </div>
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-rename-to">
+              {{i18n "discourse_quiz.admin.rename_to"}}
+            </label>
+            <input
+              id="quiz-rename-to"
+              class="quiz-admin-field__control"
+              type="text"
+              value={{this.renameTo}}
+              {{on "input" this.onRenameToChange}}
+            />
+          </div>
           <DButton
             @label={{if this.renaming "discourse_quiz.admin.renaming" "discourse_quiz.admin.rename_button"}}
             @action={{this.renameCategory}}
             @disabled={{or this.renaming (not this.renameFrom) (not this.renameTo)}}
-            class="btn-default"
+            class="btn-default quiz-admin-field__action"
           />
         </div>
         {{#if this.renameResult}}
@@ -503,9 +511,11 @@ export default class AdminQuizIndex extends Component {
         </div>
 
         <div class="quiz-admin-filters">
-          <label>
-            {{i18n "discourse_quiz.admin.category_filter"}}
-            <select {{on "change" this.onCategoryChange}}>
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-category-filter">
+              {{i18n "discourse_quiz.admin.category_filter"}}
+            </label>
+            <select id="quiz-category-filter" class="quiz-admin-field__control" {{on "change" this.onCategoryChange}}>
               <option value="" selected={{eq this.selectedCategory ""}}>
                 {{i18n "discourse_quiz.admin.all_categories"}}
               </option>
@@ -515,16 +525,27 @@ export default class AdminQuizIndex extends Component {
                 </option>
               {{/each}}
             </select>
-          </label>
+          </div>
 
-          <label class="quiz-admin-search">
-            {{i18n "discourse_quiz.admin.search"}}
-            <input type="text" value={{this.searchQuery}} {{on "input" this.onSearchInput}} />
-          </label>
-          <DButton @label="discourse_quiz.admin.search_button" @action={{this.applySearch}} class="btn-default" />
-          {{#if this.searchQuery}}
-            <DButton @label="discourse_quiz.admin.clear_search" @action={{this.clearSearch}} class="btn-default" />
-          {{/if}}
+          <div class="quiz-admin-field quiz-admin-field--grow">
+            <label class="quiz-admin-field__label" for="quiz-search-query">
+              {{i18n "discourse_quiz.admin.search"}}
+            </label>
+            <input
+              id="quiz-search-query"
+              class="quiz-admin-field__control"
+              type="text"
+              value={{this.searchQuery}}
+              {{on "input" this.onSearchInput}}
+            />
+          </div>
+
+          <div class="quiz-admin-field__actions">
+            <DButton @label="discourse_quiz.admin.search_button" @action={{this.applySearch}} class="btn-default" />
+            {{#if this.searchQuery}}
+              <DButton @label="discourse_quiz.admin.clear_search" @action={{this.clearSearch}} class="btn-default" />
+            {{/if}}
+          </div>
         </div>
 
         <div class="quiz-admin-pagination">

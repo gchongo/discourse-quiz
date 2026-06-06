@@ -183,28 +183,32 @@ export default class QuizQuestionEditModal extends Component {
           <div class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.category"}}</span>
             {{#if this.useNewCategory}}
-              <input
-                type="text"
-                value={{this.newCategoryName}}
-                placeholder={{i18n "discourse_quiz.admin.form.new_category_placeholder"}}
-                {{on "input" this.updateNewCategory}}
-              />
-              {{#if this.categoryOptions.length}}
-                <button type="button" class="btn btn-link quiz-admin-link-btn" {{on "click" this.useExistingCategories}}>
-                  {{i18n "discourse_quiz.admin.form.use_existing_categories"}}
-                </button>
-              {{/if}}
+              <div class="quiz-admin-form__category-row">
+                <input
+                  type="text"
+                  value={{this.newCategoryName}}
+                  placeholder={{i18n "discourse_quiz.admin.form.new_category_placeholder"}}
+                  {{on "input" this.updateNewCategory}}
+                />
+                {{#if this.categoryOptions.length}}
+                  <button type="button" class="btn btn-link quiz-admin-link-btn" {{on "click" this.useExistingCategories}}>
+                    {{i18n "discourse_quiz.admin.form.use_existing_categories"}}
+                  </button>
+                {{/if}}
+              </div>
             {{else if this.categoryOptions.length}}
-              <select {{on "change" this.updateCategory}}>
-                {{#each this.categoryOptions as |category|}}
-                  <option value={{category}} selected={{eq this.categoryName category}}>
-                    {{category}}
-                  </option>
-                {{/each}}
-              </select>
-              <button type="button" class="btn btn-link quiz-admin-link-btn" {{on "click" this.enableNewCategory}}>
-                {{i18n "discourse_quiz.admin.form.use_new_category"}}
-              </button>
+              <div class="quiz-admin-form__category-row">
+                <select {{on "change" this.updateCategory}}>
+                  {{#each this.categoryOptions as |category|}}
+                    <option value={{category}} selected={{eq this.categoryName category}}>
+                      {{category}}
+                    </option>
+                  {{/each}}
+                </select>
+                <button type="button" class="btn btn-link quiz-admin-link-btn" {{on "click" this.enableNewCategory}}>
+                  {{i18n "discourse_quiz.admin.form.use_new_category"}}
+                </button>
+              </div>
             {{else}}
               <input
                 type="text"
