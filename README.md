@@ -118,7 +118,15 @@ If a failed migration version is stuck (e.g. `20260611000000` from an earlier at
 DELETE FROM schema_migrations WHERE version IN ('20260611000000', '20260605000000');
 ```
 
-**Important:** Plugin migration timestamps must not be in the future. Discourse rejects migrations dated after the current UTC time during `db:migrate`.
+**Important:** Plugin migration timestamps must not be in the future. Discourse rejects migrations dated after the current UTC time during `db:migrate`. For example, `20260606100000` (10:00 UTC) fails if rebuild runs at 02:31 UTC on the same day — use an earlier timestamp such as `20260605110000`.
+
+If a failed future-dated version was partially recorded:
+
+```sql
+DELETE FROM schema_migrations WHERE version IN ('20260606100000', '20260605110000');
+```
+
+Then pull the fixed plugin and rebuild.
 
 Then run `rake db:migrate` again after pulling the fixed plugin code.
 
