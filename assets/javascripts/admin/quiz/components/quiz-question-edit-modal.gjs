@@ -240,19 +240,21 @@ export default class QuizQuestionEditModal extends Component {
     this.saving = true;
 
     try {
+      let result;
+
       if (this.isNew) {
-        await ajax("/admin/quiz/questions.json", {
+        result = await ajax("/admin/quiz/questions.json", {
           type: "POST",
           data: { question: this.questionPayload() },
         });
       } else {
-        await ajax(`/admin/quiz/questions/${this.args.model.question.id}.json`, {
+        result = await ajax(`/admin/quiz/questions/${this.args.model.question.id}.json`, {
           type: "PUT",
           data: { question: this.questionPayload() },
         });
       }
 
-      await this.args.model.onSaved?.();
+      await this.args.model.onSaved?.(result.duplicate_warning);
       this.args.closeModal();
     } catch (e) {
       this.saveError =

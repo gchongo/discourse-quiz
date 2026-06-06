@@ -60,6 +60,9 @@ export default class AdminQuizIndex extends Component {
   @tracked upsert = false;
   @tracked importResult = null;
   @tracked importErrors = [];
+  @tracked importWarnings = [];
+  @tracked duplicateSummary = null;
+  @tracked saveDuplicateWarning = null;
   @tracked loadError = null;
   @tracked loading = true;
   @tracked importing = false;
@@ -84,6 +87,14 @@ export default class AdminQuizIndex extends Component {
 
   get canGoNext() {
     return this.page < this.totalPages;
+  }
+
+  get saveDuplicateWarningIds() {
+    return (this.saveDuplicateWarning?.duplicate_ids || []).join(", ");
+  }
+
+  duplicateIdsLabel(ids) {
+    return (ids || []).join(", ");
   }
 
   buildListUrl() {
@@ -134,11 +145,16 @@ export default class AdminQuizIndex extends Component {
       const data = await ajax(this.buildListUrl());
       this.questions = data.questions || [];
       this.categories = data.categories || [];
+      this.duplicateSummary = data.duplicate_summary || null;
       this.total = data.total || 0;
       this.page = data.page || this.page;
       this.loadError = data.error || null;
+      if (this.loadError) {
+        this.duplicateSummary = null;
+      }
     } catch (e) {
       this.loadError = e.jqXHR?.responseJSON?.error || null;
+      this.duplicateSummary = null;
       if (!this.loadError) {
         popupAjaxError(e);
       }
@@ -253,6 +269,7 @@ export default class AdminQuizIndex extends Component {
   async bulkImport() {
     this.importResult = null;
     this.importErrors = [];
+    this.importWarnings = [];
     this.importing = true;
 
     try {
@@ -268,6 +285,7 @@ export default class AdminQuizIndex extends Component {
 
       this.importResult = result;
       this.importErrors = result.errors || [];
+      this.importWarnings = result.warnings || [];
 
       if (!this.dryRun) {
         this.loadQuestions();
@@ -310,11 +328,16 @@ export default class AdminQuizIndex extends Component {
   }
 
   openQuestionModal(question) {
+    this.saveDuplicateWarning = null;
+
     this.modal.show(QuizQuestionEditModal, {
       model: {
         question,
         categories: this.categories,
-        onSaved: () => this.loadQuestions(),
+        onSaved: (duplicateWarning) => {
+          this.saveDuplicateWarning = duplicateWarning || null;
+          this.loadQuestions();
+        },
       },
     });
   }
@@ -450,6 +473,25 @@ export default class AdminQuizIndex extends Component {
           </p>
         {{/if}}
 
+        {{#if this.importWarnings.length}}
+          <table class="quiz-import-warnings table">
+            <thead>
+              <tr>
+                <th>{{i18n "discourse_quiz.admin.import_warning_row"}}</th>
+                <th>{{i18n "discourse_quiz.admin.import_warning_messages"}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each this.importWarnings as |warning|}}
+                <tr>
+                  <td>{{warning.row}}</td>
+                  <td>{{warning.message}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{/if}}
+
         {{#if this.importErrors.length}}
           <table class="quiz-import-errors table">
             <thead>
@@ -522,6 +564,25 @@ export default class AdminQuizIndex extends Component {
       <section class="quiz-admin-list">
         {{#if this.loadError}}
           <p class="quiz-admin-error">{{this.loadError}}</p>
+        {{/if}}
+
+        {{#if this.saveDuplicateWarning}}
+          <p class="quiz-admin-warning">
+            {{i18n
+              "discourse_quiz.admin.duplicate_save_warning"
+              ids=this.saveDuplicateWarningIds
+            }}
+          </p>
+        {{/if}}
+
+        {{#if this.duplicateSummary.duplicate_group_count}}
+          <p class="quiz-admin-warning">
+            {{i18n
+              "discourse_quiz.admin.duplicate_summary"
+              group_count=this.duplicateSummary.duplicate_group_count
+              question_count=this.duplicateSummary.duplicate_question_count
+            }}
+          </p>
         {{/if}}
 
         <div class="quiz-admin-list__toolbar">
@@ -642,8 +703,18 @@ export default class AdminQuizIndex extends Component {
           </thead>
           <tbody>
             {{#each this.questions as |question|}}
-              <tr>
-                <td>{{question.id}}</td>
+              <tr class={{if question.duplicate_ids "is-duplicate"}}>
+                <td>
+                  {{question.id}}
+                  {{#if question.duplicate_ids}}
+                    <span
+                      class="quiz-admin-duplicate-badge"
+                      title={{this.duplicateIdsLabel question.duplicate_ids}}
+                    >
+                      {{i18n "discourse_quiz.admin.duplicate_row_hint"}}
+                    </span>
+                  {{/if}}
+                </td>
                 <td>{{question.category_name}}</td>
                 <td>
                   {{#if (eq question.question_type "multiple_choice")}}

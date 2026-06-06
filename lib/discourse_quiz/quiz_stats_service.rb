@@ -16,9 +16,15 @@ module DiscourseQuiz
       wrong_ids = QuizUserAttempt.latest_wrong_question_ids_for(@user.id)
       today = QuizUserAttempt.today_counts_for(@user.id)
 
+      lifetime_correct =
+        QuizUserAttempt.lifetime_correct_count_for(@user.id, question_ids: scope_ids)
+      lifetime_attempts =
+        QuizUserAttempt.lifetime_attempt_count_for(@user.id, question_ids: scope_ids)
+
       {
-        lifetime_correct:
-          QuizUserAttempt.lifetime_correct_count_for(@user.id, question_ids: scope_ids),
+        lifetime_correct: lifetime_correct,
+        lifetime_attempts: lifetime_attempts,
+        accuracy_rate: accuracy_rate(lifetime_correct, lifetime_attempts),
         wrong_questions: (never_correct_ids & scope_ids).size,
         today_correct: today[:correct],
         today_incorrect: today[:incorrect],
@@ -39,6 +45,12 @@ module DiscourseQuiz
 
     def normalize_category_names(category_names)
       Array(category_names).map(&:to_s).map(&:strip).reject(&:blank?).uniq
+    end
+
+    def accuracy_rate(lifetime_correct, lifetime_attempts)
+      return nil if lifetime_attempts.zero?
+
+      ((lifetime_correct.to_f / lifetime_attempts) * 100).round(1)
     end
   end
 end

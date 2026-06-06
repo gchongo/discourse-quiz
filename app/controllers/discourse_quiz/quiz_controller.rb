@@ -84,6 +84,7 @@ module DiscourseQuiz
         quiz_summary_stats: {
           lifetime_correct: summary[:lifetime_correct],
           wrong_questions: summary[:wrong_questions],
+          accuracy_rate: summary[:accuracy_rate],
         },
       )
     end

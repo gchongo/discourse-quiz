@@ -55,6 +55,8 @@ describe DiscourseQuiz::QuizStatsService do
     stats = described_class.new(user).summary
 
     expect(stats[:lifetime_correct]).to eq(2)
+    expect(stats[:lifetime_attempts]).to eq(3)
+    expect(stats[:accuracy_rate]).to eq(66.7)
     expect(stats[:wrong_questions]).to eq(1)
     expect(stats[:unseen_pending]).to eq(0)
     expect(stats[:questions_in_scope]).to eq(2)
@@ -80,6 +82,15 @@ describe DiscourseQuiz::QuizStatsService do
     stats = described_class.new(user).summary
 
     expect(stats[:lifetime_correct]).to eq(1)
+    expect(stats[:lifetime_attempts]).to eq(2)
+    expect(stats[:accuracy_rate]).to eq(50.0)
     expect(stats[:wrong_questions]).to eq(0)
+  end
+
+  it "returns nil accuracy when there are no attempts" do
+    stats = described_class.new(user).summary
+
+    expect(stats[:lifetime_attempts]).to eq(0)
+    expect(stats[:accuracy_rate]).to be_nil
   end
 end

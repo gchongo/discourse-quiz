@@ -414,6 +414,23 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
   }
 }
 
+label.quiz-option-check,
+label.quiz-option-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  cursor: pointer;
+
+  input {
+    margin-top: 0.2em;
+    flex: 0 0 auto;
+  }
+
+  span {
+    flex: 1 1 auto;
+  }
+}
+
 .quiz-question-display {
   min-width: 0;
   max-width: 100%;
@@ -445,23 +462,6 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
 
   button.quiz-option-btn {
     cursor: pointer;
-  }
-
-  label.quiz-option-check,
-  label.quiz-option-radio {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5em;
-    cursor: pointer;
-
-    input {
-      margin-top: 0.2em;
-      flex: 0 0 auto;
-    }
-
-    span {
-      flex: 1 1 auto;
-    }
   }
 
   .quiz-question-display--true-false {
@@ -512,6 +512,20 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
 .quiz-result-display {
   min-width: 0;
   max-width: 100%;
+
+  label.quiz-option-check,
+  label.quiz-option-radio {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  &.quiz-result-display--true-false {
+    .quiz-options-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5em;
+    }
+  }
 
   .quiz-question-category {
     text-align: center;
@@ -651,6 +665,33 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
   .quiz-admin-error {
     color: var(--danger);
     margin-bottom: 1em;
+  }
+
+  .quiz-admin-warning {
+    color: var(--highlight);
+    margin-bottom: 1em;
+    line-height: 1.5;
+  }
+
+  .quiz-import-warnings {
+    margin-top: 0.75em;
+    width: 100%;
+    color: var(--highlight);
+  }
+
+  .quiz-questions-table tr.is-duplicate td {
+    background: var(--highlight-low);
+  }
+
+  .quiz-admin-duplicate-badge {
+    display: inline-block;
+    margin-left: 0.35em;
+    padding: 0.1em 0.4em;
+    border-radius: var(--d-border-radius);
+    font-size: var(--font-down-2);
+    color: var(--highlight);
+    background: var(--highlight-low);
+    vertical-align: middle;
   }
 
   .quiz-admin-import__toolbar {

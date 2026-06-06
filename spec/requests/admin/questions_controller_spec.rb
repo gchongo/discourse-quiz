@@ -28,6 +28,32 @@ describe DiscourseQuiz::AdminQuizQuestionsController do
       expect(DiscourseQuiz::QuizQuestion.count).to eq(1)
       expect(response.parsed_body["question"]["question_text"]).to eq("新题目")
     end
+
+    it "returns a duplicate warning when question text already exists" do
+      existing =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "历史",
+          question_text: "已有题目",
+          options: %w[A B],
+          correct_index: 0,
+        )
+
+      post "/admin/quiz/questions.json",
+           params: {
+             question: {
+               category_name: "地理",
+               question_text: "已有题目",
+               options: %w[A B C],
+               correct_index: 1,
+               active: true,
+             },
+           }
+
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["duplicate_warning"]["duplicate_ids"]).to contain_exactly(
+        existing.id,
+      )
+    end
   end
 
   describe "POST /admin/quiz/questions/bulk_import" do
@@ -58,12 +84,59 @@ describe DiscourseQuiz::AdminQuizQuestionsController do
       ].to_json
 
       post "/admin/quiz/questions/bulk_import.json",
-           params: { questions_json: payload, dry_run: true }
+           params: {
+             questions_json: payload,
+             dry_run: true,
+           }
 
       expect(response.status).to eq(200)
       expect(response.parsed_body["dry_run"]).to eq(true)
       expect(response.parsed_body["valid"]).to eq(1)
       expect(DiscourseQuiz::QuizQuestion.count).to eq(0)
+    end
+
+    it "returns duplicate warnings for repeated import rows and existing questions" do
+      existing =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "历史",
+          question_text: "重复题干",
+          options: %w[A B],
+          correct_index: 0,
+        )
+
+      payload = [
+        {
+          category_name: "历史",
+          question_text: "本批重复",
+          options: %w[A B],
+          correct_index: 0,
+        },
+        {
+          category_name: "地理",
+          question_text: "本批重复",
+          options: %w[A B C],
+          correct_index: 1,
+        },
+        {
+          category_name: "常识",
+          question_text: "重复题干",
+          options: %w[X Y],
+          correct_index: 0,
+        },
+      ].to_json
+
+      post "/admin/quiz/questions/bulk_import.json", params: { questions_json: payload }
+
+      body = response.parsed_body
+      expect(response.status).to eq(200)
+      expect(body["imported"]).to eq(3)
+      expect(body["warnings"].length).to eq(2)
+
+      batch_warning = body["warnings"].find { |warning| warning["row"] == 2 }
+      existing_warning = body["warnings"].find { |warning| warning["row"] == 3 }
+
+      expect(batch_warning["message"]).to include("1")
+      expect(existing_warning["message"]).to include(existing.id.to_s)
     end
 
     it "supports upsert by id" do
@@ -216,6 +289,34 @@ describe DiscourseQuiz::AdminQuizQuestionsController do
       get "/admin/quiz/questions.json", params: { question_type: "single_choice" }
       expect(response.parsed_body["questions"].length).to eq(1)
       expect(response.parsed_body["questions"].first["id"]).to eq(single.id)
+    end
+
+    it "returns duplicate summary and flags duplicate questions" do
+      first =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "历史",
+          question_text: "重复题干",
+          options: %w[A B],
+          correct_index: 0,
+        )
+
+      duplicate =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "地理",
+          question_text: "  重复题干 ",
+          options: %w[A B C],
+          correct_index: 1,
+        )
+
+      get "/admin/quiz/questions.json"
+      body = response.parsed_body
+
+      expect(body["duplicate_summary"]["duplicate_group_count"]).to eq(1)
+      expect(body["duplicate_summary"]["duplicate_question_count"]).to eq(2)
+
+      flagged = body["questions"].find { |q| q["id"] == duplicate.id }
+      expect(flagged["duplicate_ids"]).to contain_exactly(first.id)
+      expect(flagged["duplicate_count"]).to eq(2)
     end
   end
 

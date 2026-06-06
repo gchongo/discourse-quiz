@@ -36,6 +36,7 @@ describe UserSummarySerializer do
 
       expect(stats[:lifetime_correct]).to eq(0)
       expect(stats[:wrong_questions]).to eq(1)
+      expect(stats[:accuracy_rate]).to eq(0.0)
     end
 
     it "is omitted when viewing another user's summary" do

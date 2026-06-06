@@ -15,10 +15,15 @@ module DiscourseQuiz
       offset = (page - 1) * per_page
 
       questions = questions_scope.offset(offset).limit(per_page)
+      duplicate_index = QuizDuplicateDetector.index_data
 
       render_json_dump(
-        questions: questions.map { |question| question_json(question) },
+        questions:
+          questions.map do |question|
+            question_json(question, duplicate_map: duplicate_index[:duplicate_map])
+          end,
         categories: QuizQuestion.category_names,
+        duplicate_summary: duplicate_index[:summary],
         total: total,
         page: page,
         per_page: per_page,
@@ -49,7 +54,7 @@ module DiscourseQuiz
       question = QuizQuestion.new(import_attributes(params.require(:question)))
 
       if question.save
-        render_json_dump(question: question_json(question))
+        render_json_dump(question: question_json(question), duplicate_warning: duplicate_warning_for(question))
       else
         render_json_dump({ errors: question.errors.full_messages }, status: 422)
       end
@@ -107,7 +112,7 @@ module DiscourseQuiz
       question.assign_attributes(import_attributes(params.require(:question)))
 
       if question.save
-        render_json_dump(question: question_json(question))
+        render_json_dump(question: question_json(question), duplicate_warning: duplicate_warning_for(question))
       else
         render_json_dump({ errors: question.errors.full_messages }, status: 422)
       end
@@ -134,7 +139,7 @@ module DiscourseQuiz
       [per_page, MAX_PER_PAGE].min
     end
 
-    def question_json(question)
+    def question_json(question, duplicate_map: nil)
       json = {
         id: question.id,
         category_name: question.category_name,
@@ -148,7 +153,35 @@ module DiscourseQuiz
         created_at: question.created_at,
       }
       json[:position] = question.position if QuizQuestion.position_column?
+
+      duplicate_ids = duplicate_ids_for_question(question, duplicate_map: duplicate_map)
+      if duplicate_ids.present?
+        json[:duplicate_ids] = duplicate_ids
+        json[:duplicate_count] = duplicate_ids.size + 1
+      end
+
       json
+    end
+
+    def duplicate_ids_for_question(question, duplicate_map: nil)
+      map = duplicate_map || QuizDuplicateDetector.duplicate_ids_map
+      map[question.id] || []
+    end
+
+    def duplicate_warning_for(question)
+      duplicate_ids = QuizDuplicateDetector.duplicate_ids_for_text(
+        question.question_text,
+        exclude_id: question.id,
+      )
+      return nil if duplicate_ids.blank?
+
+      {
+        duplicate_ids: duplicate_ids,
+        message: I18n.t(
+          "discourse_quiz.admin.duplicate_warning",
+          ids: duplicate_ids.join(", "),
+        ),
+      }
     end
 
     def import_questions(payload, dry_run:, upsert:)
@@ -156,6 +189,9 @@ module DiscourseQuiz
       updated = 0
       valid = 0
       errors = []
+      warnings = []
+      seen_import_keys = {}
+      key_to_ids = QuizDuplicateDetector.key_to_ids_index
 
       payload.each_with_index do |item, index|
         row = index + 1
@@ -168,6 +204,13 @@ module DiscourseQuiz
 
         if question.valid?
           valid += 1
+          append_import_duplicate_warnings(
+            warnings,
+            row: row,
+            question: question,
+            seen_import_keys: seen_import_keys,
+            key_to_ids: key_to_ids,
+          )
           next if dry_run
 
           if question.persisted?
@@ -177,6 +220,8 @@ module DiscourseQuiz
             question.save!
             imported += 1
           end
+
+          QuizDuplicateDetector.register_question!(key_to_ids, question)
         else
           errors << { row: row, messages: question.errors.full_messages }
         end
@@ -187,9 +232,37 @@ module DiscourseQuiz
         updated: updated,
         valid: valid,
         errors: errors,
+        warnings: warnings,
         total: payload.length,
         dry_run: dry_run,
         upsert: upsert,
+      }
+    end
+
+    def append_import_duplicate_warnings(warnings, row:, question:, seen_import_keys:, key_to_ids:)
+      key = QuizDuplicateDetector.normalized_key(question.question_text)
+      return if key.blank?
+
+      if seen_import_keys[key]
+        warnings << {
+          row: row,
+          message: I18n.t("discourse_quiz.admin.duplicate_import_batch", row: seen_import_keys[key]),
+        }
+      else
+        seen_import_keys[key] = row
+      end
+
+      duplicate_ids =
+        QuizDuplicateDetector.duplicate_ids_for_text(
+          question.question_text,
+          exclude_id: question.id,
+          key_to_ids: key_to_ids,
+        )
+      return if duplicate_ids.blank?
+
+      warnings << {
+        row: row,
+        message: I18n.t("discourse_quiz.admin.duplicate_import_existing", ids: duplicate_ids.join(", ")),
       }
     end
 

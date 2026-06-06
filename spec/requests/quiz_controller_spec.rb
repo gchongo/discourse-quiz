@@ -214,6 +214,7 @@ describe DiscourseQuiz::QuizController do
       stats = response.parsed_body["quiz_summary_stats"]
       expect(stats["lifetime_correct"]).to eq(0)
       expect(stats["wrong_questions"]).to eq(1)
+      expect(stats["accuracy_rate"]).to eq(0.0)
     end
   end
 

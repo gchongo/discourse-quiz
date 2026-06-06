@@ -2,29 +2,36 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.12.9)
+## Current features (v0.14.1)
 
-- Quiz home screen with toggle list (multi-category selection, X-style) before starting
+- Quiz home screen with question-type filter, practice mode, and optional category selection
+- Home layout: start button below practice mode; category list below start button (optional)
+- Home skeleton loading: question types and practice mode show immediately; only the category list shows a loading skeleton
+- Reset button resets category selection only (not question types or practice mode)
 - Desktop and mobile quiz panel entry with show/hide controls
 - Desktop docked panel pushes main content aside; narrow viewports auto-switch to floating
 - Desktop minimize/expand for browsing topics while keeping the panel available
 - Panel mounted in a persistent outlet so quiz state survives topic navigation
 - Desktop floating/minimized panel can be dragged by the title bar; position is remembered
+- Category list height adapts to available panel space instead of a fixed viewport cap
 - Question bank table: `discourse_quiz_questions`
 - Panel loads one random active question from the bank
+- Question types: single choice (default), true/false, and multiple choice (all correct options required)
+- Answer UI uses radio buttons for single/true-false and checkboxes for multiple choice
+- Result page reuses the same option control styling; feedback appears below options and above the explanation
+- Correct-answer feedback shows points on the same line, right-aligned
 - Submit answers with correct/incorrect feedback and explanation
 - Guest demo with configurable attempt limit and login paywall
 - Logged-in answer history in `discourse_quiz_user_attempts`
 - Gamification points for correct answers (when `discourse-gamification` is enabled)
 - Daily point cap with learning-only mode after the cap
-- Admin page with add/edit, search, pagination, category rename, export, dry-run import, and upsert import
-- Optional site setting `quiz_categories` to limit panel questions by category name
 - Practice modes (logged-in): random, wrong-answer review, unseen questions
 - Session de-duplication: while practicing, avoids repeating questions until the selected range is exhausted
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
-- Question types: single choice (default), true/false, and multiple choice (all correct options required)
-- Quiz home screen question-type filter: choose single choice, true/false, and/or multiple choice before starting
-- User summary stats (own profile only at `/u/:username/summary`): lifetime correct count and never-correct question count
+- User summary stats (own profile only at `/u/:username/summary`): lifetime correct count, never-correct question count, and accuracy rate
+- Admin page with add/edit, search, pagination, category rename, export, dry-run import, and upsert import
+- Admin duplicate-question detection: list summary, row highlighting, save/import warnings
+- Optional site setting `quiz_categories` to limit panel questions by category name
 
 ## Installation
 
@@ -101,7 +108,8 @@ id,category_name,question_text,question_type,options,correct_index,correct_indic
 - **Dry run**: validate import without writing to the database
 - **Upsert**: update existing rows when `id` is present
 - **Rename category**: rename a category across all questions in the bank
-- **Search / pagination**: find questions by text or category in large banks
+- **Search / pagination**: find questions by text, category, or question type in large banks
+- **Duplicate detection**: normalized question-text duplicates are highlighted in the list; save/import responses include warnings
 
 ## Testing
 
@@ -207,12 +215,12 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | GET | `/quiz/categories.json` | Active categories for the home screen + status |
 | GET | `/quiz/next.json` | Random active question; optional `category_names[]`, `question_types[]` (`single_choice`, `true_false`, `multiple_choice`), `practice_mode` (`normal`, `wrong_only`, `unseen`), `exclude_question_ids[]` (session de-duplication) |
 | GET | `/quiz/status.json` | Current guest/login quiz status |
-| GET | `/quiz/summary_stats.json` | Logged-in user's lifetime correct and wrong-question counts |
+| GET | `/quiz/summary_stats.json` | Logged-in user's lifetime correct, never-correct question count, and accuracy rate |
 | POST | `/quiz/submit.json` | Submit `question_id` + `answer_index` (single/true-false) or `answer_indices[]` (multiple choice) |
-| GET | `/admin/quiz/questions.json` | Admin question list (`page`, `per_page`, `q`, `category_name`, `question_type`) |
+| GET | `/admin/quiz/questions.json` | Admin question list (`page`, `per_page`, `q`, `category_name`, `question_type`) + duplicate summary |
 | GET | `/admin/quiz/questions/export.json` | Export JSON or CSV (`export_format`) |
-| POST | `/admin/quiz/questions.json` | Create one question |
-| PUT | `/admin/quiz/questions/:id.json` | Update one question |
+| POST | `/admin/quiz/questions.json` | Create one question (may include `duplicate_warning`) |
+| PUT | `/admin/quiz/questions/:id.json` | Update one question (may include `duplicate_warning`) |
 | PUT | `/admin/quiz/categories/rename.json` | Rename a category across the bank |
 | POST | `/admin/quiz/questions/bulk_import.json` | Bulk import JSON or CSV (`import_format`, `dry_run`, `upsert`) |
 

@@ -1,7 +1,6 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
-import { and, eq, not } from "discourse/truth-helpers";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
 
@@ -18,6 +17,10 @@ export default class QuizResultDisplay extends Component {
 
   get isMultipleChoice() {
     return this.result.question_type === "multiple_choice";
+  }
+
+  get isTrueFalse() {
+    return this.result.question_type === "true_false";
   }
 
   get submittedIndex() {
@@ -43,7 +46,7 @@ export default class QuizResultDisplay extends Component {
     const submittedIndices = new Set(this.quiz.submittedAnswerIndices || []);
 
     return (this.question.options || []).map((option, index) => {
-      const classes = ["quiz-option-btn", "is-locked"];
+      const classes = ["quiz-option-btn", "quiz-option-check", "is-locked"];
 
       if (correctIndices.has(index)) {
         classes.push("is-correct");
@@ -57,6 +60,32 @@ export default class QuizResultDisplay extends Component {
         option,
         index,
         className: classes.join(" "),
+        checked: submittedIndices.has(index),
+      };
+    });
+  }
+
+  get radioGroupName() {
+    return `quiz-result-${this.question.id}`;
+  }
+
+  get singleChoiceResultOptions() {
+    return (this.question.options || []).map((option, index) => {
+      const classes = ["quiz-option-btn", "quiz-option-radio", "is-locked"];
+
+      if (index === this.result.correct_index) {
+        classes.push("is-correct");
+      }
+
+      if (index === this.submittedIndex && !this.result.correct) {
+        classes.push("is-incorrect");
+      }
+
+      return {
+        option,
+        index,
+        className: classes.join(" "),
+        checked: index === this.submittedIndex,
       };
     });
   }
@@ -68,7 +97,9 @@ export default class QuizResultDisplay extends Component {
 
   <template>
     {{#if this.result}}
-      <div class="quiz-result-display">
+      <div
+        class="quiz-result-display {{if this.isTrueFalse 'quiz-result-display--true-false'}}"
+      >
         {{#if this.quiz.isLearningOnly}}
           <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
         {{/if}}
@@ -81,22 +112,25 @@ export default class QuizResultDisplay extends Component {
             {{#if this.isMultipleChoice}}
               {{#each this.multipleChoiceResultOptions as |entry|}}
                 <li>
-                  <span class={{entry.className}}>
-                    {{entry.option}}
-                  </span>
+                  <label class={{entry.className}}>
+                    <input type="checkbox" checked={{entry.checked}} disabled />
+                    <span>{{entry.option}}</span>
+                  </label>
                 </li>
               {{/each}}
             {{else}}
-              {{#each this.question.options as |option index|}}
-              <li>
-                  <span
-                    class="quiz-option-btn is-locked
-                      {{if (eq index this.result.correct_index) 'is-correct'}}
-                      {{if (and (eq index this.submittedIndex) (not this.result.correct)) 'is-incorrect'}}"
-                  >
-                    {{option}}
-                  </span>
-              </li>
+              {{#each this.singleChoiceResultOptions as |entry|}}
+                <li>
+                  <label class={{entry.className}}>
+                    <input
+                      type="radio"
+                      name={{this.radioGroupName}}
+                      checked={{entry.checked}}
+                      disabled
+                    />
+                    <span>{{entry.option}}</span>
+                  </label>
+                </li>
               {{/each}}
             {{/if}}
           </ul>

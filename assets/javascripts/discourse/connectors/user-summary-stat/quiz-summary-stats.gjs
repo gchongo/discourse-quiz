@@ -2,6 +2,7 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
+import { i18n } from "discourse-i18n";
 import DUserStat from "discourse/ui-kit/d-user-stat";
 
 export default class QuizSummaryStats extends Component {
@@ -27,6 +28,16 @@ export default class QuizSummaryStats extends Component {
     return Boolean(this.stats);
   }
 
+  get accuracyDisplay() {
+    if (this.stats?.accuracy_rate === null || this.stats?.accuracy_rate === undefined) {
+      return i18n("discourse_quiz.user_summary.accuracy_none");
+    }
+
+    return i18n("discourse_quiz.user_summary.accuracy_value", {
+      rate: this.stats.accuracy_rate,
+    });
+  }
+
   async loadStats() {
     try {
       const data = await ajax("/quiz/summary_stats.json");
@@ -48,6 +59,12 @@ export default class QuizSummaryStats extends Component {
         <DUserStat
           @value={{this.stats.wrong_questions}}
           @label="discourse_quiz.user_summary.wrong_questions"
+        />
+      </li>
+      <li class="user-summary-stat-outlet quiz-accuracy-rate">
+        <DUserStat
+          @value={{this.accuracyDisplay}}
+          @label="discourse_quiz.user_summary.accuracy_rate"
         />
       </li>
     {{/if}}

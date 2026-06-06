@@ -62,6 +62,14 @@ module DiscourseQuiz
       scope.count
     end
 
+    def self.lifetime_attempt_count_for(user_id, question_ids: nil)
+      return 0 unless table_ready?
+
+      scope = where(user_id: user_id)
+      scope = scope.where(question_id: question_ids) if question_ids.present?
+      scope.count
+    end
+
     def self.never_correct_question_ids_for(user_id)
       return [] unless table_ready?
 

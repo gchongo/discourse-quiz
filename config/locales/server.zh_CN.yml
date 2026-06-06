@@ -2,6 +2,9 @@ zh_CN:
   discourse_quiz:
     admin:
       title: "社区竞答"
+      duplicate_warning: "题干与已有题目重复，相关 ID：%{ids}。"
+      duplicate_import_existing: "题干与题库中已有题目重复，相关 ID：%{ids}。"
+      duplicate_import_batch: "本批导入中存在重复题干（首次出现在第 %{row} 行）。"
     errors:
       invalid_options: "选项必须是非空数组。"
       invalid_correct_index: "正确选项索引必须在选项范围内。"
