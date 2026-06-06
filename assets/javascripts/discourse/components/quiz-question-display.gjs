@@ -2,6 +2,7 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { service } from "@ember/service";
+import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
 import { eq, not } from "discourse/truth-helpers";
@@ -43,6 +44,12 @@ export default class QuizQuestionDisplay extends Component {
   }
 
   @action
+  resetSelection() {
+    this.selectedIndex = null;
+    this.selectedIndices = [];
+  }
+
+  @action
   selectOption(index) {
     this.selectedIndex = index;
   }
@@ -73,6 +80,7 @@ export default class QuizQuestionDisplay extends Component {
   <template>
     <div
       class="quiz-question-display {{if this.isTrueFalse 'quiz-question-display--true-false'}}"
+      {{didUpdate this.resetSelection this.question.id}}
     >
       {{#if this.quiz.isLearningOnly}}
         <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
