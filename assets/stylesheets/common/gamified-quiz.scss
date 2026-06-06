@@ -13,6 +13,14 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
   transition: margin-left 0.2s ease;
 }
 
+.quiz-panel-outlet {
+  pointer-events: none;
+
+  .quiz-panel-container {
+    pointer-events: auto;
+  }
+}
+
 .quiz-header-icon {
   .btn.active {
     color: var(--tertiary);
