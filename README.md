@@ -51,6 +51,24 @@ bin/rspec plugins/discourse-quiz
 bin/qunit plugins/discourse-quiz/test/javascripts
 ```
 
+## Troubleshooting migrate failures
+
+If rebuild fails on `db:migrate` for this plugin:
+
+```bash
+./launcher enter app
+cd /var/www/discourse
+su discourse -c 'bundle exec rake db:migrate'
+```
+
+If version `20260611000000` is stuck after a failed run:
+
+```sql
+DELETE FROM schema_migrations WHERE version = '20260611000000';
+```
+
+Then run `rake db:migrate` again after pulling the fixed plugin code.
+
 ## Next steps
 
 - Submit answers and scoring
