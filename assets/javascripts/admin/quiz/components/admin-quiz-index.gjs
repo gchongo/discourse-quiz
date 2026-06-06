@@ -25,6 +25,7 @@ export default class AdminQuizIndex extends Component {
   @tracked selectedCategory = "";
   @tracked importJson = IMPORT_EXAMPLE;
   @tracked importResult = null;
+  @tracked loadError = null;
   @tracked loading = true;
 
   constructor() {
@@ -35,6 +36,7 @@ export default class AdminQuizIndex extends Component {
   @action
   async loadQuestions() {
     this.loading = true;
+    this.loadError = null;
     try {
       const url = this.selectedCategory
         ? `/admin/quiz/questions.json?category_name=${encodeURIComponent(this.selectedCategory)}`
@@ -43,8 +45,12 @@ export default class AdminQuizIndex extends Component {
       const data = await ajax(url);
       this.questions = data.questions || [];
       this.categories = data.categories || [];
+      this.loadError = data.error || null;
     } catch (e) {
-      popupAjaxError(e);
+      this.loadError = e.jqXHR?.responseJSON?.error || null;
+      if (!this.loadError) {
+        popupAjaxError(e);
+      }
     } finally {
       this.loading = false;
     }
@@ -120,6 +126,10 @@ export default class AdminQuizIndex extends Component {
       </section>
 
       <section class="quiz-admin-list">
+        {{#if this.loadError}}
+          <p class="quiz-admin-error">{{this.loadError}}</p>
+        {{/if}}
+
         <div class="quiz-admin-filters">
           <label>
             {{i18n "discourse_quiz.admin.category_filter"}}

@@ -51,14 +51,27 @@ bin/rspec plugins/discourse-quiz
 bin/qunit plugins/discourse-quiz/test/javascripts
 ```
 
-## Troubleshooting admin `/admin/quiz/questions.json` 500
+## Troubleshooting admin `/admin/quiz/questions.json` 503
 
-Same as the public endpoint: rebuild after pulling latest code. The admin list API no longer uses `AdminQuizQuestionSerializer` (direct JSON, like `/quiz/next.json`).
+If `/quiz/next.json` works but admin returns `题库尚未就绪`, the table exists but the admin query failed — often because the `position` column is missing on an older schema.
 
-Quick test inside the container:
+Inside the container:
 
 ```bash
-su discourse -c 'bundle exec rails runner "puts DiscourseQuiz::QuizQuestion.order(:id).map(&:question_text).inspect"'
+su discourse -c 'bundle exec rails runner "
+  c = ActiveRecord::Base.connection
+  puts \"table: #{c.table_exists?(:discourse_quiz_questions)}\"
+  puts \"position column: #{c.column_exists?(:discourse_quiz_questions, :position)}\"
+  puts \"count: #{DiscourseQuiz::QuizQuestion.count}\"
+"'
+```
+
+Fix: pull latest code (includes migration `20260605100000`) and `./launcher rebuild app`.
+
+Or add the column manually:
+
+```sql
+ALTER TABLE discourse_quiz_questions ADD COLUMN IF NOT EXISTS position integer NOT NULL DEFAULT 0;
 ```
 
 ## Troubleshooting `/quiz/next.json` 500

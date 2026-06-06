@@ -15,6 +15,18 @@ module DiscourseQuiz
     scope :active, -> { where(active: true) }
     scope :by_category, ->(name) { where(category_name: name) if name.present? }
 
+    def self.position_column?
+      connection.column_exists?(table_name, :position)
+    end
+
+    def self.ordered_for_admin
+      if position_column?
+        order(position: :asc, id: :asc)
+      else
+        order(id: :asc)
+      end
+    end
+
     def self.category_names
       distinct.order(:category_name).pluck(:category_name)
     end
