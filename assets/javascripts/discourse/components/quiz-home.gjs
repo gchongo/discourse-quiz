@@ -12,6 +12,8 @@ import QuizCategoryRow from "./quiz-category-row";
 export default class QuizHome extends Component {
   @service quiz;
 
+  categorySkeletonRows = [1, 2, 3, 4, 5];
+
   @action
   startQuiz() {
     this.quiz.startQuiz();
@@ -83,51 +85,65 @@ export default class QuizHome extends Component {
         {{/unless}}
       </div>
 
-      <div class="quiz-home-list">
-        <div class="quiz-category-row">
-          <span class="quiz-category-row__label">
-            {{i18n "discourse_quiz.home_all_categories"}}
-          </span>
-          <DToggleSwitch
-            @state={{this.quiz.selectAllMode}}
-            {{on "click" this.quiz.toggleAllCategories}}
-          />
-        </div>
+      <div class="quiz-home-actions">
+        {{#if this.quiz.quizStatus.is_guest}}
+          <p class="quiz-status-hint">
+            {{i18n
+              "discourse_quiz.guest_attempts_left"
+              count=this.quiz.quizStatus.attempts_left
+            }}
+          </p>
+        {{/if}}
 
-        {{#each this.quiz.availableCategories as |category|}}
-          <QuizCategoryRow @category={{category}} />
-        {{/each}}
-      </div>
-
-      {{#if this.quiz.quizStatus.is_guest}}
-        <p class="quiz-status-hint">
-          {{i18n
-            "discourse_quiz.guest_attempts_left"
-            count=this.quiz.quizStatus.attempts_left
-          }}
-        </p>
-      {{/if}}
-
-      {{#if this.quiz.isLearningOnly}}
-        <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
-      {{/if}}
-
-      <div class="quiz-home-footer">
-        <p class="quiz-home-summary">{{this.quiz.selectedSummary}}</p>
-        <p class="quiz-home-summary">{{this.quiz.selectedTypesSummary}}</p>
-
-        <DButton
-          @label="discourse_quiz.home_reset"
-          @action={{this.resetSelection}}
-          class="btn-default quiz-home-reset-btn"
-        />
+        {{#if this.quiz.isLearningOnly}}
+          <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
+        {{/if}}
 
         <DButton
           @label="discourse_quiz.home_start"
           @action={{this.startQuiz}}
-          @disabled={{or this.quiz.loading (not this.quiz.canStart)}}
+          @disabled={{or this.quiz.homeLoading (not this.quiz.canStart)}}
           class="btn-primary quiz-home-start-btn"
         />
+      </div>
+
+      <div class="quiz-home-categories">
+        <div class="quiz-home-categories__header">
+          <span class="quiz-home-modes__label">{{i18n "discourse_quiz.home_categories_optional"}}</span>
+          <DButton
+            @label="discourse_quiz.home_reset"
+            @action={{this.resetSelection}}
+            class="btn-default btn-small quiz-home-reset-btn"
+          />
+        </div>
+
+        <div class="quiz-home-list">
+          {{#if this.quiz.homeLoading}}
+            <div class="quiz-home-list-skeleton" aria-busy="true">
+              <span class="sr-only">{{i18n "discourse_quiz.home_loading_categories"}}</span>
+              {{#each this.categorySkeletonRows as |_row|}}
+                <div class="quiz-home-list-skeleton__row">
+                  <span class="quiz-home-list-skeleton__label"></span>
+                  <span class="quiz-home-list-skeleton__toggle"></span>
+                </div>
+              {{/each}}
+            </div>
+          {{else}}
+            <div class="quiz-category-row">
+              <span class="quiz-category-row__label">
+                {{i18n "discourse_quiz.home_all_categories"}}
+              </span>
+              <DToggleSwitch
+                @state={{this.quiz.selectAllMode}}
+                {{on "click" this.quiz.toggleAllCategories}}
+              />
+            </div>
+
+            {{#each this.quiz.availableCategories as |category|}}
+              <QuizCategoryRow @category={{category}} />
+            {{/each}}
+          {{/if}}
+        </div>
       </div>
     </div>
   </template>

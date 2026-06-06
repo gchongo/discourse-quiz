@@ -12,6 +12,7 @@ en:
       drag_panel: "Drag to move"
     discourse_quiz:
       loading: "Loading question..."
+      home_loading_categories: "Loading categories..."
       load_error: "Failed to load question. Please try again."
       no_questions: "No questions in the bank yet. Add questions in admin."
       submit: "Submit answer"
@@ -53,6 +54,7 @@ en:
       home_selected_types_named: "Types: %{types}"
       current_types_all: "Types: all"
       current_types_named: "Types: %{types}"
+      home_categories_optional: "Categories (optional)"
       home_practice_mode: "Practice mode"
       home_mode_normal: "Random"
       home_mode_wrong_only: "Wrong answers"

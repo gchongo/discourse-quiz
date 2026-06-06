@@ -8,7 +8,7 @@ import { on } from "@ember/modifier";
 import DButton from "discourse/ui-kit/d-button";
 import { i18n } from "discourse-i18n";
 import { htmlSafe } from "@ember/template";
-import { eq } from "discourse/truth-helpers";
+import { and, eq, not } from "discourse/truth-helpers";
 import QuizHome from "./quiz-home";
 import QuizQuestionDisplay from "./quiz-question-display";
 import QuizResultDisplay from "./quiz-result-display";
@@ -198,10 +198,10 @@ export default class QuizPanel extends Component {
         <div class="quiz-panel-content">
           {{#if this.quiz.panelVisible}}
           {{#unless this.quiz.isMinimized}}
-            {{#if this.quiz.loading}}
-              <p class="quiz-panel-placeholder">{{i18n "discourse_quiz.loading"}}</p>
-            {{else if this.quiz.paywallActive}}
+            {{#if this.quiz.paywallActive}}
               <QuizPaywall @status={{this.quiz.quizStatus}} />
+            {{else if (and this.quiz.loading (not (eq this.quiz.panelPhase "home")))}}
+              <p class="quiz-panel-placeholder">{{i18n "discourse_quiz.loading"}}</p>
             {{else if (eq this.quiz.panelPhase "home")}}
               {{#if this.quiz.errorMessage}}
                 <p class="quiz-panel-error">{{this.quiz.errorMessage}}</p>

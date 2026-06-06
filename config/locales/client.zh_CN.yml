@@ -12,6 +12,7 @@ zh_CN:
       drag_panel: "拖动标题栏移动面板"
     discourse_quiz:
       loading: "正在加载题目..."
+      home_loading_categories: "正在加载分类列表..."
       load_error: "加载题目失败，请稍后重试。"
       no_questions: "题库暂无题目，请先在后台导入。"
       submit: "提交答案"
@@ -53,6 +54,7 @@ zh_CN:
       home_selected_types_named: "题型：%{types}"
       current_types_all: "题型：全部"
       current_types_named: "题型：%{types}"
+      home_categories_optional: "分类（可选）"
       home_practice_mode: "练习模式"
       home_mode_normal: "随机抽题"
       home_mode_wrong_only: "错题巩固"

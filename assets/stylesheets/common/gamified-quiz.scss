@@ -254,14 +254,86 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     }
   }
 
+  .quiz-home-actions {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    margin-bottom: 1em;
+  }
+
+  .quiz-home-categories {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75em;
+      margin-bottom: 0.35em;
+
+      .quiz-home-modes__label {
+        margin-bottom: 0;
+      }
+    }
+  }
+
   .quiz-home-list {
     flex: 1 1 auto;
     min-height: 0;
-    max-height: 50vh;
+    max-height: 40vh;
     overflow-y: auto;
     border: 1px solid var(--primary-low);
     border-radius: var(--d-border-radius);
     background: var(--secondary);
+  }
+
+  .quiz-home-list-skeleton {
+    &__row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75em;
+      padding: 0.75em 0.85em;
+      border-bottom: 1px solid var(--primary-low);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    &__label {
+      flex: 1;
+      height: 1.1em;
+      max-width: 70%;
+      border-radius: var(--d-border-radius);
+      background: var(--primary-low);
+      animation: quiz-home-skeleton-pulse 1.4s ease-in-out infinite;
+    }
+
+    &__toggle {
+      flex-shrink: 0;
+      width: 2.5em;
+      height: 1.4em;
+      border-radius: 1em;
+      background: var(--primary-low);
+      animation: quiz-home-skeleton-pulse 1.4s ease-in-out infinite;
+      animation-delay: 0.15s;
+    }
+  }
+
+  @keyframes quiz-home-skeleton-pulse {
+    0%,
+    100% {
+      opacity: 0.45;
+    }
+
+    50% {
+      opacity: 0.85;
+    }
   }
 
   .quiz-category-row {
@@ -289,22 +361,11 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     }
   }
 
-  .quiz-home-footer {
+  .quiz-home-reset-btn {
     flex-shrink: 0;
-    margin-top: 1em;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .quiz-home-summary {
     margin: 0;
-    font-size: var(--font-down-1);
-    color: var(--primary-medium);
-    line-height: 1.4;
   }
 
-  .quiz-home-reset-btn,
   .quiz-home-start-btn {
     width: 100%;
     margin: 0;

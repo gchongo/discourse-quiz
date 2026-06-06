@@ -36,6 +36,7 @@ export default class QuizService extends Service {
   @tracked availableCategories = [];
 
   @tracked loading = false;
+  @tracked homeLoading = false;
   @tracked submitting = false;
   @tracked currentQuestion = null;
   @tracked answerResult = null;
@@ -535,7 +536,7 @@ export default class QuizService extends Service {
 
   @action
   async loadHome() {
-    this.loading = true;
+    this.homeLoading = true;
 
     try {
       const data = await ajax("/quiz/categories.json");
@@ -552,7 +553,7 @@ export default class QuizService extends Service {
       this.availableCategories = [];
       this.errorMessage = i18n("discourse_quiz.load_error");
     } finally {
-      this.loading = false;
+      this.homeLoading = false;
     }
   }
 
