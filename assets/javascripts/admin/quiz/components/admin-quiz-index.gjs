@@ -71,6 +71,8 @@ export default class AdminQuizIndex extends Component {
   @tracked renameTo = "";
   @tracked renaming = false;
   @tracked renameResult = null;
+  @tracked disablingDuplicates = false;
+  @tracked duplicateDisableResult = null;
 
   constructor() {
     super(...arguments);
@@ -95,6 +97,28 @@ export default class AdminQuizIndex extends Component {
 
   duplicateIdsLabel(ids) {
     return (ids || []).join(", ");
+  }
+
+  @action
+  async bulkDisableDuplicates() {
+    if (!confirm(i18n("discourse_quiz.admin.duplicate_disable_confirm"))) {
+      return;
+    }
+
+    this.disablingDuplicates = true;
+    this.duplicateDisableResult = null;
+
+    try {
+      const result = await ajax("/admin/quiz/questions/bulk_disable_duplicates.json", {
+        type: "POST",
+      });
+      this.duplicateDisableResult = result;
+      this.loadQuestions();
+    } catch (e) {
+      popupAjaxError(e);
+    } finally {
+      this.disablingDuplicates = false;
+    }
   }
 
   buildListUrl() {
@@ -583,6 +607,26 @@ export default class AdminQuizIndex extends Component {
               question_count=this.duplicateSummary.duplicate_question_count
             }}
           </p>
+          <DButton
+            @label={{if
+              this.disablingDuplicates
+              "discourse_quiz.admin.duplicate_disable_running"
+              "discourse_quiz.admin.duplicate_disable_button"
+            }}
+            @action={{this.bulkDisableDuplicates}}
+            @disabled={{this.disablingDuplicates}}
+            class="btn-default"
+          />
+        {{/if}}
+
+        {{#if this.duplicateDisableResult}}
+          <p class="quiz-import-result">
+            {{i18n
+              "discourse_quiz.admin.duplicate_disable_result"
+              disabled=this.duplicateDisableResult.disabled
+              kept=this.duplicateDisableResult.kept_count
+            }}
+          </p>
         {{/if}}
 
         <div class="quiz-admin-list__toolbar">
@@ -690,12 +734,59 @@ export default class AdminQuizIndex extends Component {
           />
         </div>
 
+        <div class="quiz-questions-cards">
+          {{#each this.questions as |question|}}
+            <article class="quiz-question-card {{if question.duplicate_ids 'is-duplicate'}}">
+              <div class="quiz-question-card__meta">
+                <span class="quiz-question-card__category">{{question.category_name}}</span>
+                <span class="quiz-question-card__status">
+                  {{#if question.active}}
+                    <span
+                      class="quiz-admin-active-indicator is-active"
+                      title={{i18n "discourse_quiz.admin.yes"}}
+                      aria-label={{i18n "discourse_quiz.admin.yes"}}
+                    ></span>
+                  {{else}}
+                    <span
+                      class="quiz-admin-active-indicator is-inactive"
+                      title={{i18n "discourse_quiz.admin.no"}}
+                      aria-label={{i18n "discourse_quiz.admin.no"}}
+                    ></span>
+                  {{/if}}
+                </span>
+              </div>
+
+              <div class="quiz-question-card__text">{{question.question_text}}</div>
+
+              {{#if question.duplicate_ids}}
+                <span class="quiz-admin-duplicate-badge">
+                  {{i18n "discourse_quiz.admin.duplicate_row_hint"}}
+                  #{{this.duplicateIdsLabel question.duplicate_ids}}
+                </span>
+              {{/if}}
+
+              <div class="quiz-question-card__actions quiz-admin-actions">
+                <DButton
+                  @icon="pencil"
+                  @action={{fn this.editQuestion question}}
+                  @title="discourse_quiz.admin.edit"
+                  class="btn-default btn-small"
+                />
+                <DButton
+                  @icon="trash-can"
+                  @action={{fn this.deleteQuestion question.id}}
+                  class="btn-danger btn-small"
+                />
+              </div>
+            </article>
+          {{/each}}
+        </div>
+
         <table class="quiz-questions-table table">
           <thead>
             <tr>
-              <th>{{i18n "discourse_quiz.admin.table.id"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.category"}}</th>
-              <th>{{i18n "discourse_quiz.admin.table.question_type"}}</th>
+              <th class="quiz-admin-col-type">{{i18n "discourse_quiz.admin.table.question_type"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.question"}}</th>
               <th class="quiz-admin-col-active">{{i18n "discourse_quiz.admin.table.active"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.actions"}}</th>
@@ -704,19 +795,8 @@ export default class AdminQuizIndex extends Component {
           <tbody>
             {{#each this.questions as |question|}}
               <tr class={{if question.duplicate_ids "is-duplicate"}}>
-                <td>
-                  {{question.id}}
-                  {{#if question.duplicate_ids}}
-                    <span
-                      class="quiz-admin-duplicate-badge"
-                      title={{this.duplicateIdsLabel question.duplicate_ids}}
-                    >
-                      {{i18n "discourse_quiz.admin.duplicate_row_hint"}}
-                    </span>
-                  {{/if}}
-                </td>
                 <td>{{question.category_name}}</td>
-                <td>
+                <td class="quiz-admin-col-type">
                   {{#if (eq question.question_type "multiple_choice")}}
                     {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
                   {{else if (eq question.question_type "true_false")}}
@@ -725,7 +805,18 @@ export default class AdminQuizIndex extends Component {
                     {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
                   {{/if}}
                 </td>
-                <td>{{question.question_text}}</td>
+                <td>
+                  {{question.question_text}}
+                  {{#if question.duplicate_ids}}
+                    <span
+                      class="quiz-admin-duplicate-badge"
+                      title={{this.duplicateIdsLabel question.duplicate_ids}}
+                    >
+                      {{i18n "discourse_quiz.admin.duplicate_row_hint"}}
+                      #{{this.duplicateIdsLabel question.duplicate_ids}}
+                    </span>
+                  {{/if}}
+                </td>
                 <td class="quiz-admin-col-active">
                   {{#if question.active}}
                     <span

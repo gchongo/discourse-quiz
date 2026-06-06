@@ -291,6 +291,32 @@ describe DiscourseQuiz::AdminQuizQuestionsController do
       expect(response.parsed_body["questions"].first["id"]).to eq(single.id)
     end
 
+    it "bulk disables duplicate questions" do
+      kept =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "历史",
+          question_text: "重复题干",
+          options: %w[A B],
+          correct_index: 0,
+        )
+
+      duplicate =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "地理",
+          question_text: "  重复题干 ",
+          options: %w[A B C],
+          correct_index: 1,
+        )
+
+      post "/admin/quiz/questions/bulk_disable_duplicates.json"
+
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["disabled"]).to eq(1)
+      expect(response.parsed_body["kept_ids"]).to contain_exactly(kept.id)
+      expect(kept.reload.active).to eq(true)
+      expect(duplicate.reload.active).to eq(false)
+    end
+
     it "returns duplicate summary and flags duplicate questions" do
       first =
         DiscourseQuiz::QuizQuestion.create!(

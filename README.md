@@ -2,18 +2,20 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.14.1)
+## Current features (v0.15.1)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
+- Category selection and practice/question-type preferences persist in `localStorage`
+- Category list cache: cached categories show immediately on home open while refreshing in the background
 - Home layout: start button below practice mode; category list below start button (optional)
-- Home skeleton loading: question types and practice mode show immediately; only the category list shows a loading skeleton
-- Reset button resets category selection only (not question types or practice mode)
+- Home category list sizes to content height and scrolls only when needed
+- Home skeleton loading: only shown when no cached categories are available
+- Reset button resets category selection only (labeled「重置分类」)
 - Desktop and mobile quiz panel entry with show/hide controls
 - Desktop docked panel pushes main content aside; narrow viewports auto-switch to floating
 - Desktop minimize/expand for browsing topics while keeping the panel available
 - Panel mounted in a persistent outlet so quiz state survives topic navigation
 - Desktop floating/minimized panel can be dragged by the title bar; position is remembered
-- Category list height adapts to available panel space instead of a fixed viewport cap
 - Question bank table: `discourse_quiz_questions`
 - Panel loads one random active question from the bank
 - Question types: single choice (default), true/false, and multiple choice (all correct options required)
@@ -30,7 +32,8 @@ Discourse quiz plugin with a dedicated question bank.
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
 - User summary stats (own profile only at `/u/:username/summary`): lifetime correct count, never-correct question count, and accuracy rate
 - Admin page with add/edit, search, pagination, category rename, export, dry-run import, and upsert import
-- Admin duplicate-question detection: list summary, row highlighting, save/import warnings
+- Admin duplicate-question detection with list summary, row highlighting, save/import warnings, and bulk disable (keep lowest ID per group)
+- Admin question list hides ID on desktop and mobile; mobile uses card layout, desktop keeps the table with compact active indicators
 - Optional site setting `quiz_categories` to limit panel questions by category name
 
 ## Installation
@@ -95,7 +98,7 @@ Use `|` to separate multiple options in the `options` column:
 id,category_name,question_text,question_type,options,correct_index,correct_indices,explanation,active
 ,历史,中国历史上第一个统一的封建王朝是哪个？,single_choice,夏朝|商朝|秦朝|汉朝,2,,秦朝是中国历史上第一个统一的中央集权封建王朝。,true
 ,历史,秦朝只存在了 15 年。,true_false,,0,,对。,true
-,历史,下列哪些属于战国七雄？,multiple_choice,齐|晋|秦|楚,0,0|2|3,战国七雄不含晋。,true
+,历史,下列哪些属于战国七雄？,multiple_choice,齐|晋|秦|楚,,0|2|3,战国七雄不含晋。,true
 ```
 
 `question_type` is `single_choice` (default), `true_false`, or `multiple_choice`. `correct_index` is zero-based. For multiple choice, set `correct_indices` (JSON array or `0|2|3` in CSV). Leave `id` blank for new rows. Include `id` when using **upsert** import.
@@ -110,6 +113,7 @@ id,category_name,question_text,question_type,options,correct_index,correct_indic
 - **Rename category**: rename a category across all questions in the bank
 - **Search / pagination**: find questions by text, category, or question type in large banks
 - **Duplicate detection**: normalized question-text duplicates are highlighted in the list; save/import responses include warnings
+- **Bulk disable duplicates**: disable all but the lowest-ID question in each duplicate group
 
 ## Testing
 
@@ -132,7 +136,7 @@ exit
 
 After pulling **v0.12.2** or later, re-enable `quiz_plugin_enabled` and rebuild.
 
-Clear browser localStorage keys `discourse-quiz-question-types` and hard-refresh if the quiz home screen still misbehaves.
+Clear browser localStorage keys `discourse-quiz-question-types`, `discourse-quiz-categories`, `discourse-quiz-categories-cache`, and hard-refresh if the quiz home screen still misbehaves.
 
 ## Troubleshooting admin `/admin/quiz/questions.json` 503
 
@@ -223,6 +227,7 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | PUT | `/admin/quiz/questions/:id.json` | Update one question (may include `duplicate_warning`) |
 | PUT | `/admin/quiz/categories/rename.json` | Rename a category across the bank |
 | POST | `/admin/quiz/questions/bulk_import.json` | Bulk import JSON or CSV (`import_format`, `dry_run`, `upsert`) |
+| POST | `/admin/quiz/questions/bulk_disable_duplicates.json` | Disable duplicate questions, keeping the lowest ID in each group |
 
 ## Gamification
 

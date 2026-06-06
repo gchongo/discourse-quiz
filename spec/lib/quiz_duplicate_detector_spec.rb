@@ -106,4 +106,15 @@ describe DiscourseQuiz::QuizDuplicateDetector do
       )
     expect(another).to contain_exactly(new_q.id)
   end
+
+  it "disables duplicate questions while keeping the lowest id in each group" do
+    result = described_class.disable_duplicates!
+
+    expect(result[:disabled]).to eq(1)
+    expect(result[:kept_count]).to eq(1)
+    expect(result[:kept_ids]).to contain_exactly(first_q.id)
+    expect(first_q.reload.active).to eq(true)
+    expect(duplicate_q.reload.active).to eq(false)
+    expect(unique_q.reload.active).to eq(true)
+  end
 end

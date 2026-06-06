@@ -72,6 +72,11 @@ module DiscourseQuiz
       end
     end
 
+    def bulk_disable_duplicates
+      result = QuizDuplicateDetector.disable_duplicates!
+      render_json_dump(result)
+    end
+
     def bulk_import
       payload = parse_import_payload
       return if payload.nil?

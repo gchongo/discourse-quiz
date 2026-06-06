@@ -10,6 +10,8 @@ const MODE_PREF_KEY = "discourse-quiz-practice-mode";
 const PRACTICE_MODES = ["normal", "wrong_only", "unseen"];
 const QUESTION_TYPES = ["single_choice", "true_false", "multiple_choice"];
 const QUESTION_TYPES_PREF_KEY = "discourse-quiz-question-types";
+const CATEGORIES_PREF_KEY = "discourse-quiz-categories";
+const CATEGORIES_CACHE_KEY = "discourse-quiz-categories-cache";
 const NARROW_BREAKPOINT = 1100;
 const PANEL_WIDTH = 340;
 const HTML_CLASS_VISIBLE = "has-quiz-panel";
@@ -50,6 +52,8 @@ export default class QuizService extends Service {
   @tracked typeFilterTrueFalse = true;
   @tracked typeFilterMultipleChoice = true;
   @tracked sessionSeenQuestionIds = [];
+
+  _categoriesCache = null;
 
   get isEnabled() {
     return this.siteSettings.quiz_plugin_enabled;
@@ -219,6 +223,7 @@ export default class QuizService extends Service {
   @action
   openPanel() {
     this.loadQuestionTypePreference();
+    this.loadCategoryPreference();
     this.panelVisible = true;
     this.isMinimized = false;
     this.syncLayoutClasses();
@@ -230,6 +235,7 @@ export default class QuizService extends Service {
     this.panelVisible = !this.panelVisible;
     if (this.panelVisible) {
       this.loadQuestionTypePreference();
+      this.loadCategoryPreference();
       this.isMinimized = false;
       this.showHome();
     }
@@ -447,6 +453,8 @@ export default class QuizService extends Service {
     } else {
       this.resetCategorySelection();
     }
+
+    this.saveCategoryPreference();
   }
 
   @action
@@ -462,12 +470,15 @@ export default class QuizService extends Service {
     } else {
       this.selectedCategories = [...this.selectedCategories, category];
     }
+
+    this.saveCategoryPreference();
   }
 
   @action
   resetCategorySelection() {
     this.selectAllMode = true;
     this.selectedCategories = [];
+    this.saveCategoryPreference();
   }
 
   @action
@@ -532,24 +543,124 @@ export default class QuizService extends Service {
 
   @action
   async loadHome() {
-    this.homeLoading = true;
+    const cached = this.readCategoriesCache();
+
+    if (cached?.categories?.length) {
+      this.applyHomeData(cached, { fromCache: true });
+      this.pruneSelectedCategories();
+      this.homeLoading = false;
+    } else {
+      this.homeLoading = true;
+    }
 
     try {
       const data = await ajax("/quiz/categories.json");
-      this.availableCategories = data.categories || [];
-      this.quizStatus = data.status || null;
-      this.pruneSelectedCategories();
-
-      if (this.quizStatus?.mode === "paywall") {
-        this.paywallActive = true;
-      } else if (this.availableCategories.length === 0) {
-        this.errorMessage = i18n("discourse_quiz.no_questions");
-      }
+      this.applyHomeData(data);
     } catch (e) {
-      this.availableCategories = [];
-      this.errorMessage = i18n("discourse_quiz.load_error");
+      if (!cached?.categories?.length) {
+        this.availableCategories = [];
+        this.errorMessage = i18n("discourse_quiz.load_error");
+      }
     } finally {
       this.homeLoading = false;
+    }
+  }
+
+  applyHomeData(data, { fromCache = false } = {}) {
+    this.availableCategories = data.categories || [];
+    this.quizStatus = data.status || this.quizStatus;
+
+    if (!fromCache) {
+      this.pruneSelectedCategories();
+      this.writeCategoriesCache(data);
+    }
+
+    if (this.quizStatus?.mode === "paywall") {
+      this.paywallActive = true;
+      this.errorMessage = null;
+    } else if (!fromCache && this.availableCategories.length === 0) {
+      this.errorMessage = i18n("discourse_quiz.no_questions");
+    } else if (!fromCache) {
+      this.errorMessage = null;
+    }
+  }
+
+  readCategoriesCache() {
+    if (this._categoriesCache) {
+      return this._categoriesCache;
+    }
+
+    try {
+      const stored = localStorage.getItem(CATEGORIES_CACHE_KEY);
+
+      if (!stored) {
+        return null;
+      }
+
+      const parsed = JSON.parse(stored);
+
+      if (!Array.isArray(parsed?.categories)) {
+        return null;
+      }
+
+      this._categoriesCache = parsed;
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
+  writeCategoriesCache(data) {
+    const payload = {
+      categories: data.categories || [],
+      status: data.status || null,
+      cached_at: Date.now(),
+    };
+
+    this._categoriesCache = payload;
+
+    try {
+      localStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify(payload));
+    } catch {
+      // localStorage may be unavailable
+    }
+  }
+
+  loadCategoryPreference() {
+    try {
+      const stored = localStorage.getItem(CATEGORIES_PREF_KEY);
+
+      if (!stored) {
+        return;
+      }
+
+      const parsed = JSON.parse(stored);
+
+      if (typeof parsed.selectAllMode === "boolean") {
+        this.selectAllMode = parsed.selectAllMode;
+      }
+
+      if (Array.isArray(parsed.selectedCategories)) {
+        this.selectedCategories = parsed.selectedCategories.filter(
+          (category) => typeof category === "string" && category.trim() !== ""
+        );
+      }
+    } catch {
+      // localStorage may be unavailable or JSON invalid
+    }
+  }
+
+  saveCategoryPreference() {
+    try {
+      localStorage.setItem(
+        CATEGORIES_PREF_KEY,
+        JSON.stringify({
+          selectAllMode: this.selectAllMode,
+          selectedCategories: this.selectedCategories,
+        })
+      );
+    } catch {
+      // localStorage may be unavailable
     }
   }
 

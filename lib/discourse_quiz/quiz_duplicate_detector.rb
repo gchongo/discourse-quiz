@@ -58,6 +58,31 @@ module DiscourseQuiz
       index_data[:summary]
     end
 
+    def self.disable_duplicates!
+      disabled = 0
+      kept_ids = []
+
+      duplicate_groups.each_value do |ids|
+        keeper = ids.min
+        kept_ids << keeper
+        to_disable = ids - [keeper]
+        next if to_disable.empty?
+
+        disabled +=
+          QuizQuestion.where(id: to_disable, active: true).update_all(
+            active: false,
+            updated_at: Time.zone.now,
+          )
+      end
+
+      {
+        disabled: disabled,
+        kept_count: kept_ids.uniq.size,
+        group_count: duplicate_groups.size,
+        kept_ids: kept_ids.uniq.sort,
+      }
+    end
+
     def self.duplicate_ids_for_text(question_text, exclude_id: nil, key_to_ids: nil)
       key = normalized_key(question_text)
       return [] if key.blank?
