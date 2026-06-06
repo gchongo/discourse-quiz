@@ -808,6 +808,33 @@ label.quiz-option-radio {
 
   .quiz-questions-table {
     width: 100%;
+
+    .quiz-admin-col-active {
+      width: 2.75em;
+      text-align: center;
+    }
+  }
+
+  .quiz-admin-active-indicator {
+    display: inline-block;
+    width: 0.65em;
+    height: 0.65em;
+    border-radius: 50%;
+    vertical-align: middle;
+
+    &.is-active {
+      background: var(--success);
+    }
+
+    &.is-inactive {
+      background: var(--primary-low-mid);
+    }
+  }
+
+  @media screen and (width <= 768px) {
+    .quiz-questions-table .quiz-admin-col-active {
+      display: none;
+    }
   }
 
   .quiz-admin-actions {

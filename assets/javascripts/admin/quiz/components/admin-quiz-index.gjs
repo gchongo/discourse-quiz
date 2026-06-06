@@ -697,7 +697,7 @@ export default class AdminQuizIndex extends Component {
               <th>{{i18n "discourse_quiz.admin.table.category"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.question_type"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.question"}}</th>
-              <th>{{i18n "discourse_quiz.admin.table.active"}}</th>
+              <th class="quiz-admin-col-active">{{i18n "discourse_quiz.admin.table.active"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.actions"}}</th>
             </tr>
           </thead>
@@ -726,11 +726,19 @@ export default class AdminQuizIndex extends Component {
                   {{/if}}
                 </td>
                 <td>{{question.question_text}}</td>
-                <td>
+                <td class="quiz-admin-col-active">
                   {{#if question.active}}
-                    {{i18n "discourse_quiz.admin.yes"}}
+                    <span
+                      class="quiz-admin-active-indicator is-active"
+                      title={{i18n "discourse_quiz.admin.yes"}}
+                      aria-label={{i18n "discourse_quiz.admin.yes"}}
+                    ></span>
                   {{else}}
-                    {{i18n "discourse_quiz.admin.no"}}
+                    <span
+                      class="quiz-admin-active-indicator is-inactive"
+                      title={{i18n "discourse_quiz.admin.no"}}
+                      aria-label={{i18n "discourse_quiz.admin.no"}}
+                    ></span>
                   {{/if}}
                 </td>
                 <td class="quiz-admin-actions">
