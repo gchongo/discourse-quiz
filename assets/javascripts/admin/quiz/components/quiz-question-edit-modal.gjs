@@ -56,9 +56,13 @@ export default class QuizQuestionEditModal extends Component {
       .filter(Boolean);
   }
 
+  get baseCategories() {
+    return this.args.model.categories || [];
+  }
+
   get categoryOptions() {
-    const categories = [...(this.args.model.categories || [])];
-    const current = this.effectiveCategoryName;
+    const categories = [...this.baseCategories];
+    const current = this.categoryName?.trim();
 
     if (current && !categories.includes(current)) {
       categories.push(current);
@@ -68,7 +72,11 @@ export default class QuizQuestionEditModal extends Component {
   }
 
   get effectiveCategoryName() {
-    if (this.useNewCategory || !this.categoryOptions.length) {
+    if (this.useNewCategory) {
+      return this.newCategoryName.trim();
+    }
+
+    if (!this.baseCategories.length && !this.categoryName) {
       return this.newCategoryName.trim();
     }
 
