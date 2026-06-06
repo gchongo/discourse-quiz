@@ -69,6 +69,15 @@ module DiscourseQuiz
         where(user_id: user_id, is_correct: true).distinct.pluck(:question_id)
     end
 
+    def self.recent_correct_question_ids_for(user_id, within: 30.minutes)
+      return [] unless table_ready?
+
+      where(user_id: user_id, is_correct: true).where(
+        "created_at >= ?",
+        Time.zone.now - within,
+      ).distinct.pluck(:question_id)
+    end
+
     def self.table_ready?
       ActiveRecord::Base.connection.table_exists?(:discourse_quiz_user_attempts)
     end

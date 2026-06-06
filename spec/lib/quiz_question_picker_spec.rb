@@ -81,6 +81,69 @@ describe DiscourseQuiz::QuizQuestionPicker do
     end
   end
 
+  describe "session exclusions" do
+    it "avoids questions already seen in the current session" do
+      picker =
+        described_class.new(
+          user: user,
+          practice_mode: "normal",
+          exclude_question_ids: [history_q.id],
+        )
+
+      expect(picker.pick).to eq(geo_q)
+    end
+
+    it "falls back to the full pool when every question was seen" do
+      picker =
+        described_class.new(
+          user: user,
+          practice_mode: "normal",
+          exclude_question_ids: [history_q.id, geo_q.id],
+        )
+
+      expect(picker.pick).to be_present
+    end
+  end
+
+  describe "recent correct down-weighting" do
+    it "prefers questions not answered correctly in the last 30 minutes" do
+      DiscourseQuiz::QuizUserAttempt.create!(
+        user_id: user.id,
+        question_id: history_q.id,
+        answer_index: 0,
+        is_correct: true,
+        created_at: 5.minutes.ago,
+      )
+
+      picker = described_class.new(user: user, practice_mode: "normal")
+
+      20.times do
+        expect(picker.pick.id).to eq(geo_q.id)
+      end
+    end
+
+    it "does not down-weight in wrong_only mode" do
+      DiscourseQuiz::QuizUserAttempt.create!(
+        user_id: user.id,
+        question_id: history_q.id,
+        answer_index: 1,
+        is_correct: false,
+        created_at: 5.minutes.ago,
+      )
+
+      DiscourseQuiz::QuizUserAttempt.create!(
+        user_id: user.id,
+        question_id: geo_q.id,
+        answer_index: 1,
+        is_correct: true,
+        created_at: 5.minutes.ago,
+      )
+
+      picker = described_class.new(user: user, practice_mode: "wrong_only")
+      expect(picker.pick).to eq(history_q)
+    end
+  end
+
   describe "unseen mode" do
     it "returns only questions the user has never attempted" do
       DiscourseQuiz::QuizUserAttempt.create!(

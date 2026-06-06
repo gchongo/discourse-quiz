@@ -238,7 +238,12 @@ module DiscourseQuiz
         user: current_user,
         category_names: effective_category_filters,
         practice_mode: practice_mode,
+        exclude_question_ids: session_exclude_question_ids,
       )
+    end
+
+    def session_exclude_question_ids
+      Array(params[:exclude_question_ids]).map(&:to_i).reject(&:zero?).uniq
     end
 
     def normalized_practice_mode

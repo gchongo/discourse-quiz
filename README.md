@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.9.3)
+## Current features (v0.10.0)
 
 - Quiz home screen with toggle list (multi-category selection, X-style) before starting
 - Desktop and mobile quiz panel entry with show/hide controls
@@ -20,6 +20,8 @@ Discourse quiz plugin with a dedicated question bank.
 - Admin page with add/edit, search, pagination, category rename, export, dry-run import, and upsert import
 - Optional site setting `quiz_categories` to limit panel questions by category name
 - Practice modes (logged-in): random, wrong-answer review, unseen questions
+- Session de-duplication: while practicing, avoids repeating questions until the selected range is exhausted
+- Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
 - User summary stats (own profile only at `/u/:username/summary`): lifetime correct count and never-correct question count
 
 ## Installation
@@ -167,8 +169,9 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/quiz/categories.json` | Active categories for the home screen + status |
-| GET | `/quiz/next.json` | Random active question; optional `category_names[]`, `practice_mode` (`normal`, `wrong_only`, `unseen`) |
+| GET | `/quiz/next.json` | Random active question; optional `category_names[]`, `practice_mode` (`normal`, `wrong_only`, `unseen`), `exclude_question_ids[]` (session de-duplication) |
 | GET | `/quiz/status.json` | Current guest/login quiz status |
+| GET | `/quiz/summary_stats.json` | Logged-in user's lifetime correct and wrong-question counts |
 | POST | `/quiz/submit.json` | Submit `question_id` + `answer_index`, returns result |
 | GET | `/admin/quiz/questions.json` | Admin question list (`page`, `per_page`, `q`, `category_name`) |
 | GET | `/admin/quiz/questions/export.json` | Export JSON or CSV (`export_format`) |
@@ -186,6 +189,5 @@ Install and enable the official `discourse-gamification` plugin, then set:
 
 ## Next steps
 
-- Phase B (remaining): session de-duplication, down-weight recently correct questions
 - Phase C: admin analytics and user attempt history
 - Later: v0.6 source topic audit (`source_topic_id`, scheduled validation)

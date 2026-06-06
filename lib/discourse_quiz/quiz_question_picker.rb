@@ -3,13 +3,15 @@
 module DiscourseQuiz
   class QuizQuestionPicker
     MODES = %w[normal wrong_only unseen].freeze
+    RECENT_CORRECT_COOLDOWN = 30.minutes
 
     attr_reader :empty_reason
 
-    def initialize(user:, category_names: [], practice_mode: "normal")
+    def initialize(user:, category_names: [], practice_mode: "normal", exclude_question_ids: [])
       @user = user
       @category_names = normalize_category_names(category_names)
       @practice_mode = MODES.include?(practice_mode.to_s) ? practice_mode.to_s : "normal"
+      @exclude_question_ids = normalize_question_ids(exclude_question_ids)
       @empty_reason = nil
     end
 
@@ -17,7 +19,8 @@ module DiscourseQuiz
       scope = filtered_scope
       return nil if scope.none?
 
-      question = scope.order(Arel.sql("RANDOM()")).first
+      pool = apply_session_exclusions(scope)
+      question = weighted_random_pick(pool)
       @empty_reason = empty_reason_for_mode unless question
       question
     end
@@ -27,6 +30,29 @@ module DiscourseQuiz
     end
 
     private
+
+    def apply_session_exclusions(scope)
+      return scope if @exclude_question_ids.blank?
+
+      remaining = scope.where.not(id: @exclude_question_ids)
+      remaining.any? ? remaining : scope
+    end
+
+    def weighted_random_pick(scope)
+      pool = scope
+
+      if @practice_mode == "normal" && @user
+        recent_ids =
+          QuizUserAttempt.recent_correct_question_ids_for(
+            @user.id,
+            within: RECENT_CORRECT_COOLDOWN,
+          )
+        preferred = scope.where.not(id: recent_ids)
+        pool = preferred if preferred.any?
+      end
+
+      pool.order(Arel.sql("RANDOM()")).first
+    end
 
     def filtered_scope
       scope = base_scope
@@ -73,6 +99,10 @@ module DiscourseQuiz
 
     def normalize_category_names(category_names)
       Array(category_names).map(&:to_s).map(&:strip).reject(&:blank?).uniq
+    end
+
+    def normalize_question_ids(question_ids)
+      Array(question_ids).map(&:to_i).reject(&:zero?).uniq
     end
   end
 end

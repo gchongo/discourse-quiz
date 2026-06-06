@@ -42,6 +42,7 @@ export default class QuizService extends Service {
   @tracked paywallActive = false;
   @tracked errorMessage = null;
   @tracked practiceMode = "normal";
+  @tracked sessionSeenQuestionIds = [];
 
   get isEnabled() {
     return this.siteSettings.quiz_plugin_enabled;
@@ -377,6 +378,7 @@ export default class QuizService extends Service {
     this.submittedAnswerIndex = null;
     this.errorMessage = null;
     this.paywallActive = false;
+    this.sessionSeenQuestionIds = [];
 
     await this.loadHome();
   }
@@ -424,6 +426,7 @@ export default class QuizService extends Service {
       return;
     }
 
+    this.sessionSeenQuestionIds = [];
     this.panelPhase = "playing";
     this.loadQuestion();
   }
@@ -441,6 +444,7 @@ export default class QuizService extends Service {
       const data = await ajax(this.buildNextUrl());
       this.currentQuestion = data;
       this.quizStatus = data.status || this.quizStatus;
+      this.rememberSessionQuestion(data.id);
     } catch (e) {
       this.currentQuestion = null;
       const status = e?.jqXHR?.responseJSON?.status;
@@ -518,6 +522,10 @@ export default class QuizService extends Service {
       params.append("category_names[]", name);
     });
 
+    this.sessionSeenQuestionIds.forEach((id) => {
+      params.append("exclude_question_ids[]", id);
+    });
+
     const query = params.toString();
     return query ? `/quiz/next.json?${query}` : "/quiz/next.json";
   }
@@ -574,6 +582,18 @@ export default class QuizService extends Service {
 
     if (this.selectedCategories.length === 0) {
       this.selectAllMode = true;
+    }
+  }
+
+  rememberSessionQuestion(questionId) {
+    const id = Number(questionId);
+
+    if (!Number.isFinite(id) || id <= 0) {
+      return;
+    }
+
+    if (!this.sessionSeenQuestionIds.includes(id)) {
+      this.sessionSeenQuestionIds = [...this.sessionSeenQuestionIds, id];
     }
   }
 }

@@ -66,6 +66,20 @@ describe DiscourseQuiz::QuizController do
       expect(response.parsed_body["error_code"]).to eq("practice_mode_requires_login")
     end
 
+    it "excludes session question ids when provided" do
+      other =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "体育",
+          question_text: "Marathon?",
+          options: %w[A B],
+          correct_index: 0,
+        )
+
+      get "/quiz/next.json", params: { exclude_question_ids: [question.id] }
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["id"]).to eq(other.id)
+    end
+
     it "returns wrong-only questions for logged in users" do
       sign_in(user)
 
