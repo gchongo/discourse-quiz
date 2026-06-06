@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import { service } from "@ember/service";
-import dButton from "discourse/components/d-button";
+import DButton from "discourse/ui-kit/d-button";
 import { i18n } from "discourse-i18n";
 import { htmlSafe } from "@ember/template";
 
@@ -38,24 +38,24 @@ export default class QuizPanel extends Component {
           <span class="quiz-panel-title">{{i18n "gamified_quiz.panel_title"}}</span>
           <div class="quiz-panel-controls">
             {{#if this.quiz.isMobile}}
-              <dButton
+              <DButton
                 @icon={{if this.quiz.isMinimized "chevron-up" "chevron-down"}}
                 @action={{this.quiz.toggleMinimize}}
-                class="btn-flat quiz-panel-control-btn"
+                class="btn-default quiz-panel-control-btn"
               />
             {{else}}
-              <dButton
+              <DButton
                 @icon={{if this.quiz.isDocked "external-link-alt" "columns"}}
                 @action={{this.quiz.toggleDock}}
                 @title={{if this.quiz.isDocked "gamified_quiz.undock_panel" "gamified_quiz.dock_panel"}}
-                class="btn-flat quiz-panel-control-btn"
+                class="btn-default quiz-panel-control-btn"
               />
             {{/if}}
-            <dButton
+            <DButton
               @icon="times"
               @action={{this.quiz.closePanel}}
               @title="gamified_quiz.close_panel"
-              class="btn-flat quiz-panel-control-btn"
+              class="btn-default quiz-panel-control-btn quiz-panel-close-btn"
             />
           </div>
         </div>
