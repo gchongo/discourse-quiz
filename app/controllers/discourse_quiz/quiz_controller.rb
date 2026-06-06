@@ -39,6 +39,7 @@ module DiscourseQuiz
           id: question.id,
           category_name: question.category_name,
           question_text: question.question_text,
+          question_type: question.resolved_question_type,
           options: question.options,
           status: quiz_status,
         },
@@ -110,7 +111,13 @@ module DiscourseQuiz
         )
       end
 
-      submission = QuizSubmissionService.new(current_user, question, params[:answer_index])
+      submission =
+        QuizSubmissionService.new(
+          current_user,
+          question,
+          answer_index: params[:answer_index],
+          answer_indices: submit_answer_indices,
+        )
       result = submission.submit
       return render_json_dump(result, status: submission.status_code) if submission.failed?
 
@@ -244,6 +251,10 @@ module DiscourseQuiz
 
     def session_exclude_question_ids
       Array(params[:exclude_question_ids]).map(&:to_i).reject(&:zero?).uniq
+    end
+
+    def submit_answer_indices
+      Array(params[:answer_indices]).map(&:to_i).reject(&:negative?).uniq
     end
 
     def normalized_practice_mode

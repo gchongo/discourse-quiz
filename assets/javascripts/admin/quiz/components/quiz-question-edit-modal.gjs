@@ -14,8 +14,10 @@ export default class QuizQuestionEditModal extends Component {
   @tracked newCategoryName = "";
   @tracked useNewCategory = false;
   @tracked questionText;
+  @tracked questionType = "single_choice";
   @tracked optionsText;
   @tracked correctIndex;
+  @tracked correctIndices = [];
   @tracked explanation;
   @tracked active;
   @tracked saveError = null;
@@ -27,8 +29,10 @@ export default class QuizQuestionEditModal extends Component {
 
     this.categoryName = question.category_name || "";
     this.questionText = question.question_text || "";
+    this.questionType = question.question_type || "single_choice";
     this.optionsText = (question.options || []).join("\n");
     this.correctIndex = question.correct_index ?? 0;
+    this.correctIndices = [...(question.correct_indices || [])];
     this.explanation = question.explanation || "";
     this.active = question.active !== false;
     const categories = this.args.model.categories || [];
@@ -56,6 +60,22 @@ export default class QuizQuestionEditModal extends Component {
       .filter(Boolean);
   }
 
+  get isTrueFalse() {
+    return this.questionType === "true_false";
+  }
+
+  get isMultipleChoice() {
+    return this.questionType === "multiple_choice";
+  }
+
+  get showOptionsEditor() {
+    return !this.isTrueFalse;
+  }
+
+  get trueFalseOptions() {
+    return [i18n("discourse_quiz.true_false.true"), i18n("discourse_quiz.true_false.false")];
+  }
+
   get baseCategories() {
     return this.args.model.categories || [];
   }
@@ -81,6 +101,10 @@ export default class QuizQuestionEditModal extends Component {
     }
 
     return this.categoryName?.trim() || "";
+  }
+
+  isCorrectIndexSelected(index) {
+    return this.correctIndices.includes(index);
   }
 
   @action
@@ -112,17 +136,40 @@ export default class QuizQuestionEditModal extends Component {
   }
 
   @action
+  updateQuestionType(event) {
+    this.questionType = event.target.value;
+
+    if (this.isTrueFalse) {
+      this.correctIndex = 0;
+      this.correctIndices = [];
+    }
+  }
+
+  @action
   updateOptionsText(event) {
     this.optionsText = event.target.value;
 
     if (this.correctIndex >= this.parsedOptions.length) {
       this.correctIndex = Math.max(0, this.parsedOptions.length - 1);
     }
+
+    this.correctIndices = this.correctIndices.filter(
+      (index) => index >= 0 && index < this.parsedOptions.length
+    );
   }
 
   @action
   selectCorrectIndex(index) {
     this.correctIndex = index;
+  }
+
+  @action
+  toggleCorrectIndex(index) {
+    if (this.isCorrectIndexSelected(index)) {
+      this.correctIndices = this.correctIndices.filter((value) => value !== index);
+    } else {
+      this.correctIndices = [...this.correctIndices, index].sort((a, b) => a - b);
+    }
   }
 
   @action
@@ -139,8 +186,10 @@ export default class QuizQuestionEditModal extends Component {
     return {
       category_name: this.effectiveCategoryName,
       question_text: this.questionText,
-      options: this.parsedOptions,
+      question_type: this.questionType,
+      options: this.isTrueFalse ? this.trueFalseOptions : this.parsedOptions,
       correct_index: this.correctIndex,
+      correct_indices: this.isMultipleChoice ? this.correctIndices : [],
       explanation: this.explanation,
       active: this.active,
     };
@@ -220,16 +269,64 @@ export default class QuizQuestionEditModal extends Component {
           </div>
 
           <label class="quiz-admin-form__field">
+            <span>{{i18n "discourse_quiz.admin.form.question_type"}}</span>
+            <select {{on "change" this.updateQuestionType}}>
+              <option value="single_choice" selected={{eq this.questionType "single_choice"}}>
+                {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
+              </option>
+              <option value="true_false" selected={{eq this.questionType "true_false"}}>
+                {{i18n "discourse_quiz.admin.form.question_types.true_false"}}
+              </option>
+              <option value="multiple_choice" selected={{eq this.questionType "multiple_choice"}}>
+                {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
+              </option>
+            </select>
+          </label>
+
+          <label class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.question"}}</span>
             <textarea rows="3" value={{this.questionText}} {{on "input" this.updateQuestionText}}></textarea>
           </label>
 
-          <label class="quiz-admin-form__field">
-            <span>{{i18n "discourse_quiz.admin.form.options"}}</span>
-            <textarea rows="5" value={{this.optionsText}} {{on "input" this.updateOptionsText}}></textarea>
-          </label>
+          {{#if this.showOptionsEditor}}
+            <label class="quiz-admin-form__field">
+              <span>{{i18n "discourse_quiz.admin.form.options"}}</span>
+              <textarea rows="5" value={{this.optionsText}} {{on "input" this.updateOptionsText}}></textarea>
+            </label>
+          {{/if}}
 
-          {{#if this.parsedOptions.length}}
+          {{#if this.isTrueFalse}}
+            <fieldset class="quiz-admin-form__field">
+              <legend>{{i18n "discourse_quiz.admin.form.correct_answer"}}</legend>
+              {{#each this.trueFalseOptions as |option index|}}
+                <label class="quiz-admin-form__radio">
+                  <input
+                    type="radio"
+                    name="quiz-correct-index"
+                    checked={{eq this.correctIndex index}}
+                    {{on "change" (fn this.selectCorrectIndex index)}}
+                  />
+                  <span>{{option}}</span>
+                </label>
+              {{/each}}
+            </fieldset>
+          {{else if this.isMultipleChoice}}
+            {{#if this.parsedOptions.length}}
+              <fieldset class="quiz-admin-form__field">
+                <legend>{{i18n "discourse_quiz.admin.form.correct_answers"}}</legend>
+                {{#each this.parsedOptions as |option index|}}
+                  <label class="quiz-admin-form__radio">
+                    <input
+                      type="checkbox"
+                      checked={{this.isCorrectIndexSelected index}}
+                      {{on "change" (fn this.toggleCorrectIndex index)}}
+                    />
+                    <span>{{option}}</span>
+                  </label>
+                {{/each}}
+              </fieldset>
+            {{/if}}
+          {{else if this.parsedOptions.length}}
             <fieldset class="quiz-admin-form__field">
               <legend>{{i18n "discourse_quiz.admin.form.correct_answer"}}</legend>
               {{#each this.parsedOptions as |option index|}}

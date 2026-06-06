@@ -138,8 +138,10 @@ module DiscourseQuiz
         id: question.id,
         category_name: question.category_name,
         question_text: question.question_text,
+        question_type: question.resolved_question_type,
         options: question.options,
         correct_index: question.correct_index,
+        correct_indices: question.multiple_choice? ? question.resolved_correct_indices : [],
         explanation: question.explanation,
         active: question.active,
         created_at: question.created_at,
@@ -223,7 +225,17 @@ module DiscourseQuiz
     def import_attributes(item)
       attrs = item.is_a?(ActionController::Parameters) ? item : ActionController::Parameters.new(item)
       permitted =
-        attrs.permit(:category_name, :question_text, :correct_index, :explanation, :active, :position, options: [])
+        attrs.permit(
+          :category_name,
+          :question_text,
+          :question_type,
+          :correct_index,
+          :explanation,
+          :active,
+          :position,
+          options: [],
+          correct_indices: [],
+        )
 
       if permitted[:options].is_a?(String)
         permitted[:options] = permitted[:options].split(/\r?\n/).map(&:strip).reject(&:blank?)

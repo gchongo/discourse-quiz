@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.10.0)
+## Current features (v0.11.0)
 
 - Quiz home screen with toggle list (multi-category selection, X-style) before starting
 - Desktop and mobile quiz panel entry with show/hide controls
@@ -22,6 +22,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Practice modes (logged-in): random, wrong-answer review, unseen questions
 - Session de-duplication: while practicing, avoids repeating questions until the selected range is exhausted
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
+- Question types: single choice (default), true/false, and multiple choice (all correct options required)
 - User summary stats (own profile only at `/u/:username/summary`): lifetime correct count and never-correct question count
 
 ## Installation
@@ -55,9 +56,25 @@ Upload a `.json` or `.csv` file, or paste content into the textarea.
   {
     "category_name": "历史",
     "question_text": "中国历史上第一个统一的封建王朝是哪个？",
+    "question_type": "single_choice",
     "options": ["夏朝", "商朝", "秦朝", "汉朝"],
     "correct_index": 2,
     "explanation": "秦朝是中国历史上第一个统一的中央集权封建王朝。"
+  },
+  {
+    "category_name": "历史",
+    "question_text": "秦朝只存在了 15 年。",
+    "question_type": "true_false",
+    "correct_index": 0,
+    "explanation": "对。"
+  },
+  {
+    "category_name": "历史",
+    "question_text": "下列哪些属于战国七雄？",
+    "question_type": "multiple_choice",
+    "options": ["齐", "晋", "秦", "楚"],
+    "correct_indices": [0, 2, 3],
+    "explanation": "战国七雄不含晋。"
   }
 ]
 ```
@@ -67,11 +84,13 @@ Upload a `.json` or `.csv` file, or paste content into the textarea.
 Use `|` to separate multiple options in the `options` column:
 
 ```csv
-id,category_name,question_text,options,correct_index,explanation,active
-,历史,中国历史上第一个统一的封建王朝是哪个？,夏朝|商朝|秦朝|汉朝,2,秦朝是中国历史上第一个统一的中央集权封建王朝。,true
+id,category_name,question_text,question_type,options,correct_index,correct_indices,explanation,active
+,历史,中国历史上第一个统一的封建王朝是哪个？,single_choice,夏朝|商朝|秦朝|汉朝,2,,秦朝是中国历史上第一个统一的中央集权封建王朝。,true
+,历史,秦朝只存在了 15 年。,true_false,,0,,对。,true
+,历史,下列哪些属于战国七雄？,multiple_choice,齐|晋|秦|楚,0,0|2|3,战国七雄不含晋。,true
 ```
 
-`correct_index` is zero-based. Leave `id` blank for new rows. Include `id` when using **upsert** import.
+`question_type` is `single_choice` (default), `true_false`, or `multiple_choice`. `correct_index` is zero-based. For multiple choice, set `correct_indices` (JSON array or `0|2|3` in CSV). Leave `id` blank for new rows. Include `id` when using **upsert** import.
 
 ### Admin workflows
 
@@ -172,7 +191,7 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | GET | `/quiz/next.json` | Random active question; optional `category_names[]`, `practice_mode` (`normal`, `wrong_only`, `unseen`), `exclude_question_ids[]` (session de-duplication) |
 | GET | `/quiz/status.json` | Current guest/login quiz status |
 | GET | `/quiz/summary_stats.json` | Logged-in user's lifetime correct and wrong-question counts |
-| POST | `/quiz/submit.json` | Submit `question_id` + `answer_index`, returns result |
+| POST | `/quiz/submit.json` | Submit `question_id` + `answer_index` (single/true-false) or `answer_indices[]` (multiple choice) |
 | GET | `/admin/quiz/questions.json` | Admin question list (`page`, `per_page`, `q`, `category_name`) |
 | GET | `/admin/quiz/questions/export.json` | Export JSON or CSV (`export_format`) |
 | POST | `/admin/quiz/questions.json` | Create one question |

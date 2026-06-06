@@ -19,6 +19,11 @@ en:
       submit_error: "Failed to submit answer. Please try again."
       correct: "Correct!"
       incorrect: "Incorrect. The correct answer is: %{answer}"
+      incorrect_multiple: "Incorrect. The correct answers are: %{answers}"
+      select_multiple_hint: "Select all correct options."
+      true_false:
+        true: "True"
+        false: "False"
       explanation: "Explanation"
       next_question: "Next question"
       select_option: "Select an option before submitting."
@@ -102,9 +107,15 @@ en:
         no: "No"
         form:
           category: "Category"
+          question_type: "Question type"
+          question_types:
+            single_choice: "Single choice"
+            true_false: "True / false"
+            multiple_choice: "Multiple choice"
           question: "Question"
           options: "Options (one per line)"
           correct_answer: "Correct answer"
+          correct_answers: "Correct answers"
           explanation: "Explanation"
           active: "Active"
           use_new_category: "Use a new category"

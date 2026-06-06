@@ -19,6 +19,11 @@ zh_CN:
       submit_error: "提交失败，请稍后重试。"
       correct: "回答正确！"
       incorrect: "回答错误，正确答案是：%{answer}"
+      incorrect_multiple: "回答错误，正确答案是：%{answers}"
+      select_multiple_hint: "请选择所有正确选项。"
+      true_false:
+        true: "对"
+        false: "错"
       explanation: "解析"
       next_question: "下一题"
       select_option: "请先选择一个选项。"
@@ -102,9 +107,15 @@ zh_CN:
         no: "否"
         form:
           category: "分类"
+          question_type: "题型"
+          question_types:
+            single_choice: "单选题"
+            true_false: "判断题"
+            multiple_choice: "多选题"
           question: "题目"
           options: "选项（每行一个）"
           correct_answer: "正确答案"
+          correct_answers: "正确答案（可多选）"
           explanation: "解析"
           active: "启用"
           use_new_category: "使用新分类"

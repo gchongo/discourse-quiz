@@ -12,13 +12,34 @@ export default class QuizQuestionDisplay extends Component {
   @service quiz;
 
   @tracked selectedIndex = null;
+  @tracked selectedIndices = [];
 
   get question() {
     return this.args.question;
   }
 
+  get isMultipleChoice() {
+    return this.question.question_type === "multiple_choice";
+  }
+
+  get isTrueFalse() {
+    return this.question.question_type === "true_false";
+  }
+
   get canSubmit() {
-    return this.selectedIndex !== null && !this.quiz.submitting;
+    if (this.quiz.submitting) {
+      return false;
+    }
+
+    if (this.isMultipleChoice) {
+      return this.selectedIndices.length > 0;
+    }
+
+    return this.selectedIndex !== null;
+  }
+
+  isSelected(index) {
+    return this.selectedIndices.includes(index);
   }
 
   @action
@@ -27,8 +48,22 @@ export default class QuizQuestionDisplay extends Component {
   }
 
   @action
+  toggleOption(index) {
+    if (this.isSelected(index)) {
+      this.selectedIndices = this.selectedIndices.filter((value) => value !== index);
+    } else {
+      this.selectedIndices = [...this.selectedIndices, index].sort((a, b) => a - b);
+    }
+  }
+
+  @action
   submitAnswer() {
     if (!this.canSubmit) {
+      return;
+    }
+
+    if (this.isMultipleChoice) {
+      this.quiz.submitAnswer(null, this.selectedIndices);
       return;
     }
 
@@ -36,7 +71,9 @@ export default class QuizQuestionDisplay extends Component {
   }
 
   <template>
-    <div class="quiz-question-display">
+    <div
+      class="quiz-question-display {{if this.isTrueFalse 'quiz-question-display--true-false'}}"
+    >
       {{#if this.quiz.isLearningOnly}}
         <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
       {{/if}}
@@ -51,17 +88,33 @@ export default class QuizQuestionDisplay extends Component {
       <div class="quiz-question-category">{{this.question.category_name}}</div>
       <div class="quiz-question-text">{{this.question.question_text}}</div>
 
+      {{#if this.isMultipleChoice}}
+        <p class="quiz-status-hint">{{i18n "discourse_quiz.select_multiple_hint"}}</p>
+      {{/if}}
+
       <ul class="quiz-options-list">
         {{#each this.question.options as |option index|}}
           <li>
-            <button
-              type="button"
-              class="quiz-option-btn {{if (eq this.selectedIndex index) 'is-selected'}}"
-              disabled={{this.quiz.submitting}}
-              {{on "click" (fn this.selectOption index)}}
-            >
-              {{option}}
-            </button>
+            {{#if this.isMultipleChoice}}
+              <label class="quiz-option-btn quiz-option-check {{if (this.isSelected index) 'is-selected'}}">
+                <input
+                  type="checkbox"
+                  checked={{this.isSelected index}}
+                  disabled={{this.quiz.submitting}}
+                  {{on "change" (fn this.toggleOption index)}}
+                />
+                <span>{{option}}</span>
+              </label>
+            {{else}}
+              <button
+                type="button"
+                class="quiz-option-btn {{if (eq this.selectedIndex index) 'is-selected'}}"
+                disabled={{this.quiz.submitting}}
+                {{on "click" (fn this.selectOption index)}}
+              >
+                {{option}}
+              </button>
+            {{/if}}
           </li>
         {{/each}}
       </ul>

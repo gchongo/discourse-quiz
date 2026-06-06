@@ -43,11 +43,15 @@ module DiscourseQuiz
       hash = item.is_a?(Hash) ? item.stringify_keys : {}
       options = normalize_options(hash["options"])
 
+      question_type = normalize_question_type(hash["question_type"])
+
       item = {
         "category_name" => hash["category_name"].to_s.strip,
         "question_text" => hash["question_text"].to_s.strip,
+        "question_type" => question_type,
         "options" => options,
         "correct_index" => hash["correct_index"].to_i,
+        "correct_indices" => normalize_correct_indices(hash["correct_indices"], hash["correct_index"], question_type),
         "explanation" => hash["explanation"].to_s.presence,
         "active" => parse_active(hash["active"], default: true),
         "position" => hash["position"].to_i,
@@ -59,11 +63,15 @@ module DiscourseQuiz
     def self.normalize_csv_row(row)
       options = normalize_options(row["options"])
 
+      question_type = normalize_question_type(row["question_type"])
+
       item = {
         "category_name" => row["category_name"].to_s.strip,
         "question_text" => row["question_text"].to_s.strip,
+        "question_type" => question_type,
         "options" => options,
         "correct_index" => row["correct_index"].to_s.strip.to_i,
+        "correct_indices" => normalize_correct_indices(row["correct_indices"], row["correct_index"], question_type),
         "explanation" => row["explanation"].to_s.presence,
         "active" => parse_active(row["active"], default: true),
       }
@@ -86,6 +94,35 @@ module DiscourseQuiz
       return default if value.nil? || (value.is_a?(String) && value.strip.blank?)
 
       ActiveModel::Type::Boolean.new.cast(value)
+    end
+
+    def self.normalize_question_type(value)
+      type = value.to_s.strip.presence || DiscourseQuiz::QuestionTypes::SINGLE_CHOICE
+      DiscourseQuiz::QuestionTypes::ALL.include?(type) ? type : DiscourseQuiz::QuestionTypes::SINGLE_CHOICE
+    end
+
+    def self.normalize_correct_indices(indices_value, fallback_index, question_type)
+      return [] unless question_type == DiscourseQuiz::QuestionTypes::MULTIPLE_CHOICE
+
+      values =
+        case indices_value
+        when Array
+          indices_value
+        when String
+          if indices_value.include?("|")
+            indices_value.split("|")
+          else
+            indices_value.split(",")
+          end
+        else
+          []
+        end
+
+      normalized = DiscourseQuiz::QuestionTypes.normalize_indices(values)
+      return normalized if normalized.present?
+
+      fallback = fallback_index.to_i
+      fallback.negative? ? [] : [fallback]
     end
   end
 end

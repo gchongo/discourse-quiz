@@ -4,7 +4,17 @@ require "csv"
 
 module DiscourseQuiz
   class QuestionExporter
-    HEADERS = %w[id category_name question_text options correct_index explanation active].freeze
+    HEADERS = %w[
+      id
+      category_name
+      question_text
+      question_type
+      options
+      correct_index
+      correct_indices
+      explanation
+      active
+    ].freeze
 
     def self.to_json(questions)
       questions.map { |question| question_hash(question) }
@@ -22,8 +32,10 @@ module DiscourseQuiz
         id: question.id,
         category_name: question.category_name,
         question_text: question.question_text,
+        question_type: question.resolved_question_type,
         options: question.options,
         correct_index: question.correct_index,
+        correct_indices: question.multiple_choice? ? question.resolved_correct_indices : [],
         explanation: question.explanation,
         active: question.active,
       }
@@ -36,8 +48,10 @@ module DiscourseQuiz
         question.id,
         question.category_name,
         question.question_text,
+        question.resolved_question_type,
         Array(question.options).join("|"),
         question.correct_index,
+        Array(question.resolved_correct_indices).join("|"),
         question.explanation,
         question.active,
       ]

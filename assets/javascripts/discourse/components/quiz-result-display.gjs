@@ -16,8 +16,48 @@ export default class QuizResultDisplay extends Component {
     return this.args.result;
   }
 
+  get isMultipleChoice() {
+    return this.result.question_type === "multiple_choice";
+  }
+
   get submittedIndex() {
     return this.quiz.submittedAnswerIndex;
+  }
+
+  get incorrectMessage() {
+    if (this.result.correct) {
+      return null;
+    }
+
+    if (this.isMultipleChoice) {
+      return i18n("discourse_quiz.incorrect_multiple", {
+        answers: (this.result.correct_options || []).join("、"),
+      });
+    }
+
+    return i18n("discourse_quiz.incorrect", { answer: this.result.correct_option });
+  }
+
+  isCorrectIndex(index) {
+    return (this.result.correct_indices || []).includes(index);
+  }
+
+  isSubmittedIndex(index) {
+    return (this.quiz.submittedAnswerIndices || []).includes(index);
+  }
+
+  optionClass(index) {
+    const classes = ["quiz-option-btn", "is-locked"];
+
+    if (this.isCorrectIndex(index)) {
+      classes.push("is-correct");
+    }
+
+    if (this.isSubmittedIndex(index) && !this.result.correct) {
+      classes.push("is-incorrect");
+    }
+
+    return classes.join(" ");
   }
 
   @action
@@ -34,7 +74,7 @@ export default class QuizResultDisplay extends Component {
           {{#if this.result.correct}}
             {{i18n "discourse_quiz.correct"}}
           {{else}}
-            {{i18n "discourse_quiz.incorrect" answer=this.result.correct_option}}
+            {{this.incorrectMessage}}
           {{/if}}
         </div>
 
@@ -52,13 +92,19 @@ export default class QuizResultDisplay extends Component {
           <ul class="quiz-options-list">
             {{#each this.question.options as |option index|}}
               <li>
-                <span
-                  class="quiz-option-btn is-locked
-                    {{if (eq index this.result.correct_index) 'is-correct'}}
-                    {{if (and (eq index this.submittedIndex) (not this.result.correct)) 'is-incorrect'}}"
-                >
-                  {{option}}
-                </span>
+                {{#if this.isMultipleChoice}}
+                  <span class={{this.optionClass index}}>
+                    {{option}}
+                  </span>
+                {{else}}
+                  <span
+                    class="quiz-option-btn is-locked
+                      {{if (eq index this.result.correct_index) 'is-correct'}}
+                      {{if (and (eq index this.submittedIndex) (not this.result.correct)) 'is-incorrect'}}"
+                  >
+                    {{option}}
+                  </span>
+                {{/if}}
               </li>
             {{/each}}
           </ul>

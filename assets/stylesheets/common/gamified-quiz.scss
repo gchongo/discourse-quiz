@@ -376,6 +376,30 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     cursor: pointer;
   }
 
+  label.quiz-option-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5em;
+    cursor: pointer;
+
+    input {
+      margin-top: 0.2em;
+      flex: 0 0 auto;
+    }
+
+    span {
+      flex: 1 1 auto;
+    }
+  }
+
+  .quiz-question-display--true-false {
+    .quiz-options-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5em;
+    }
+  }
+
   .quiz-submit-btn {
     margin-top: 1em;
     width: 100%;

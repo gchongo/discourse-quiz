@@ -221,7 +221,9 @@ export default class QuizPanel extends Component {
                   @result={{this.quiz.answerResult}}
                 />
               {{else}}
-                <QuizQuestionDisplay @question={{this.quiz.currentQuestion}} />
+                {{#key this.quiz.currentQuestion.id}}
+                  <QuizQuestionDisplay @question={{this.quiz.currentQuestion}} />
+                {{/key}}
               {{/if}}
             {{/if}}
           {{/unless}}

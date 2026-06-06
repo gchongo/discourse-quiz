@@ -5,6 +5,9 @@ zh_CN:
     errors:
       invalid_options: "选项必须是非空数组。"
       invalid_correct_index: "正确选项索引必须在选项范围内。"
+      invalid_correct_indices: "正确选项索引必须在选项范围内。"
+      invalid_true_false_options: "判断题必须只有两个选项。"
+      invalid_multiple_choice_options: "多选题至少需要两个选项。"
       no_active_questions: "当前没有可用的题目。"
       no_wrong_questions: "该范围内暂无错题可练，请换随机模式或其他分类。"
       no_unseen_questions: "该范围内所有题目你都已做过。"
@@ -18,6 +21,9 @@ zh_CN:
       question_not_found: "题目不存在。"
       invalid_answer_index: "所选答案无效。"
       paywall_reached: "已达到答题次数上限，请登录后继续。"
+    true_false:
+      true: "对"
+      false: "错"
   site_settings:
     quiz_plugin_enabled: "启用答题面板与题库。"
     quiz_categories: "答题面板可选分类过滤（留空表示全部）。"

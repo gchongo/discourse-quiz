@@ -80,6 +80,49 @@ describe DiscourseQuiz::QuizController do
       expect(response.parsed_body["id"]).to eq(other.id)
     end
 
+    it "returns question_type in the payload" do
+      sign_in(user)
+
+      multiple =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "示例",
+          question_text: "Pick many",
+          question_type: "multiple_choice",
+          options: %w[A B C],
+          correct_index: 0,
+          correct_indices: [0, 2],
+        )
+
+      get "/quiz/next.json", params: { category_name: "示例" }
+      expect(response.status).to eq(200)
+      expect(%w[single_choice multiple_choice]).to include(
+        response.parsed_body["question_type"],
+      )
+    end
+
+    it "submits multiple-choice answers" do
+      sign_in(user)
+
+      multiple =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "示例",
+          question_text: "Pick many",
+          question_type: "multiple_choice",
+          options: %w[A B C],
+          correct_index: 0,
+          correct_indices: [0, 2],
+        )
+
+      post "/quiz/submit.json",
+           params: {
+             question_id: multiple.id,
+             answer_indices: [0, 2],
+           }
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["correct"]).to eq(true)
+      expect(response.parsed_body["correct_indices"]).to eq([0, 2])
+    end
+
     it "returns wrong-only questions for logged in users" do
       sign_in(user)
 

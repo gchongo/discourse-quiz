@@ -38,6 +38,7 @@ export default class QuizService extends Service {
   @tracked currentQuestion = null;
   @tracked answerResult = null;
   @tracked submittedAnswerIndex = null;
+  @tracked submittedAnswerIndices = null;
   @tracked quizStatus = null;
   @tracked paywallActive = false;
   @tracked errorMessage = null;
@@ -376,6 +377,7 @@ export default class QuizService extends Service {
     this.currentQuestion = null;
     this.answerResult = null;
     this.submittedAnswerIndex = null;
+    this.submittedAnswerIndices = null;
     this.errorMessage = null;
     this.paywallActive = false;
     this.sessionSeenQuestionIds = [];
@@ -437,6 +439,7 @@ export default class QuizService extends Service {
     this.errorMessage = null;
     this.answerResult = null;
     this.submittedAnswerIndex = null;
+    this.submittedAnswerIndices = null;
     this.paywallActive = false;
     this.panelPhase = "playing";
 
@@ -477,8 +480,18 @@ export default class QuizService extends Service {
   }
 
   @action
-  async submitAnswer(answerIndex) {
-    if (!this.currentQuestion || answerIndex === null || answerIndex === undefined) {
+  async submitAnswer(answerIndex, answerIndices = null) {
+    if (!this.currentQuestion) {
+      return;
+    }
+
+    const isMultipleChoice = this.currentQuestion.question_type === "multiple_choice";
+
+    if (isMultipleChoice) {
+      if (!Array.isArray(answerIndices) || answerIndices.length === 0) {
+        return;
+      }
+    } else if (answerIndex === null || answerIndex === undefined) {
       return;
     }
 
@@ -487,11 +500,13 @@ export default class QuizService extends Service {
 
     try {
       this.submittedAnswerIndex = answerIndex;
+      this.submittedAnswerIndices = answerIndices;
       const result = await ajax("/quiz/submit.json", {
         type: "POST",
         data: {
           question_id: this.currentQuestion.id,
           answer_index: answerIndex,
+          answer_indices: answerIndices,
         },
       });
       this.answerResult = result;
@@ -499,6 +514,7 @@ export default class QuizService extends Service {
     } catch (e) {
       this.answerResult = null;
       this.submittedAnswerIndex = null;
+      this.submittedAnswerIndices = null;
 
       if (e?.jqXHR?.status === 429) {
         this.errorMessage =
