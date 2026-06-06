@@ -61,11 +61,13 @@ cd /var/www/discourse
 su discourse -c 'bundle exec rake db:migrate'
 ```
 
-If version `20260611000000` is stuck after a failed run:
+If a failed migration version is stuck (e.g. `20260611000000` from an earlier attempt):
 
 ```sql
-DELETE FROM schema_migrations WHERE version = '20260611000000';
+DELETE FROM schema_migrations WHERE version IN ('20260611000000', '20260605000000');
 ```
+
+**Important:** Plugin migration timestamps must not be in the future. Discourse rejects migrations dated after the current UTC time during `db:migrate`.
 
 Then run `rake db:migrate` again after pulling the fixed plugin code.
 

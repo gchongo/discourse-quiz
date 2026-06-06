@@ -15,6 +15,7 @@ module ::DiscourseQuiz
 end
 
 require_relative "lib/discourse_quiz/engine"
+require_relative "lib/discourse_quiz/seed_questions"
 
 after_initialize do
   add_admin_route(
@@ -22,4 +23,10 @@ after_initialize do
     "discourse-quiz",
     { use_new_show_route: true },
   )
+
+  begin
+    DiscourseQuiz::SeedQuestions.seed!
+  rescue StandardError => e
+    Rails.logger.warn("[discourse-quiz] Failed to seed sample question: #{e.message}")
+  end
 end
