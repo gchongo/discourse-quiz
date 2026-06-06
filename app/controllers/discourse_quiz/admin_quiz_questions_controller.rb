@@ -5,17 +5,39 @@ module DiscourseQuiz
     requires_plugin DiscourseQuiz::PLUGIN_NAME
 
     def index
+      unless table_ready?
+        return(
+          render_json_dump(
+            { questions: [], categories: [], error: I18n.t("discourse_quiz.errors.database_unavailable") },
+            status: 503,
+          )
+        )
+      end
+
       questions = QuizQuestion.order(position: :asc, id: :asc)
       questions = questions.by_category(params[:category_name]) if params[:category_name].present?
 
       render_json_dump(
-        questions: serialize_data(questions.to_a, ::AdminQuizQuestionSerializer),
+        questions: questions.map { |question| question_json(question) },
         categories: QuizQuestion.category_names,
+      )
+    rescue ActiveRecord::StatementInvalid => e
+      Rails.logger.error("[discourse-quiz] admin#index failed: #{e.message}")
+      render_json_dump(
+        { questions: [], categories: [], error: I18n.t("discourse_quiz.errors.database_unavailable") },
+        status: 503,
       )
     end
 
     def categories
+      unless table_ready?
+        return render_json_dump({ categories: [] })
+      end
+
       render_json_dump(categories: QuizQuestion.category_names)
+    rescue ActiveRecord::StatementInvalid => e
+      Rails.logger.error("[discourse-quiz] admin#categories failed: #{e.message}")
+      render_json_dump({ categories: [] })
     end
 
     def bulk_import
@@ -43,6 +65,24 @@ module DiscourseQuiz
     end
 
     private
+
+    def table_ready?
+      ActiveRecord::Base.connection.table_exists?(:discourse_quiz_questions)
+    end
+
+    def question_json(question)
+      {
+        id: question.id,
+        category_name: question.category_name,
+        question_text: question.question_text,
+        options: question.options,
+        correct_index: question.correct_index,
+        explanation: question.explanation,
+        active: question.active,
+        position: question.position,
+        created_at: question.created_at,
+      }
+    end
 
     def parse_import_payload
       raw = params[:questions_json].to_s.strip

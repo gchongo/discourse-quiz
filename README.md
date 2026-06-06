@@ -51,6 +51,16 @@ bin/rspec plugins/discourse-quiz
 bin/qunit plugins/discourse-quiz/test/javascripts
 ```
 
+## Troubleshooting admin `/admin/quiz/questions.json` 500
+
+Same as the public endpoint: rebuild after pulling latest code. The admin list API no longer uses `AdminQuizQuestionSerializer` (direct JSON, like `/quiz/next.json`).
+
+Quick test inside the container:
+
+```bash
+su discourse -c 'bundle exec rails runner "puts DiscourseQuiz::QuizQuestion.order(:id).map(&:question_text).inspect"'
+```
+
 ## Troubleshooting `/quiz/next.json` 500
 
 Inside the container:
