@@ -1,4 +1,5 @@
 import { acceptance } from "discourse/tests/helpers/qunit-helpers";
+import { parsePostData } from "discourse/tests/helpers/create-pretender";
 import { click, visit } from "@ember/test-helpers";
 import { test } from "qunit";
 
@@ -21,6 +22,22 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
         },
       ];
     });
+
+    server.post("/quiz/submit.json", (request) => {
+      const data = parsePostData(request.requestBody);
+      const correct = Number(data.answer_index) === 0;
+
+      return [
+        200,
+        { "Content-Type": "application/json" },
+        {
+          correct,
+          explanation: "1 + 1 = 2",
+          correct_index: 1,
+          correct_option: "2",
+        },
+      ];
+    });
   });
 
   test("clicking header icon shows a question", async function (assert) {
@@ -28,5 +45,14 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
     await click(".quiz-header-icon .btn");
     assert.dom(".quiz-panel-container").hasClass("is-visible");
     assert.dom(".quiz-question-text").hasText("1 + 1 = ?");
+  });
+
+  test("submitting an answer shows the result", async function (assert) {
+    await visit("/");
+    await click(".quiz-header-icon .btn");
+    await click(".quiz-option-btn");
+    await click(".quiz-submit-btn");
+    assert.dom(".quiz-result-banner.is-correct").exists();
+    assert.dom(".quiz-explanation-text").hasText("1 + 1 = 2");
   });
 });

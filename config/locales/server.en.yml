@@ -10,6 +10,8 @@ en:
       import_empty: "Import payload is empty."
       import_not_array: "Import payload must be a JSON array."
       import_invalid_json: "Import payload is not valid JSON."
+      question_not_found: "Question not found."
+      invalid_answer_index: "Answer index is out of range."
   site_settings:
     quiz_plugin_enabled: "Enable the quiz panel and question bank."
     quiz_categories: "Optional category name filter for the quiz panel (leave blank for all)."

@@ -13,7 +13,10 @@ export default class QuizService extends Service {
   @tracked isMinimized = false;
 
   @tracked loading = false;
+  @tracked submitting = false;
   @tracked currentQuestion = null;
+  @tracked answerResult = null;
+  @tracked submittedAnswerIndex = null;
   @tracked errorMessage = null;
 
   get isEnabled() {
@@ -59,6 +62,8 @@ export default class QuizService extends Service {
   async loadQuestion() {
     this.loading = true;
     this.errorMessage = null;
+    this.answerResult = null;
+    this.submittedAnswerIndex = null;
 
     try {
       this.currentQuestion = await ajax("/quiz/next.json");
@@ -71,6 +76,33 @@ export default class QuizService extends Service {
       }
     } finally {
       this.loading = false;
+    }
+  }
+
+  @action
+  async submitAnswer(answerIndex) {
+    if (!this.currentQuestion || answerIndex === null || answerIndex === undefined) {
+      return;
+    }
+
+    this.submitting = true;
+    this.errorMessage = null;
+
+    try {
+      this.submittedAnswerIndex = answerIndex;
+      this.answerResult = await ajax("/quiz/submit.json", {
+        type: "POST",
+        data: {
+          question_id: this.currentQuestion.id,
+          answer_index: answerIndex,
+        },
+      });
+    } catch (e) {
+      this.answerResult = null;
+      this.submittedAnswerIndex = null;
+      this.errorMessage = i18n("discourse_quiz.submit_error");
+    } finally {
+      this.submitting = false;
     }
   }
 }

@@ -4,6 +4,7 @@ import DButton from "discourse/ui-kit/d-button";
 import { i18n } from "discourse-i18n";
 import { htmlSafe } from "@ember/template";
 import QuizQuestionDisplay from "./quiz-question-display";
+import QuizResultDisplay from "./quiz-result-display";
 
 export default class QuizPanel extends Component {
   @service quiz;
@@ -67,7 +68,14 @@ export default class QuizPanel extends Component {
             {{else if this.quiz.errorMessage}}
               <p class="quiz-panel-error">{{this.quiz.errorMessage}}</p>
             {{else if this.quiz.currentQuestion}}
-              <QuizQuestionDisplay @question={{this.quiz.currentQuestion}} />
+              {{#if this.quiz.answerResult}}
+                <QuizResultDisplay
+                  @question={{this.quiz.currentQuestion}}
+                  @result={{this.quiz.answerResult}}
+                />
+              {{else}}
+                <QuizQuestionDisplay @question={{this.quiz.currentQuestion}} />
+              {{/if}}
             {{/if}}
           {{/unless}}
         </div>

@@ -3,6 +3,7 @@
 DiscourseQuiz::Engine.routes.draw do
   get "/next" => "quiz#next"
   get "/categories" => "quiz#categories"
+  post "/submit" => "quiz#submit"
 end
 
 Discourse::Application.routes.draw do

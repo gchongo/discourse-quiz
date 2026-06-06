@@ -31,4 +31,33 @@ describe DiscourseQuiz::QuizController do
       expect(response.parsed_body["categories"]).to include("示例")
     end
   end
+
+  describe "POST /quiz/submit" do
+    it "returns correct for the right answer" do
+      post "/quiz/submit.json", params: { question_id: question.id, answer_index: 1 }
+      expect(response.status).to eq(200)
+      json = response.parsed_body
+      expect(json["correct"]).to eq(true)
+      expect(json["correct_index"]).to eq(1)
+      expect(json["correct_option"]).to eq("2")
+    end
+
+    it "returns incorrect for the wrong answer" do
+      post "/quiz/submit.json", params: { question_id: question.id, answer_index: 0 }
+      expect(response.status).to eq(200)
+      json = response.parsed_body
+      expect(json["correct"]).to eq(false)
+      expect(json["correct_option"]).to eq("2")
+    end
+
+    it "rejects an invalid answer index" do
+      post "/quiz/submit.json", params: { question_id: question.id, answer_index: 99 }
+      expect(response.status).to eq(422)
+    end
+
+    it "returns not found for missing questions" do
+      post "/quiz/submit.json", params: { question_id: -1, answer_index: 0 }
+      expect(response.status).to eq(404)
+    end
+  end
 end

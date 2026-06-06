@@ -2,11 +2,12 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.2.0)
+## Current features (v0.3.0)
 
 - Desktop and mobile quiz panel entry with show/hide controls
 - Question bank table: `discourse_quiz_questions`
 - Panel loads one random active question from the bank
+- Submit answers with correct/incorrect feedback and explanation
 - Admin page with category filter and bulk JSON import
 - Optional site setting `quiz_categories` to limit panel questions by category name
 
@@ -117,7 +118,14 @@ DELETE FROM schema_migrations WHERE version IN ('20260611000000', '2026060500000
 
 Then run `rake db:migrate` again after pulling the fixed plugin code.
 
+## API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/quiz/next.json` | Random active question (no answer) |
+| POST | `/quiz/submit.json` | Submit `question_id` + `answer_index`, returns result |
+| GET | `/admin/quiz/questions.json` | Admin question list |
+
 ## Next steps
 
-- Submit answers and scoring
 - Guest limits and gamification integration

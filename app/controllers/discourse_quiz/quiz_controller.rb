@@ -47,6 +47,54 @@ module DiscourseQuiz
       render_json_dump(categories: QuizQuestion.category_names)
     end
 
+    def submit
+      unless table_ready?
+        return(
+          render_json_dump(
+            { error: I18n.t("discourse_quiz.errors.database_unavailable") },
+            status: 503,
+          )
+        )
+      end
+
+      question = QuizQuestion.active.find_by(id: params[:question_id].to_i)
+      unless question
+        return(
+          render_json_dump(
+            { error: I18n.t("discourse_quiz.errors.question_not_found") },
+            status: 404,
+          )
+        )
+      end
+
+      answer_index = params[:answer_index].to_i
+      unless valid_answer_index?(question, answer_index)
+        return(
+          render_json_dump(
+            { error: I18n.t("discourse_quiz.errors.invalid_answer_index") },
+            status: 422,
+          )
+        )
+      end
+
+      correct = answer_index == question.correct_index
+
+      render_json_dump(
+        {
+          correct: correct,
+          explanation: question.explanation,
+          correct_index: question.correct_index,
+          correct_option: question.options[question.correct_index],
+        },
+      )
+    rescue ActiveRecord::StatementInvalid => e
+      Rails.logger.error("[discourse-quiz] quiz#submit failed: #{e.message}")
+      render_json_dump(
+        { error: I18n.t("discourse_quiz.errors.database_unavailable") },
+        status: 503,
+      )
+    end
+
     private
 
     def ensure_enabled
@@ -62,6 +110,10 @@ module DiscourseQuiz
       return [] if setting.blank?
 
       setting.split(",").map(&:strip).reject(&:blank?)
+    end
+
+    def valid_answer_index?(question, answer_index)
+      question.options.is_a?(Array) && answer_index >= 0 && answer_index < question.options.length
     end
   end
 end
