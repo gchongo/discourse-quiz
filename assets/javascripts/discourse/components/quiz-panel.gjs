@@ -1,8 +1,10 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
+import { tracked } from "@glimmer/tracking";
 import { service } from "@ember/service";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import willDestroy from "@ember/render-modifiers/modifiers/will-destroy";
+import { on } from "@ember/modifier";
 import DButton from "discourse/ui-kit/d-button";
 import { i18n } from "discourse-i18n";
 import { htmlSafe } from "@ember/template";
@@ -16,11 +18,26 @@ export default class QuizPanel extends Component {
   @service quiz;
   @service siteSettings;
 
+  @tracked isDragging = false;
+
+  _panelElement = null;
+  _dragStartX = 0;
+  _dragStartY = 0;
+  _dragStartLeft = 0;
+  _dragStartTop = 0;
+
   get panelStyles() {
     if (this.quiz.isMobile) {
       return "";
     }
-    return htmlSafe("--quiz-panel-width: 300px;");
+
+    let styles = "--quiz-panel-width: 300px;";
+
+    if (this.quiz.isDraggable && this.quiz.hasCustomPosition) {
+      styles += `--quiz-panel-left: ${this.quiz.panelLeft}px; --quiz-panel-top: ${this.quiz.panelTop}px;`;
+    }
+
+    return htmlSafe(styles);
   }
 
   @action
@@ -30,23 +47,101 @@ export default class QuizPanel extends Component {
 
   @action
   teardownLayout() {
+    this.stopDragging();
     this.quiz.unregisterLayoutListeners();
   }
 
   get containerClass() {
     const classes = ["quiz-panel-container"];
+
     if (this.quiz.isMobile) {
       classes.push("is-mobile");
     } else {
       classes.push(this.quiz.isDockedEffective ? "is-docked" : "is-floating");
     }
+
     if (this.quiz.isMinimized) {
       classes.push("is-minimized");
     }
+
     if (this.quiz.panelVisible) {
       classes.push("is-visible");
     }
+
+    if (this.quiz.isDraggable && this.quiz.hasCustomPosition) {
+      classes.push("is-positioned");
+    }
+
+    if (this.isDragging) {
+      classes.push("is-dragging");
+    }
+
     return classes.join(" ");
+  }
+
+  @action
+  onHeaderPointerDown(event) {
+    if (!this.quiz.isDraggable || event.button !== 0) {
+      return;
+    }
+
+    if (event.target.closest(".quiz-panel-controls, .quiz-panel-back-btn, .btn")) {
+      return;
+    }
+
+    const panel = event.currentTarget.closest(".quiz-panel-container");
+    this._panelElement = panel;
+
+    const rect = panel.getBoundingClientRect();
+
+    if (!this.quiz.hasCustomPosition) {
+      this.quiz.setPanelPosition(rect.left, rect.top, { persist: false });
+    }
+
+    this.isDragging = true;
+    this._dragStartX = event.clientX;
+    this._dragStartY = event.clientY;
+    this._dragStartLeft = this.quiz.panelLeft;
+    this._dragStartTop = this.quiz.panelTop;
+
+    document.addEventListener("pointermove", this.onDragMove);
+    document.addEventListener("pointerup", this.onDragEnd);
+    document.addEventListener("pointercancel", this.onDragEnd);
+
+    event.preventDefault();
+  }
+
+  @action
+  onDragMove(event) {
+    if (!this.isDragging || !this._panelElement) {
+      return;
+    }
+
+    const rect = this._panelElement.getBoundingClientRect();
+    const left = this._dragStartLeft + (event.clientX - this._dragStartX);
+    const top = this._dragStartTop + (event.clientY - this._dragStartY);
+    const clamped = this.quiz.clampPanelPosition(left, top, rect.width, rect.height);
+
+    this.quiz.panelLeft = clamped.left;
+    this.quiz.panelTop = clamped.top;
+  }
+
+  @action
+  onDragEnd() {
+    if (!this.isDragging) {
+      return;
+    }
+
+    this.isDragging = false;
+    this.quiz.savePositionPreference();
+    this.stopDragging();
+  }
+
+  stopDragging() {
+    document.removeEventListener("pointermove", this.onDragMove);
+    document.removeEventListener("pointerup", this.onDragEnd);
+    document.removeEventListener("pointercancel", this.onDragEnd);
+    this._panelElement = null;
   }
 
   <template>
@@ -57,7 +152,11 @@ export default class QuizPanel extends Component {
         {{didInsert this.setupLayout}}
         {{willDestroy this.teardownLayout}}
       >
-        <div class="quiz-panel-header">
+        <div
+          class="quiz-panel-header {{if this.quiz.isDraggable 'is-draggable'}}"
+          title={{if this.quiz.isDraggable (i18n "gamified_quiz.drag_panel")}}
+          {{on "pointerdown" this.onHeaderPointerDown}}
+        >
           <div class="quiz-panel-title-row">
             {{#if this.quiz.isPlaying}}
               <DButton

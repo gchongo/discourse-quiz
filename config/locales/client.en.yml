@@ -9,6 +9,7 @@ en:
       undock_panel: "Float panel"
       minimize_panel: "Minimize panel"
       expand_panel: "Expand panel"
+      drag_panel: "Drag to move"
     discourse_quiz:
       loading: "Loading question..."
       load_error: "Failed to load question. Please try again."

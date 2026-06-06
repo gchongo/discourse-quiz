@@ -60,6 +60,16 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     transition: bottom 0.2s ease;
   }
 
+  &.is-floating.is-positioned,
+  &.is-docked.is-minimized.is-positioned,
+  &.is-floating.is-minimized.is-positioned {
+    right: auto;
+    bottom: auto;
+    left: var(--quiz-panel-left);
+    top: var(--quiz-panel-top);
+    transition: none;
+  }
+
   &.is-docked.is-minimized,
   &.is-floating.is-minimized {
     top: auto;
@@ -75,6 +85,15 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
 
     .quiz-panel-content {
       display: none;
+    }
+  }
+
+  &.is-dragging {
+    user-select: none;
+    transition: none;
+
+    .quiz-panel-header.is-draggable {
+      cursor: grabbing;
     }
   }
 
@@ -105,6 +124,19 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     padding: 10px 15px;
     border-bottom: 1px solid var(--primary-low);
     background: var(--secondary);
+
+    &.is-draggable {
+      cursor: grab;
+
+      .quiz-panel-title-row {
+        cursor: grab;
+      }
+
+      &:active,
+      .quiz-panel-container.is-dragging & {
+        cursor: grabbing;
+      }
+    }
 
     .quiz-panel-title-row {
       display: flex;

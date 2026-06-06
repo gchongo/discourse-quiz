@@ -5,7 +5,9 @@ import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
 
 const DOCK_PREF_KEY = "discourse-quiz-docked";
+const POSITION_PREF_KEY = "discourse-quiz-panel-position";
 const NARROW_BREAKPOINT = 1100;
+const PANEL_WIDTH = 300;
 const HTML_CLASS_VISIBLE = "has-quiz-panel";
 const HTML_CLASS_DOCKED = "has-quiz-panel-docked";
 
@@ -18,6 +20,8 @@ export default class QuizService extends Service {
   @tracked isDocked = true;
   @tracked isMinimized = false;
   @tracked narrowViewport = false;
+  @tracked panelLeft = null;
+  @tracked panelTop = null;
 
   _resizeHandler = null;
   _layoutListenerCount = 0;
@@ -54,6 +58,14 @@ export default class QuizService extends Service {
 
   get canDock() {
     return !this.isMobile && !this.narrowViewport;
+  }
+
+  get isDraggable() {
+    return !this.isMobile && (!this.isDockedEffective || this.isMinimized);
+  }
+
+  get hasCustomPosition() {
+    return this.panelLeft !== null && this.panelTop !== null;
   }
 
   get shouldPushLayout() {
@@ -148,6 +160,7 @@ export default class QuizService extends Service {
     }
 
     this.loadDockPreference();
+    this.loadPositionPreference();
     this._resizeHandler = () => this.handleViewportResize();
     window.addEventListener("resize", this._resizeHandler, { passive: true });
     this.handleViewportResize();
@@ -177,6 +190,64 @@ export default class QuizService extends Service {
     if (wasNarrow !== this.narrowViewport) {
       this.syncLayoutClasses();
     }
+
+    this.ensurePanelInViewport();
+  }
+
+  setPanelPosition(left, top, { persist = true, width = PANEL_WIDTH, height = 120 } = {}) {
+    const clamped = this.clampPanelPosition(left, top, width, height);
+    this.panelLeft = clamped.left;
+    this.panelTop = clamped.top;
+
+    if (persist) {
+      this.savePositionPreference();
+    }
+  }
+
+  ensurePanelInViewport() {
+    if (!this.hasCustomPosition) {
+      return;
+    }
+
+    let width = PANEL_WIDTH;
+    let height = 120;
+
+    if (typeof document !== "undefined") {
+      const panel = document.querySelector(".quiz-panel-container.is-visible");
+
+      if (panel) {
+        const rect = panel.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+      }
+    }
+
+    this.setPanelPosition(this.panelLeft, this.panelTop, {
+      persist: true,
+      width,
+      height,
+    });
+  }
+
+  clampPanelPosition(left, top, width = PANEL_WIDTH, height = 120) {
+    if (typeof window === "undefined") {
+      return { left, top };
+    }
+
+    const margin = 8;
+    const headerOffset =
+      parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue("--header-offset"),
+        10
+      ) || 0;
+
+    return {
+      left: Math.max(margin, Math.min(left, window.innerWidth - width - margin)),
+      top: Math.max(
+        headerOffset + margin,
+        Math.min(top, window.innerHeight - height - margin)
+      ),
+    };
   }
 
   syncLayoutClasses() {
@@ -198,6 +269,40 @@ export default class QuizService extends Service {
 
     const html = document.documentElement;
     html.classList.remove(HTML_CLASS_VISIBLE, HTML_CLASS_DOCKED);
+  }
+
+  loadPositionPreference() {
+    try {
+      const stored = localStorage.getItem(POSITION_PREF_KEY);
+
+      if (!stored) {
+        return;
+      }
+
+      const { left, top } = JSON.parse(stored);
+
+      if (Number.isFinite(left) && Number.isFinite(top)) {
+        this.panelLeft = left;
+        this.panelTop = top;
+      }
+    } catch {
+      // localStorage may be unavailable or JSON invalid
+    }
+  }
+
+  savePositionPreference() {
+    if (!this.hasCustomPosition) {
+      return;
+    }
+
+    try {
+      localStorage.setItem(
+        POSITION_PREF_KEY,
+        JSON.stringify({ left: this.panelLeft, top: this.panelTop })
+      );
+    } catch {
+      // localStorage may be unavailable
+    }
   }
 
   loadDockPreference() {
