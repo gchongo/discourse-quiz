@@ -13,6 +13,10 @@ export default class QuizService extends Service {
   @tracked isDocked = true;
   @tracked isMinimized = false;
 
+  @tracked panelPhase = "home";
+  @tracked selectedCategory = "";
+  @tracked availableCategories = [];
+
   @tracked loading = false;
   @tracked submitting = false;
   @tracked currentQuestion = null;
@@ -34,11 +38,15 @@ export default class QuizService extends Service {
     return this.quizStatus?.mode === "learning_only";
   }
 
+  get isPlaying() {
+    return this.panelPhase === "playing";
+  }
+
   @action
   openPanel() {
     this.panelVisible = true;
     this.isMinimized = false;
-    this.loadQuestion();
+    this.showHome();
   }
 
   @action
@@ -46,7 +54,7 @@ export default class QuizService extends Service {
     this.panelVisible = !this.panelVisible;
     if (this.panelVisible) {
       this.isMinimized = false;
-      this.loadQuestion();
+      this.showHome();
     }
   }
 
@@ -66,17 +74,67 @@ export default class QuizService extends Service {
   }
 
   @action
+  selectCategory(category) {
+    this.selectedCategory = category;
+  }
+
+  @action
+  async showHome() {
+    this.panelPhase = "home";
+    this.currentQuestion = null;
+    this.answerResult = null;
+    this.submittedAnswerIndex = null;
+    this.errorMessage = null;
+    this.paywallActive = false;
+
+    await this.loadHome();
+  }
+
+  @action
+  async loadHome() {
+    this.loading = true;
+
+    try {
+      const data = await ajax("/quiz/categories.json");
+      this.availableCategories = data.categories || [];
+      this.quizStatus = data.status || null;
+
+      if (this.quizStatus?.mode === "paywall") {
+        this.paywallActive = true;
+      } else if (this.availableCategories.length === 0) {
+        this.errorMessage = i18n("discourse_quiz.no_questions");
+      }
+    } catch (e) {
+      this.availableCategories = [];
+      this.errorMessage = i18n("discourse_quiz.load_error");
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  @action
+  startQuiz() {
+    this.panelPhase = "playing";
+    this.loadQuestion();
+  }
+
+  @action
   async loadQuestion() {
     this.loading = true;
     this.errorMessage = null;
     this.answerResult = null;
     this.submittedAnswerIndex = null;
     this.paywallActive = false;
+    this.panelPhase = "playing";
+
+    const url = this.selectedCategory
+      ? `/quiz/next.json?category_name=${encodeURIComponent(this.selectedCategory)}`
+      : "/quiz/next.json";
 
     try {
-      const data = await ajax("/quiz/next.json");
+      const data = await ajax(url);
       this.currentQuestion = data;
-      this.quizStatus = data.status || null;
+      this.quizStatus = data.status || this.quizStatus;
     } catch (e) {
       this.currentQuestion = null;
       const status = e?.jqXHR?.responseJSON?.status;
@@ -88,7 +146,7 @@ export default class QuizService extends Service {
       }
 
       if (e?.jqXHR?.status === 404) {
-        this.errorMessage = i18n("discourse_quiz.no_questions");
+        this.errorMessage = i18n("discourse_quiz.no_questions_in_range");
       } else {
         this.errorMessage = i18n("discourse_quiz.load_error");
       }
@@ -122,7 +180,8 @@ export default class QuizService extends Service {
       this.submittedAnswerIndex = null;
 
       if (e?.jqXHR?.status === 429) {
-        this.errorMessage = e.jqXHR.responseJSON?.errors?.[0] || i18n("discourse_quiz.submit_error");
+        this.errorMessage =
+          e.jqXHR.responseJSON?.errors?.[0] || i18n("discourse_quiz.submit_error");
       } else {
         this.errorMessage = i18n("discourse_quiz.submit_error");
       }

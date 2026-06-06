@@ -17,7 +17,7 @@ module DiscourseQuiz
         )
       end
 
-      question = QuizQuestion.pick_random(category_names: category_filters)
+      question = QuizQuestion.pick_random(category_names: effective_category_filters)
 
       unless question
         return(
@@ -46,7 +46,10 @@ module DiscourseQuiz
     end
 
     def categories
-      render_json_dump(categories: QuizQuestion.category_names)
+      render_json_dump(
+        categories: QuizQuestion.available_category_names(allowed: site_category_allowlist),
+        status: quiz_status,
+      )
     end
 
     def status
@@ -142,11 +145,24 @@ module DiscourseQuiz
       ActiveRecord::Base.connection.table_exists?(:discourse_quiz_questions)
     end
 
-    def category_filters
+    def site_category_allowlist
       setting = SiteSetting.quiz_categories.to_s.strip
       return [] if setting.blank?
 
       setting.split(",").map(&:strip).reject(&:blank?)
+    end
+
+    def effective_category_filters
+      allowlist = site_category_allowlist
+      selected = params[:category_name].to_s.strip
+
+      if selected.present?
+        return [] if allowlist.present? && !allowlist.include?(selected)
+
+        return [selected]
+      end
+
+      allowlist
     end
   end
 end

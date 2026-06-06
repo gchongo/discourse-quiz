@@ -10,6 +10,17 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
   });
 
   needs.pretender((server) => {
+    server.get("/quiz/categories.json", () => {
+      return [
+        200,
+        { "Content-Type": "application/json" },
+        {
+          categories: ["示例"],
+          status: { is_guest: false, mode: "normal" },
+        },
+      ];
+    });
+
     server.get("/quiz/next.json", () => {
       return [
         200,
@@ -43,16 +54,25 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
     });
   });
 
-  test("clicking header icon shows a question", async function (assert) {
+  test("clicking header icon shows the home screen", async function (assert) {
     await visit("/");
     await click(".quiz-header-icon .btn");
     assert.dom(".quiz-panel-container").hasClass("is-visible");
+    assert.dom(".quiz-home").exists();
+    assert.dom(".quiz-category-btn").exists({ count: 2 });
+  });
+
+  test("starting a quiz shows a question", async function (assert) {
+    await visit("/");
+    await click(".quiz-header-icon .btn");
+    await click(".quiz-home-start-btn");
     assert.dom(".quiz-question-text").hasText("1 + 1 = ?");
   });
 
   test("submitting an answer shows the result", async function (assert) {
     await visit("/");
     await click(".quiz-header-icon .btn");
+    await click(".quiz-home-start-btn");
     await click(".quiz-option-btn");
     await click(".quiz-submit-btn");
     assert.dom(".quiz-result-banner.is-correct").exists();

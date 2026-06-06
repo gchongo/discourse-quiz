@@ -26,6 +26,19 @@ describe DiscourseQuiz::QuizController do
       expect(json["status"]).to be_present
     end
 
+    it "filters by category_name param" do
+      DiscourseQuiz::QuizQuestion.create!(
+        category_name: "体育",
+        question_text: "马拉松?",
+        options: %w[A B],
+        correct_index: 0,
+      )
+
+      get "/quiz/next.json", params: { category_name: "体育" }
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["category_name"]).to eq("体育")
+    end
+
     it "returns paywall for guests over the limit" do
       SiteSetting.quiz_guest_attempt_limit = 1
 
@@ -44,10 +57,25 @@ describe DiscourseQuiz::QuizController do
   end
 
   describe "GET /quiz/categories" do
-    it "returns category names" do
+    it "returns active category names with status" do
       get "/quiz/categories.json"
       expect(response.status).to eq(200)
       expect(response.parsed_body["categories"]).to include("示例")
+      expect(response.parsed_body["status"]).to be_present
+    end
+
+    it "respects the quiz_categories site setting allowlist" do
+      DiscourseQuiz::QuizQuestion.create!(
+        category_name: "体育",
+        question_text: "Q2",
+        options: %w[A B],
+        correct_index: 0,
+      )
+
+      SiteSetting.quiz_categories = "体育"
+
+      get "/quiz/categories.json"
+      expect(response.parsed_body["categories"]).to eq(["体育"])
     end
   end
 

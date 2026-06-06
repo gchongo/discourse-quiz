@@ -2,8 +2,9 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.4.0)
+## Current features (v0.5.0)
 
+- Quiz home screen to choose a category range before starting
 - Desktop and mobile quiz panel entry with show/hide controls
 - Question bank table: `discourse_quiz_questions`
 - Panel loads one random active question from the bank
@@ -134,7 +135,8 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/quiz/next.json` | Random active question (no answer) + status |
+| GET | `/quiz/categories.json` | Active categories for the home screen + status |
+| GET | `/quiz/next.json` | Random active question; optional `category_name` filter |
 | GET | `/quiz/status.json` | Current guest/login quiz status |
 | POST | `/quiz/submit.json` | Submit `question_id` + `answer_index`, returns result |
 | GET | `/admin/quiz/questions.json` | Admin question list |

@@ -31,6 +31,18 @@ module DiscourseQuiz
       distinct.order(:category_name).pluck(:category_name)
     end
 
+    def self.active_category_names
+      active.distinct.order(:category_name).pluck(:category_name)
+    end
+
+    def self.available_category_names(allowed: [])
+      names = active_category_names
+      allowlist = Array(allowed).map(&:to_s).map(&:strip).reject(&:blank?)
+      return names if allowlist.blank?
+
+      names.select { |name| allowlist.include?(name) }
+    end
+
     def self.pick_random(category_names: [])
       scope = active
       names = Array(category_names).map(&:to_s).map(&:strip).reject(&:blank?)
