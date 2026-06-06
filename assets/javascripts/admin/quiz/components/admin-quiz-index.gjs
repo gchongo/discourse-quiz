@@ -607,16 +607,6 @@ export default class AdminQuizIndex extends Component {
               question_count=this.duplicateSummary.duplicate_question_count
             }}
           </p>
-          <DButton
-            @label={{if
-              this.disablingDuplicates
-              "discourse_quiz.admin.duplicate_disable_running"
-              "discourse_quiz.admin.duplicate_disable_button"
-            }}
-            @action={{this.bulkDisableDuplicates}}
-            @disabled={{this.disablingDuplicates}}
-            class="btn-default"
-          />
         {{/if}}
 
         {{#if this.duplicateDisableResult}}
@@ -708,6 +698,19 @@ export default class AdminQuizIndex extends Component {
             {{#if this.searchQuery}}
               <DButton @label="discourse_quiz.admin.clear_search" @action={{this.clearSearch}} class="btn-default" />
             {{/if}}
+            {{#if this.duplicateSummary.duplicate_group_count}}
+              <DButton
+                @label={{if
+                  this.disablingDuplicates
+                  "discourse_quiz.admin.duplicate_disable_running"
+                  "discourse_quiz.admin.duplicate_disable_button_short"
+                }}
+                @title="discourse_quiz.admin.duplicate_disable_button"
+                @action={{this.bulkDisableDuplicates}}
+                @disabled={{this.disablingDuplicates}}
+                class="btn-default btn-small"
+              />
+            {{/if}}
           </div>
         </div>
 
@@ -785,6 +788,7 @@ export default class AdminQuizIndex extends Component {
         <table class="quiz-questions-table table">
           <thead>
             <tr>
+              <th class="quiz-admin-col-id">{{i18n "discourse_quiz.admin.table.id"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.category"}}</th>
               <th class="quiz-admin-col-type">{{i18n "discourse_quiz.admin.table.question_type"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.question"}}</th>
@@ -795,6 +799,17 @@ export default class AdminQuizIndex extends Component {
           <tbody>
             {{#each this.questions as |question|}}
               <tr class={{if question.duplicate_ids "is-duplicate"}}>
+                <td class="quiz-admin-col-id">
+                  {{question.id}}
+                  {{#if question.duplicate_ids}}
+                    <span
+                      class="quiz-admin-duplicate-badge"
+                      title={{this.duplicateIdsLabel question.duplicate_ids}}
+                    >
+                      {{i18n "discourse_quiz.admin.duplicate_row_hint"}}
+                    </span>
+                  {{/if}}
+                </td>
                 <td>{{question.category_name}}</td>
                 <td class="quiz-admin-col-type">
                   {{#if (eq question.question_type "multiple_choice")}}
@@ -805,18 +820,7 @@ export default class AdminQuizIndex extends Component {
                     {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
                   {{/if}}
                 </td>
-                <td>
-                  {{question.question_text}}
-                  {{#if question.duplicate_ids}}
-                    <span
-                      class="quiz-admin-duplicate-badge"
-                      title={{this.duplicateIdsLabel question.duplicate_ids}}
-                    >
-                      {{i18n "discourse_quiz.admin.duplicate_row_hint"}}
-                      #{{this.duplicateIdsLabel question.duplicate_ids}}
-                    </span>
-                  {{/if}}
-                </td>
+                <td>{{question.question_text}}</td>
                 <td class="quiz-admin-col-active">
                   {{#if question.active}}
                     <span

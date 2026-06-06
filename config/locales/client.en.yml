@@ -117,6 +117,7 @@ en:
         all_question_types: "All types"
         duplicate_summary: "Found %{group_count} duplicate question-text group(s) covering %{question_count} question(s)."
         duplicate_disable_button: "Disable duplicates (keep lowest ID per group)"
+        duplicate_disable_button_short: "Disable duplicates"
         duplicate_disable_running: "Disabling duplicates..."
         duplicate_disable_confirm: "Disable all but the lowest-ID question in each duplicate group?"
         duplicate_disable_result: "Disabled %{disabled} duplicate question(s); kept %{kept} question(s)."

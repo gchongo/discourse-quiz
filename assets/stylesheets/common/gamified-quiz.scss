@@ -209,10 +209,8 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
 
 .quiz-home {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   flex-direction: column;
-  min-height: 0;
-  overflow-y: auto;
 
   .quiz-home-modes {
     flex-shrink: 0;
@@ -288,8 +286,8 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
   }
 
   .quiz-home-list {
-    flex: 0 1 auto;
-    max-height: min(40vh, 100%);
+    flex: 0 0 auto;
+    max-height: 40vh;
     overflow-y: auto;
     border: 1px solid var(--primary-low);
     border-radius: var(--d-border-radius);
