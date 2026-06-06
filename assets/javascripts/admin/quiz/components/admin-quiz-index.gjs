@@ -8,7 +8,7 @@ import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
 import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
-import { eq, not } from "discourse/truth-helpers";
+import { eq, not, or } from "discourse/truth-helpers";
 import QuizQuestionEditModal from "./quiz-question-edit-modal";
 
 const IMPORT_EXAMPLE = `[

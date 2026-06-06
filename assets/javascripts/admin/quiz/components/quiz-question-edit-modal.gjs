@@ -6,7 +6,7 @@ import DButton from "discourse/ui-kit/d-button";
 import DModal from "discourse/ui-kit/d-modal";
 import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
-import { and, eq, not } from "discourse/truth-helpers";
+import { eq, not, or } from "discourse/truth-helpers";
 import { i18n } from "discourse-i18n";
 
 export default class QuizQuestionEditModal extends Component {

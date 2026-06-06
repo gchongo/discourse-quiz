@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.8.0)
+## Current features (v0.8.1)
 
 - Quiz home screen with toggle list (multi-category selection, X-style) before starting
 - Desktop and mobile quiz panel entry with show/hide controls
