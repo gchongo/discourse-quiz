@@ -14,7 +14,8 @@ export default class QuizService extends Service {
   @tracked isMinimized = false;
 
   @tracked panelPhase = "home";
-  @tracked selectedCategory = "";
+  @tracked selectAllMode = true;
+  @tracked selectedCategories = [];
   @tracked availableCategories = [];
 
   @tracked loading = false;
@@ -40,6 +41,60 @@ export default class QuizService extends Service {
 
   get isPlaying() {
     return this.panelPhase === "playing";
+  }
+
+  get canStart() {
+    return this.selectAllMode || this.selectedCategories.length > 0;
+  }
+
+  get selectedRangeLabel() {
+    if (this.selectAllMode) {
+      return i18n("discourse_quiz.current_range_all");
+    }
+
+    const count = this.selectedCategories.length;
+
+    if (count === 0) {
+      return i18n("discourse_quiz.home_select_hint");
+    }
+
+    if (count === 1) {
+      return i18n("discourse_quiz.current_range", {
+        category: this.selectedCategories[0],
+      });
+    }
+
+    if (count <= 3) {
+      return i18n("discourse_quiz.current_range_multi", {
+        categories: this.selectedCategories.join("、"),
+      });
+    }
+
+    return i18n("discourse_quiz.current_range_count", { count });
+  }
+
+  get selectedSummary() {
+    if (this.selectAllMode) {
+      return i18n("discourse_quiz.home_selected_all");
+    }
+
+    const count = this.selectedCategories.length;
+
+    if (count === 0) {
+      return i18n("discourse_quiz.home_select_hint");
+    }
+
+    if (count <= 3) {
+      return i18n("discourse_quiz.home_selected_named", {
+        categories: this.selectedCategories.join("、"),
+      });
+    }
+
+    return i18n("discourse_quiz.home_selected_count", { count });
+  }
+
+  isCategorySelected(category) {
+    return !this.selectAllMode && this.selectedCategories.includes(category);
   }
 
   @action
@@ -74,8 +129,34 @@ export default class QuizService extends Service {
   }
 
   @action
-  selectCategory(category) {
-    this.selectedCategory = category;
+  toggleAllCategories() {
+    if (this.selectAllMode) {
+      this.selectAllMode = false;
+      this.selectedCategories = [];
+    } else {
+      this.resetSelection();
+    }
+  }
+
+  @action
+  toggleCategory(category) {
+    if (this.selectAllMode) {
+      this.selectAllMode = false;
+      this.selectedCategories = [category];
+      return;
+    }
+
+    if (this.selectedCategories.includes(category)) {
+      this.selectedCategories = this.selectedCategories.filter((c) => c !== category);
+    } else {
+      this.selectedCategories = [...this.selectedCategories, category];
+    }
+  }
+
+  @action
+  resetSelection() {
+    this.selectAllMode = true;
+    this.selectedCategories = [];
   }
 
   @action
@@ -98,6 +179,7 @@ export default class QuizService extends Service {
       const data = await ajax("/quiz/categories.json");
       this.availableCategories = data.categories || [];
       this.quizStatus = data.status || null;
+      this.pruneSelectedCategories();
 
       if (this.quizStatus?.mode === "paywall") {
         this.paywallActive = true;
@@ -114,6 +196,10 @@ export default class QuizService extends Service {
 
   @action
   startQuiz() {
+    if (!this.canStart) {
+      return;
+    }
+
     this.panelPhase = "playing";
     this.loadQuestion();
   }
@@ -127,12 +213,8 @@ export default class QuizService extends Service {
     this.paywallActive = false;
     this.panelPhase = "playing";
 
-    const url = this.selectedCategory
-      ? `/quiz/next.json?category_name=${encodeURIComponent(this.selectedCategory)}`
-      : "/quiz/next.json";
-
     try {
-      const data = await ajax(url);
+      const data = await ajax(this.buildNextUrl());
       this.currentQuestion = data;
       this.quizStatus = data.status || this.quizStatus;
     } catch (e) {
@@ -187,6 +269,42 @@ export default class QuizService extends Service {
       }
     } finally {
       this.submitting = false;
+    }
+  }
+
+  buildNextUrl() {
+    const filters = this.effectiveCategoryFilters();
+
+    if (filters.length === 0) {
+      return "/quiz/next.json";
+    }
+
+    const query = filters
+      .map((name) => `category_names[]=${encodeURIComponent(name)}`)
+      .join("&");
+
+    return `/quiz/next.json?${query}`;
+  }
+
+  effectiveCategoryFilters() {
+    if (this.selectAllMode) {
+      return [];
+    }
+
+    return this.selectedCategories;
+  }
+
+  pruneSelectedCategories() {
+    if (this.selectAllMode) {
+      return;
+    }
+
+    this.selectedCategories = this.selectedCategories.filter((category) =>
+      this.availableCategories.includes(category)
+    );
+
+    if (this.selectedCategories.length === 0) {
+      this.selectAllMode = true;
     }
   }
 }

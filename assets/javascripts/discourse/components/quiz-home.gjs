@@ -2,56 +2,46 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
 import { on } from "@ember/modifier";
-import { fn } from "@ember/helper";
-import { eq } from "discourse/truth-helpers";
+import { not, or } from "discourse/truth-helpers";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
+import DToggleSwitch from "discourse/ui-kit/d-toggle-switch";
+import QuizCategoryRow from "./quiz-category-row";
 
 export default class QuizHome extends Component {
   @service quiz;
-
-  get selectedCategory() {
-    return this.quiz.selectedCategory;
-  }
-
-  @action
-  selectCategory(category) {
-    this.quiz.selectCategory(category);
-  }
 
   @action
   startQuiz() {
     this.quiz.startQuiz();
   }
 
+  @action
+  resetSelection() {
+    this.quiz.resetSelection();
+  }
+
   <template>
     <div class="quiz-home">
-      <p class="quiz-home-intro">{{i18n "discourse_quiz.home_intro"}}</p>
+      <div class="quiz-home-header">
+        <h2 class="quiz-home-title">{{i18n "discourse_quiz.home_title"}}</h2>
+        <p class="quiz-home-subtitle">{{i18n "discourse_quiz.home_subtitle"}}</p>
+      </div>
 
-      <div class="quiz-home-section">
-        <div class="quiz-home-label">{{i18n "discourse_quiz.home_range_label"}}</div>
-        <ul class="quiz-category-list">
-          <li>
-            <button
-              type="button"
-              class="quiz-category-btn {{if (eq this.selectedCategory '') 'is-selected'}}"
-              {{on "click" (fn this.selectCategory "")}}
-            >
-              {{i18n "discourse_quiz.home_all_categories"}}
-            </button>
-          </li>
-          {{#each this.quiz.availableCategories as |category|}}
-            <li>
-              <button
-                type="button"
-                class="quiz-category-btn {{if (eq this.selectedCategory category) 'is-selected'}}"
-                {{on "click" (fn this.selectCategory category)}}
-              >
-                {{category}}
-              </button>
-            </li>
-          {{/each}}
-        </ul>
+      <div class="quiz-home-list">
+        <div class="quiz-category-row">
+          <span class="quiz-category-row__label">
+            {{i18n "discourse_quiz.home_all_categories"}}
+          </span>
+          <DToggleSwitch
+            @state={{this.quiz.selectAllMode}}
+            {{on "click" this.quiz.toggleAllCategories}}
+          />
+        </div>
+
+        {{#each this.quiz.availableCategories as |category|}}
+          <QuizCategoryRow @category={{category}} />
+        {{/each}}
       </div>
 
       {{#if this.quiz.quizStatus.is_guest}}
@@ -67,12 +57,22 @@ export default class QuizHome extends Component {
         <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
       {{/if}}
 
-      <DButton
-        @label="discourse_quiz.home_start"
-        @action={{this.startQuiz}}
-        @disabled={{this.quiz.loading}}
-        class="btn-primary quiz-home-start-btn"
-      />
+      <div class="quiz-home-footer">
+        <p class="quiz-home-summary">{{this.quiz.selectedSummary}}</p>
+
+        <DButton
+          @label="discourse_quiz.home_reset"
+          @action={{this.resetSelection}}
+          class="btn-default quiz-home-reset-btn"
+        />
+
+        <DButton
+          @label="discourse_quiz.home_start"
+          @action={{this.startQuiz}}
+          @disabled={{or this.quiz.loading (not this.quiz.canStart)}}
+          class="btn-primary quiz-home-start-btn"
+        />
+      </div>
     </div>
   </template>
 }

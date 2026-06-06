@@ -154,15 +154,38 @@ module DiscourseQuiz
 
     def effective_category_filters
       allowlist = site_category_allowlist
-      selected = params[:category_name].to_s.strip
+      selected = selected_category_names
 
       if selected.present?
-        return [] if allowlist.present? && !allowlist.include?(selected)
+        validated = validate_selected_categories(selected, allowlist)
+        return validated if validated.present?
 
-        return [selected]
+        return []
       end
 
       allowlist
+    end
+
+    def selected_category_names
+      names =
+        if params[:category_names].present?
+          Array(params[:category_names])
+        elsif params[:category_name].present?
+          [params[:category_name]]
+        else
+          []
+        end
+
+      names.map(&:to_s).map(&:strip).reject(&:blank?).uniq
+    end
+
+    def validate_selected_categories(names, allowlist)
+      if allowlist.present?
+        names.select { |name| allowlist.include?(name) }
+      else
+        available = QuizQuestion.active_category_names
+        names.select { |name| available.include?(name) }
+      end
     end
   end
 end

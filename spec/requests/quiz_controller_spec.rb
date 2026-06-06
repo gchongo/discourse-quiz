@@ -39,6 +39,19 @@ describe DiscourseQuiz::QuizController do
       expect(response.parsed_body["category_name"]).to eq("体育")
     end
 
+    it "filters by multiple category_names params" do
+      DiscourseQuiz::QuizQuestion.create!(
+        category_name: "体育",
+        question_text: "马拉松?",
+        options: %w[A B],
+        correct_index: 0,
+      )
+
+      get "/quiz/next.json", params: { category_names: %w[体育 示例] }
+      expect(response.status).to eq(200)
+      expect(%w[体育 示例]).to include(response.parsed_body["category_name"])
+    end
+
     it "returns paywall for guests over the limit" do
       SiteSetting.quiz_guest_attempt_limit = 1
 

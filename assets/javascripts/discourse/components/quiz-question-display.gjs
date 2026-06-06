@@ -48,13 +48,7 @@ export default class QuizQuestionDisplay extends Component {
           }}
         </p>
       {{/if}}
-      <p class="quiz-range-hint">
-        {{#if this.quiz.selectedCategory}}
-          {{i18n "discourse_quiz.current_range" category=this.quiz.selectedCategory}}
-        {{else}}
-          {{i18n "discourse_quiz.current_range_all"}}
-        {{/if}}
-      </p>
+      <p class="quiz-range-hint">{{this.quiz.selectedRangeLabel}}</p>
       <div class="quiz-question-category">{{this.question.category_name}}</div>
       <div class="quiz-question-text">{{this.question.question_text}}</div>
 

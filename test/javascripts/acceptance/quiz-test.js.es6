@@ -59,7 +59,9 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
     await click(".quiz-header-icon .btn");
     assert.dom(".quiz-panel-container").hasClass("is-visible");
     assert.dom(".quiz-home").exists();
-    assert.dom(".quiz-category-btn").exists({ count: 2 });
+    assert.dom(".quiz-category-row").exists({ count: 2 });
+    assert.dom(".quiz-home-reset-btn").exists();
+    assert.dom(".quiz-home-start-btn").exists();
   });
 
   test("starting a quiz shows a question", async function (assert) {
