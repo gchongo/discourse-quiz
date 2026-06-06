@@ -16,6 +16,7 @@ Discourse::Application.routes.draw do
     get "/admin/quiz/questions" => "discourse_quiz/admin_quiz_questions#index"
     get "/admin/quiz/categories" => "discourse_quiz/admin_quiz_questions#categories"
     post "/admin/quiz/questions/bulk_import" => "discourse_quiz/admin_quiz_questions#bulk_import"
+    put "/admin/quiz/questions/:id" => "discourse_quiz/admin_quiz_questions#update"
     delete "/admin/quiz/questions/:id" => "discourse_quiz/admin_quiz_questions#destroy"
   end
 end

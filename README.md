@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.5.4)
+## Current features (v0.7.0)
 
 - Quiz home screen with toggle list (multi-category selection, X-style) before starting
 - Desktop and mobile quiz panel entry with show/hide controls
@@ -17,7 +17,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Logged-in answer history in `discourse_quiz_user_attempts`
 - Gamification points for correct answers (when `discourse-gamification` is enabled)
 - Daily point cap with learning-only mode after the cap
-- Admin page with category filter and bulk JSON import
+- Admin page with category filter, bulk JSON/CSV import, file upload, and per-row edit
 - Optional site setting `quiz_categories` to limit panel questions by category name
 
 ## Installation
@@ -40,6 +40,12 @@ Enable `quiz_plugin_enabled` in admin settings.
 
 ## Admin bulk import format
 
+Admin path: `/admin/plugins/discourse-quiz`
+
+Upload a `.json` or `.csv` file, or paste content into the textarea.
+
+### JSON
+
 ```json
 [
   {
@@ -52,7 +58,20 @@ Enable `quiz_plugin_enabled` in admin settings.
 ]
 ```
 
-Admin path: `/admin/plugins/discourse-quiz`
+### CSV
+
+Use `|` to separate multiple options in the `options` column:
+
+```csv
+category_name,question_text,options,correct_index,explanation,active
+历史,中国历史上第一个统一的封建王朝是哪个？,夏朝|商朝|秦朝|汉朝,2,秦朝是中国历史上第一个统一的中央集权封建王朝。,true
+```
+
+`correct_index` is zero-based. Import failures are shown row by row in the admin UI.
+
+### Edit an existing question
+
+Use the pencil icon in the question table to open the edit modal. Updates keep the same question ID and answer history.
 
 ## Testing
 
@@ -144,6 +163,8 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | GET | `/quiz/status.json` | Current guest/login quiz status |
 | POST | `/quiz/submit.json` | Submit `question_id` + `answer_index`, returns result |
 | GET | `/admin/quiz/questions.json` | Admin question list |
+| PUT | `/admin/quiz/questions/:id.json` | Update one question |
+| POST | `/admin/quiz/questions/bulk_import.json` | Bulk import JSON or CSV (`import_format`) |
 
 ## Gamification
 
@@ -154,4 +175,4 @@ Install and enable the official `discourse-gamification` plugin, then set:
 
 ## Next steps
 
-- Source topic audit job
+- v0.6.0: Source topic audit job (`source_topic_id`, scheduled validation)

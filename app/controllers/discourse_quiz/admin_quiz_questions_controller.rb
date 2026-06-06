@@ -46,6 +46,23 @@ module DiscourseQuiz
       render_json_dump(imported: imported, errors: errors, total: payload.length)
     end
 
+    def update
+      question = QuizQuestion.find_by(id: params[:id])
+
+      unless question
+        render_json_dump({ error: I18n.t("discourse_quiz.errors.question_not_found") }, status: 404)
+        return
+      end
+
+      question.assign_attributes(import_attributes(params.require(:question)))
+
+      if question.save
+        render_json_dump(question: question_json(question))
+      else
+        render_json_dump({ errors: question.errors.full_messages }, status: 422)
+      end
+    end
+
     def destroy
       QuizQuestion.find(params[:id]).destroy!
       head :no_content
@@ -70,20 +87,16 @@ module DiscourseQuiz
 
     def parse_import_payload
       raw = params[:questions_json].to_s.strip
-      if raw.blank?
-        render_json_dump({ error: I18n.t("discourse_quiz.errors.import_empty") }, status: 422)
-        return nil
-      end
+      format = params[:import_format].to_s.presence || "json"
 
-      data = JSON.parse(raw)
-      unless data.is_a?(Array)
-        render_json_dump({ error: I18n.t("discourse_quiz.errors.import_not_array") }, status: 422)
-        return nil
+      case format
+      when "csv"
+        QuestionImportParser.parse_csv(raw)
+      else
+        QuestionImportParser.parse_json(raw)
       end
-
-      data
-    rescue JSON::ParserError
-      render_json_dump({ error: I18n.t("discourse_quiz.errors.import_invalid_json") }, status: 422)
+    rescue QuestionImportParser::ImportError => e
+      render_json_dump({ error: I18n.t("discourse_quiz.errors.#{e.key}") }, status: 422)
       nil
     end
 
@@ -91,6 +104,10 @@ module DiscourseQuiz
       attrs = item.is_a?(ActionController::Parameters) ? item : ActionController::Parameters.new(item)
       permitted =
         attrs.permit(:category_name, :question_text, :correct_index, :explanation, :active, :position, options: [])
+
+      if permitted[:options].is_a?(String)
+        permitted[:options] = permitted[:options].split(/\r?\n/).map(&:strip).reject(&:blank?)
+      end
 
       permitted[:active] = true if permitted[:active].nil?
       permitted[:position] = permitted[:position].to_i if QuizQuestion.position_column?
