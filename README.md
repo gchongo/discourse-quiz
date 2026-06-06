@@ -2,10 +2,12 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.5.0)
+## Current features (v0.5.2)
 
 - Quiz home screen with toggle list (multi-category selection, X-style) before starting
 - Desktop and mobile quiz panel entry with show/hide controls
+- Desktop docked panel pushes main content aside; narrow viewports auto-switch to floating
+- Desktop minimize/expand for browsing topics while keeping the panel available
 - Question bank table: `discourse_quiz_questions`
 - Panel loads one random active question from the bank
 - Submit answers with correct/incorrect feedback and explanation

@@ -1,5 +1,8 @@
 import Component from "@glimmer/component";
+import { action } from "@ember/object";
 import { service } from "@ember/service";
+import didInsert from "@ember/render-modifiers/modifiers/did-insert";
+import willDestroy from "@ember/render-modifiers/modifiers/will-destroy";
 import DButton from "discourse/ui-kit/d-button";
 import { i18n } from "discourse-i18n";
 import { htmlSafe } from "@ember/template";
@@ -20,12 +23,22 @@ export default class QuizPanel extends Component {
     return htmlSafe("--quiz-panel-width: 300px;");
   }
 
+  @action
+  setupLayout() {
+    this.quiz.registerLayoutListeners();
+  }
+
+  @action
+  teardownLayout() {
+    this.quiz.unregisterLayoutListeners();
+  }
+
   get containerClass() {
     const classes = ["quiz-panel-container"];
     if (this.quiz.isMobile) {
       classes.push("is-mobile");
     } else {
-      classes.push(this.quiz.isDocked ? "is-docked" : "is-floating");
+      classes.push(this.quiz.isDockedEffective ? "is-docked" : "is-floating");
     }
     if (this.quiz.isMinimized) {
       classes.push("is-minimized");
@@ -38,7 +51,12 @@ export default class QuizPanel extends Component {
 
   <template>
     {{#if this.quiz.isEnabled}}
-      <div class={{this.containerClass}} style={{this.panelStyles}}>
+      <div
+        class={{this.containerClass}}
+        style={{this.panelStyles}}
+        {{didInsert this.setupLayout}}
+        {{willDestroy this.teardownLayout}}
+      >
         <div class="quiz-panel-header">
           <div class="quiz-panel-title-row">
             {{#if this.quiz.isPlaying}}
@@ -52,13 +70,7 @@ export default class QuizPanel extends Component {
             <span class="quiz-panel-title">{{i18n "gamified_quiz.panel_title"}}</span>
           </div>
           <div class="quiz-panel-controls">
-            {{#if this.quiz.isMobile}}
-              <DButton
-                @icon={{if this.quiz.isMinimized "chevron-up" "chevron-down"}}
-                @action={{this.quiz.toggleMinimize}}
-                class="btn-default quiz-panel-control-btn"
-              />
-            {{else}}
+            {{#if this.quiz.canDock}}
               <DButton
                 @icon={{if this.quiz.isDocked "up-right-from-square" "table-columns"}}
                 @action={{this.quiz.toggleDock}}
@@ -66,6 +78,16 @@ export default class QuizPanel extends Component {
                 class="btn-default quiz-panel-control-btn"
               />
             {{/if}}
+            <DButton
+              @icon={{if this.quiz.isMinimized "chevron-up" "chevron-down"}}
+              @action={{this.quiz.toggleMinimize}}
+              @title={{if
+                this.quiz.isMinimized
+                "gamified_quiz.expand_panel"
+                "gamified_quiz.minimize_panel"
+              }}
+              class="btn-default quiz-panel-control-btn"
+            />
             <DButton
               @icon="xmark"
               @action={{this.quiz.closePanel}}

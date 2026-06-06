@@ -7,6 +7,8 @@ zh_CN:
       close_panel: "关闭"
       dock_panel: "固定到侧边"
       undock_panel: "悬浮窗口"
+      minimize_panel: "收起面板"
+      expand_panel: "展开面板"
     discourse_quiz:
       loading: "正在加载题目..."
       load_error: "加载题目失败，请稍后重试。"

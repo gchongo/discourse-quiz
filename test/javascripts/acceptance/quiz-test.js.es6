@@ -58,6 +58,10 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
     await visit("/");
     await click(".quiz-header-icon .btn");
     assert.dom(".quiz-panel-container").hasClass("is-visible");
+    assert.ok(
+      document.documentElement.classList.contains("has-quiz-panel"),
+      "panel open adds layout class to html"
+    );
     assert.dom(".quiz-home").exists();
     assert.dom(".quiz-category-row").exists({ count: 2 });
     assert.dom(".quiz-home-reset-btn").exists();

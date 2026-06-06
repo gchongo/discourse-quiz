@@ -4,6 +4,11 @@ import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
 
+const DOCK_PREF_KEY = "discourse-quiz-docked";
+const NARROW_BREAKPOINT = 1100;
+const HTML_CLASS_VISIBLE = "has-quiz-panel";
+const HTML_CLASS_DOCKED = "has-quiz-panel-docked";
+
 export default class QuizService extends Service {
   @service siteSettings;
   @service capabilities;
@@ -12,6 +17,10 @@ export default class QuizService extends Service {
   @tracked panelVisible = false;
   @tracked isDocked = true;
   @tracked isMinimized = false;
+  @tracked narrowViewport = false;
+
+  _resizeHandler = null;
+  _layoutListenerCount = 0;
 
   @tracked panelPhase = "home";
   @tracked selectAllMode = true;
@@ -33,6 +42,24 @@ export default class QuizService extends Service {
 
   get isMobile() {
     return this.capabilities.isMobileDevice;
+  }
+
+  get isDockedEffective() {
+    if (this.isMobile || this.narrowViewport) {
+      return false;
+    }
+
+    return this.isDocked;
+  }
+
+  get canDock() {
+    return !this.isMobile && !this.narrowViewport;
+  }
+
+  get shouldPushLayout() {
+    return (
+      this.panelVisible && this.isDockedEffective && !this.isMinimized && !this.isMobile
+    );
   }
 
   get isLearningOnly() {
@@ -75,6 +102,7 @@ export default class QuizService extends Service {
   openPanel() {
     this.panelVisible = true;
     this.isMinimized = false;
+    this.syncLayoutClasses();
     this.showHome();
   }
 
@@ -85,21 +113,115 @@ export default class QuizService extends Service {
       this.isMinimized = false;
       this.showHome();
     }
+    this.syncLayoutClasses();
   }
 
   @action
   closePanel() {
     this.panelVisible = false;
+    this.syncLayoutClasses();
   }
 
   @action
   toggleDock() {
+    if (!this.canDock) {
+      return;
+    }
+
     this.isDocked = !this.isDocked;
+    this.saveDockPreference();
+    this.syncLayoutClasses();
   }
 
   @action
   toggleMinimize() {
     this.isMinimized = !this.isMinimized;
+    this.syncLayoutClasses();
+  }
+
+  registerLayoutListeners() {
+    this._layoutListenerCount += 1;
+
+    if (this._resizeHandler) {
+      this.syncLayoutClasses();
+      return;
+    }
+
+    this.loadDockPreference();
+    this._resizeHandler = () => this.handleViewportResize();
+    window.addEventListener("resize", this._resizeHandler, { passive: true });
+    this.handleViewportResize();
+    this.syncLayoutClasses();
+  }
+
+  unregisterLayoutListeners() {
+    this._layoutListenerCount = Math.max(0, this._layoutListenerCount - 1);
+
+    if (this._layoutListenerCount > 0) {
+      return;
+    }
+
+    if (this._resizeHandler) {
+      window.removeEventListener("resize", this._resizeHandler);
+      this._resizeHandler = null;
+    }
+
+    this.clearLayoutClasses();
+  }
+
+  handleViewportResize() {
+    const wasNarrow = this.narrowViewport;
+    this.narrowViewport =
+      !this.isMobile && window.innerWidth < NARROW_BREAKPOINT;
+
+    if (wasNarrow !== this.narrowViewport) {
+      this.syncLayoutClasses();
+    }
+  }
+
+  syncLayoutClasses() {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const html = document.documentElement;
+    const panelOpen = this.panelVisible && this.isEnabled;
+
+    html.classList.toggle(HTML_CLASS_VISIBLE, panelOpen);
+    html.classList.toggle(HTML_CLASS_DOCKED, this.shouldPushLayout);
+  }
+
+  clearLayoutClasses() {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const html = document.documentElement;
+    html.classList.remove(HTML_CLASS_VISIBLE, HTML_CLASS_DOCKED);
+  }
+
+  loadDockPreference() {
+    try {
+      const stored = localStorage.getItem(DOCK_PREF_KEY);
+
+      if (stored !== null) {
+        this.isDocked = stored === "true";
+      }
+    } catch {
+      // localStorage may be unavailable
+    }
+  }
+
+  saveDockPreference() {
+    if (!this.canDock) {
+      return;
+    }
+
+    try {
+      localStorage.setItem(DOCK_PREF_KEY, String(this.isDocked));
+    } catch {
+      // localStorage may be unavailable
+    }
   }
 
   @action
