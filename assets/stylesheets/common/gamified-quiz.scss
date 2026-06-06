@@ -237,7 +237,8 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     width: 100%;
     margin: 0;
     padding-inline: 0.35em;
-    font-size: var(--font-down-1);
+    font-size: 1em;
+    line-height: 1.4;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

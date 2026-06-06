@@ -489,7 +489,7 @@ export default class QuizService extends Service {
   }
 
   toggleTypeFilter(propertyName) {
-    if (!this[propertyName] && !this.hasOtherTypeFilters(propertyName)) {
+    if (this[propertyName] && !this.hasOtherTypeFilters(propertyName)) {
       return;
     }
 
