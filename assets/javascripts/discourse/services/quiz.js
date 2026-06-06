@@ -148,6 +148,7 @@ export default class QuizService extends Service {
     }
 
     this.isDocked = !this.isDocked;
+    this.isMinimized = false;
     this.saveDockPreference();
     this.syncLayoutClasses();
   }
