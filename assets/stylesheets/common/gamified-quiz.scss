@@ -45,8 +45,10 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     position: fixed;
     right: 0;
     top: var(--header-offset);
-    height: calc(100vh - var(--header-offset));
     width: var(--quiz-panel-width);
+    height: auto;
+    max-height: calc(100vh - var(--header-offset));
+    overflow-y: auto;
     border-left: 1px solid var(--primary-low);
   }
 
@@ -55,7 +57,9 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     right: 20px;
     bottom: calc(20px + var(--composer-height, 0px));
     width: var(--quiz-panel-width);
+    height: auto;
     max-height: min(80vh, calc(100vh - var(--header-offset) - var(--composer-height, 0px) - 40px));
+    overflow-y: auto;
     border-radius: 8px;
     transition: bottom 0.2s ease;
   }
@@ -103,7 +107,9 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     left: 0;
     right: 0;
     width: 100%;
-    height: 85vh;
+    height: auto;
+    max-height: 85vh;
+    overflow-y: auto;
     z-index: 1001;
     border-radius: 16px 16px 0 0;
     transition: transform 0.3s ease-in-out;
@@ -185,13 +191,10 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
   }
 
   .quiz-panel-content {
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: visible;
     padding: 15px;
   }
 
@@ -287,8 +290,6 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
 
   .quiz-home-list {
     flex: 0 0 auto;
-    max-height: 40vh;
-    overflow-y: auto;
     border: 1px solid var(--primary-low);
     border-radius: var(--d-border-radius);
     background: var(--secondary);

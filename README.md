@@ -2,13 +2,13 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.15.2)
+## Current features (v0.15.3)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Category selection and practice/question-type preferences persist in `localStorage`
 - Category list cache: cached categories show immediately on home open while refreshing in the background
 - Home layout: start button below practice mode; category list below start button (optional)
-- Home category list sizes to content height (not stretched); scrolls inside `max-height: 40vh` when there are many categories; the home screen scrolls as a whole when needed
+- Home category list sizes to content height; quiz panel height adapts to content with a viewport-based max-height (no fixed `40vh` category box or full-screen docked height)
 - Home skeleton loading: only shown when no cached categories are available
 - Reset button resets category selection only (labeled「重置分类」)
 - Desktop and mobile quiz panel entry with show/hide controls
