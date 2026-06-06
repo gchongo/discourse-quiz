@@ -74,6 +74,29 @@
     .quiz-panel-controls {
       display: flex;
       gap: 5px;
+      flex-shrink: 0;
+
+      .btn-flat.quiz-panel-control-btn {
+        color: var(--primary-medium);
+
+        .d-icon,
+        .d-icon svg {
+          color: var(--primary-medium);
+          fill: currentColor;
+        }
+
+        .discourse-no-touch &:hover,
+        &:focus-visible {
+          background: var(--primary-low);
+          color: var(--primary);
+
+          .d-icon,
+          .d-icon svg {
+            color: var(--primary);
+            fill: currentColor;
+          }
+        }
+      }
     }
   }
 
@@ -85,7 +108,7 @@
 
   .quiz-panel-placeholder {
     margin: 0;
-    color: var(--primary-medium);
+    color: var(--primary);
     line-height: 1.5;
   }
 }
