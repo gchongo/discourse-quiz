@@ -19,6 +19,7 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
           category_name: "示例",
           question_text: "1 + 1 = ?",
           options: ["1", "2", "3"],
+          status: { is_guest: false, mode: "normal" },
         },
       ];
     });
@@ -35,6 +36,8 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
           explanation: "1 + 1 = 2",
           correct_index: 1,
           correct_option: "2",
+          points_awarded: correct ? 10 : 0,
+          status: { is_guest: false, mode: "normal" },
         },
       ];
     });

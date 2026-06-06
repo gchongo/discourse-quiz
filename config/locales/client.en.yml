@@ -19,6 +19,12 @@ en:
       explanation: "Explanation"
       next_question: "Next question"
       select_option: "Select an option before submitting."
+      points_earned: "+%{count} points"
+      learning_only: "Daily point limit reached. You can still practice, but won't earn more points today."
+      guest_attempts_left: "%{count} free tries left"
+      login_to_continue: "Log in"
+      signup_to_continue: "Sign up"
+      paywall_default: "Log in or sign up to keep playing and earn points."
       admin:
         title: "Community quiz"
         import_title: "Bulk import questions"

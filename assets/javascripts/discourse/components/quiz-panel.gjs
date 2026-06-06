@@ -5,6 +5,7 @@ import { i18n } from "discourse-i18n";
 import { htmlSafe } from "@ember/template";
 import QuizQuestionDisplay from "./quiz-question-display";
 import QuizResultDisplay from "./quiz-result-display";
+import QuizPaywall from "./quiz-paywall";
 
 export default class QuizPanel extends Component {
   @service quiz;
@@ -65,6 +66,8 @@ export default class QuizPanel extends Component {
           {{#unless this.quiz.isMinimized}}
             {{#if this.quiz.loading}}
               <p class="quiz-panel-placeholder">{{i18n "discourse_quiz.loading"}}</p>
+            {{else if this.quiz.paywallActive}}
+              <QuizPaywall @status={{this.quiz.quizStatus}} />
             {{else if this.quiz.errorMessage}}
               <p class="quiz-panel-error">{{this.quiz.errorMessage}}</p>
             {{else if this.quiz.currentQuestion}}

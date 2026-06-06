@@ -2,12 +2,16 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.3.0)
+## Current features (v0.4.0)
 
 - Desktop and mobile quiz panel entry with show/hide controls
 - Question bank table: `discourse_quiz_questions`
 - Panel loads one random active question from the bank
 - Submit answers with correct/incorrect feedback and explanation
+- Guest demo with configurable attempt limit and login paywall
+- Logged-in answer history in `discourse_quiz_user_attempts`
+- Gamification points for correct answers (when `discourse-gamification` is enabled)
+- Daily point cap with learning-only mode after the cap
 - Admin page with category filter and bulk JSON import
 - Optional site setting `quiz_categories` to limit panel questions by category name
 
@@ -122,10 +126,18 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/quiz/next.json` | Random active question (no answer) |
+| GET | `/quiz/next.json` | Random active question (no answer) + status |
+| GET | `/quiz/status.json` | Current guest/login quiz status |
 | POST | `/quiz/submit.json` | Submit `question_id` + `answer_index`, returns result |
 | GET | `/admin/quiz/questions.json` | Admin question list |
 
+## Gamification
+
+Install and enable the official `discourse-gamification` plugin, then set:
+
+- `quiz_points_per_question` — points per correct answer
+- `quiz_daily_max_points` — daily earning cap
+
 ## Next steps
 
-- Guest limits and gamification integration
+- Source topic audit job

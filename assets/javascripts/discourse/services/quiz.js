@@ -7,6 +7,7 @@ import { i18n } from "discourse-i18n";
 export default class QuizService extends Service {
   @service siteSettings;
   @service capabilities;
+  @service currentUser;
 
   @tracked panelVisible = false;
   @tracked isDocked = true;
@@ -17,6 +18,8 @@ export default class QuizService extends Service {
   @tracked currentQuestion = null;
   @tracked answerResult = null;
   @tracked submittedAnswerIndex = null;
+  @tracked quizStatus = null;
+  @tracked paywallActive = false;
   @tracked errorMessage = null;
 
   get isEnabled() {
@@ -25,6 +28,10 @@ export default class QuizService extends Service {
 
   get isMobile() {
     return this.capabilities.isMobileDevice;
+  }
+
+  get isLearningOnly() {
+    return this.quizStatus?.mode === "learning_only";
   }
 
   @action
@@ -64,11 +71,22 @@ export default class QuizService extends Service {
     this.errorMessage = null;
     this.answerResult = null;
     this.submittedAnswerIndex = null;
+    this.paywallActive = false;
 
     try {
-      this.currentQuestion = await ajax("/quiz/next.json");
+      const data = await ajax("/quiz/next.json");
+      this.currentQuestion = data;
+      this.quizStatus = data.status || null;
     } catch (e) {
       this.currentQuestion = null;
+      const status = e?.jqXHR?.responseJSON?.status;
+
+      if (e?.jqXHR?.status === 403 && status) {
+        this.quizStatus = status;
+        this.paywallActive = true;
+        return;
+      }
+
       if (e?.jqXHR?.status === 404) {
         this.errorMessage = i18n("discourse_quiz.no_questions");
       } else {
@@ -90,17 +108,24 @@ export default class QuizService extends Service {
 
     try {
       this.submittedAnswerIndex = answerIndex;
-      this.answerResult = await ajax("/quiz/submit.json", {
+      const result = await ajax("/quiz/submit.json", {
         type: "POST",
         data: {
           question_id: this.currentQuestion.id,
           answer_index: answerIndex,
         },
       });
+      this.answerResult = result;
+      this.quizStatus = result.status || this.quizStatus;
     } catch (e) {
       this.answerResult = null;
       this.submittedAnswerIndex = null;
-      this.errorMessage = i18n("discourse_quiz.submit_error");
+
+      if (e?.jqXHR?.status === 429) {
+        this.errorMessage = e.jqXHR.responseJSON?.errors?.[0] || i18n("discourse_quiz.submit_error");
+      } else {
+        this.errorMessage = i18n("discourse_quiz.submit_error");
+      }
     } finally {
       this.submitting = false;
     }

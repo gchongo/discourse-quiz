@@ -19,6 +19,12 @@ zh_CN:
       explanation: "解析"
       next_question: "下一题"
       select_option: "请先选择一个选项。"
+      points_earned: "+%{count} 积分"
+      learning_only: "今日积分已达上限，仍可练习，但不再获得积分。"
+      guest_attempts_left: "还可免费试答 %{count} 次"
+      login_to_continue: "登录"
+      signup_to_continue: "注册"
+      paywall_default: "登录或注册后可继续答题并累积积分。"
       admin:
         title: "社区竞答"
         import_title: "批量导入题库"

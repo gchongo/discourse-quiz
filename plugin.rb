@@ -2,7 +2,7 @@
 
 # name: discourse-quiz
 # about: Quiz panel with question bank for Discourse.
-# version: 0.3.0
+# version: 0.4.0
 # authors: howhy.day
 # url: https://github.com/howhy-day/discourse-quiz
 
@@ -16,6 +16,9 @@ end
 
 require_relative "lib/discourse_quiz/engine"
 require_relative "lib/discourse_quiz/seed_questions"
+require_relative "lib/discourse_quiz/quiz_status_service"
+require_relative "lib/discourse_quiz/quiz_points_service"
+require_relative "lib/discourse_quiz/quiz_submission_service"
 
 after_initialize do
   add_admin_route(

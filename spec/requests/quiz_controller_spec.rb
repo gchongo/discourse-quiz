@@ -3,6 +3,8 @@
 require "rails_helper"
 
 describe DiscourseQuiz::QuizController do
+  let(:user) { Fabricate(:user) }
+
   let!(:question) do
     DiscourseQuiz::QuizQuestion.create!(
       category_name: "示例",
@@ -21,6 +23,23 @@ describe DiscourseQuiz::QuizController do
       json = response.parsed_body
       expect(json["question_text"]).to eq(question.question_text)
       expect(json).not_to have_key("correct_index")
+      expect(json["status"]).to be_present
+    end
+
+    it "returns paywall for guests over the limit" do
+      SiteSetting.quiz_guest_attempt_limit = 1
+
+      get "/quiz/next.json", session: { quiz_guest_attempts: 1 }
+      expect(response.status).to eq(403)
+      expect(response.parsed_body["status"]["mode"]).to eq("paywall")
+    end
+  end
+
+  describe "GET /quiz/status" do
+    it "returns quiz status" do
+      get "/quiz/status.json"
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["is_guest"]).to eq(true)
     end
   end
 
@@ -40,6 +59,22 @@ describe DiscourseQuiz::QuizController do
       expect(json["correct"]).to eq(true)
       expect(json["correct_index"]).to eq(1)
       expect(json["correct_option"]).to eq("2")
+      expect(json["status"]).to be_present
+    end
+
+    it "records attempts for logged in users" do
+      sign_in(user)
+
+      expect {
+        post "/quiz/submit.json", params: { question_id: question.id, answer_index: 1 }
+      }.to change { DiscourseQuiz::QuizUserAttempt.count }.by(1)
+
+      expect(response.parsed_body["correct"]).to eq(true)
+    end
+
+    it "increments guest attempt count in session" do
+      post "/quiz/submit.json", params: { question_id: question.id, answer_index: 1 }
+      expect(session[:quiz_guest_attempts]).to eq(1)
     end
 
     it "returns incorrect for the wrong answer" do

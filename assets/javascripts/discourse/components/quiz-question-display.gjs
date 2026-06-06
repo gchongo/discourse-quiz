@@ -37,6 +37,17 @@ export default class QuizQuestionDisplay extends Component {
 
   <template>
     <div class="quiz-question-display">
+      {{#if this.quiz.isLearningOnly}}
+        <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
+      {{/if}}
+      {{#if this.quiz.quizStatus.is_guest}}
+        <p class="quiz-status-hint">
+          {{i18n
+            "discourse_quiz.guest_attempts_left"
+            count=this.quiz.quizStatus.attempts_left
+          }}
+        </p>
+      {{/if}}
       <div class="quiz-question-category">{{this.question.category_name}}</div>
       <div class="quiz-question-text">{{this.question.question_text}}</div>
 

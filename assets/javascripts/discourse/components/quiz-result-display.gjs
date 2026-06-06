@@ -38,6 +38,16 @@ export default class QuizResultDisplay extends Component {
           {{/if}}
         </div>
 
+        {{#if this.result.points_awarded}}
+          <p class="quiz-points-earned">
+            {{i18n "discourse_quiz.points_earned" count=this.result.points_awarded}}
+          </p>
+        {{/if}}
+
+        {{#if this.quiz.isLearningOnly}}
+          <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
+        {{/if}}
+
         {{#if this.question.options}}
           <ul class="quiz-options-list">
             {{#each this.question.options as |option index|}}
