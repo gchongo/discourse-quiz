@@ -440,7 +440,8 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     cursor: pointer;
   }
 
-  label.quiz-option-check {
+  label.quiz-option-check,
+  label.quiz-option-radio {
     display: flex;
     align-items: flex-start;
     gap: 0.5em;

@@ -5,7 +5,7 @@ import { service } from "@ember/service";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
-import { eq, not } from "discourse/truth-helpers";
+import { not } from "discourse/truth-helpers";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
 
@@ -54,6 +54,18 @@ export default class QuizQuestionDisplay extends Component {
       option,
       index,
       selected: selected.has(index),
+    }));
+  }
+
+  get radioGroupName() {
+    return `quiz-question-${this.question.id}`;
+  }
+
+  get singleChoiceOptions() {
+    return (this.question.options || []).map((option, index) => ({
+      option,
+      index,
+      selected: this.selectedIndex === index,
     }));
   }
 
@@ -133,16 +145,18 @@ export default class QuizQuestionDisplay extends Component {
             </li>
           {{/each}}
         {{else}}
-          {{#each this.question.options as |option index|}}
+          {{#each this.singleChoiceOptions as |entry|}}
             <li>
-              <button
-                type="button"
-                class="quiz-option-btn {{if (eq this.selectedIndex index) 'is-selected'}}"
-                disabled={{this.quiz.submitting}}
-                {{on "click" (fn this.selectOption index)}}
-              >
-                {{option}}
-              </button>
+              <label class="quiz-option-btn quiz-option-radio {{if entry.selected 'is-selected'}}">
+                <input
+                  type="radio"
+                  name={{this.radioGroupName}}
+                  checked={{entry.selected}}
+                  disabled={{this.quiz.submitting}}
+                  {{on "change" (fn this.selectOption entry.index)}}
+                />
+                <span>{{entry.option}}</span>
+              </label>
             </li>
           {{/each}}
         {{/if}}
