@@ -133,7 +133,10 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     }
 
     &.is-minimized {
-      transform: translateY(calc(85vh - 50px));
+      height: auto;
+      max-height: none;
+      overflow: hidden;
+      transform: none;
 
       .quiz-panel-content {
         display: none;
@@ -506,11 +509,15 @@ label.quiz-option-radio {
     cursor: pointer;
   }
 
-  .quiz-question-display--true-false {
+  &.quiz-question-display--true-false {
     .quiz-options-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 0.5em;
+
+      li + li {
+        margin-top: 0;
+      }
     }
   }
 
@@ -563,9 +570,13 @@ label.quiz-option-radio {
 
   &.quiz-result-display--true-false {
     .quiz-options-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 0.5em;
+
+      li + li {
+        margin-top: 0;
+      }
     }
   }
 
