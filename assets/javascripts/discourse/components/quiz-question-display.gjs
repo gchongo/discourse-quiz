@@ -111,7 +111,7 @@ export default class QuizQuestionDisplay extends Component {
       {{didUpdate this.resetSelection this.question.id}}
     >
       {{#if this.quiz.isLearningOnly}}
-        <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
+        <p class="quiz-learning-notice">{{i18n "discourse_quiz.learning_only"}}</p>
       {{/if}}
       {{#if this.quiz.quizStatus.is_guest}}
         <p class="quiz-status-hint">

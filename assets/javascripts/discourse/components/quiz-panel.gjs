@@ -76,6 +76,10 @@ export default class QuizPanel extends Component {
       classes.push("is-dragging");
     }
 
+    if (this.quiz.isPlaying && !this.quiz.isMinimized) {
+      classes.push("is-quiz-active");
+    }
+
     return classes.join(" ");
   }
 

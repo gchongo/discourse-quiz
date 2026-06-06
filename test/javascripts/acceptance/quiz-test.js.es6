@@ -72,6 +72,7 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
     await visit("/");
     await click(".quiz-header-icon .btn");
     await click(".quiz-home-start-btn");
+    assert.dom(".quiz-panel-container").hasClass("is-quiz-active");
     assert.dom(".quiz-question-text").hasText("1 + 1 = ?");
   });
 
