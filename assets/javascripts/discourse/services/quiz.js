@@ -47,32 +47,6 @@ export default class QuizService extends Service {
     return this.selectAllMode || this.selectedCategories.length > 0;
   }
 
-  get selectedRangeLabel() {
-    if (this.selectAllMode) {
-      return i18n("discourse_quiz.current_range_all");
-    }
-
-    const count = this.selectedCategories.length;
-
-    if (count === 0) {
-      return i18n("discourse_quiz.home_select_hint");
-    }
-
-    if (count === 1) {
-      return i18n("discourse_quiz.current_range", {
-        category: this.selectedCategories[0],
-      });
-    }
-
-    if (count <= 3) {
-      return i18n("discourse_quiz.current_range_multi", {
-        categories: this.selectedCategories.join("、"),
-      });
-    }
-
-    return i18n("discourse_quiz.current_range_count", { count });
-  }
-
   get selectedSummary() {
     if (this.selectAllMode) {
       return i18n("discourse_quiz.home_selected_all");
