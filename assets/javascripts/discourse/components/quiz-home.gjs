@@ -20,8 +20,8 @@ export default class QuizHome extends Component {
   }
 
   @action
-  resetSelection() {
-    this.quiz.resetSelection();
+  resetCategorySelection() {
+    this.quiz.resetCategorySelection();
   }
 
   <template>
@@ -112,7 +112,7 @@ export default class QuizHome extends Component {
           <span class="quiz-home-modes__label">{{i18n "discourse_quiz.home_categories_optional"}}</span>
           <DButton
             @label="discourse_quiz.home_reset"
-            @action={{this.resetSelection}}
+            @action={{this.resetCategorySelection}}
             class="btn-default btn-small quiz-home-reset-btn"
           />
         </div>

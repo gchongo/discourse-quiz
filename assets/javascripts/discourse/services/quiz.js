@@ -445,7 +445,7 @@ export default class QuizService extends Service {
       this.selectAllMode = false;
       this.selectedCategories = [];
     } else {
-      this.resetSelection();
+      this.resetCategorySelection();
     }
   }
 
@@ -465,13 +465,9 @@ export default class QuizService extends Service {
   }
 
   @action
-  resetSelection() {
+  resetCategorySelection() {
     this.selectAllMode = true;
     this.selectedCategories = [];
-    this.typeFilterSingleChoice = true;
-    this.typeFilterTrueFalse = true;
-    this.typeFilterMultipleChoice = true;
-    this.saveQuestionTypePreference();
   }
 
   @action
