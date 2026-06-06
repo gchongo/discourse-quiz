@@ -15,14 +15,32 @@ const IMPORT_EXAMPLE = `[
   {
     "category_name": "历史",
     "question_text": "中国历史上第一个统一的封建王朝是哪个？",
+    "question_type": "single_choice",
     "options": ["夏朝", "商朝", "秦朝", "汉朝"],
     "correct_index": 2,
     "explanation": "秦朝是中国历史上第一个统一的中央集权封建王朝。"
+  },
+  {
+    "category_name": "历史",
+    "question_text": "秦朝只存在了 15 年。",
+    "question_type": "true_false",
+    "correct_index": 0,
+    "explanation": "对。"
+  },
+  {
+    "category_name": "历史",
+    "question_text": "下列哪些属于战国七雄？",
+    "question_type": "multiple_choice",
+    "options": ["齐", "晋", "秦", "楚"],
+    "correct_indices": [0, 2, 3],
+    "explanation": "战国七雄不含晋。"
   }
 ]`;
 
-const CSV_EXAMPLE = `id,category_name,question_text,options,correct_index,explanation,active
-,历史,中国历史上第一个统一的封建王朝是哪个？,夏朝|商朝|秦朝|汉朝,2,秦朝是中国历史上第一个统一的中央集权封建王朝。,true`;
+const CSV_EXAMPLE = `id,category_name,question_text,question_type,options,correct_index,correct_indices,explanation,active
+,历史,中国历史上第一个统一的封建王朝是哪个？,single_choice,夏朝|商朝|秦朝|汉朝,2,,秦朝是中国历史上第一个统一的中央集权封建王朝。,true
+,历史,秦朝只存在了 15 年。,true_false,,0,,对。,true
+,历史,下列哪些属于战国七雄？,multiple_choice,齐|晋|秦|楚,,0|2|3,战国七雄不含晋。,true`;
 
 const PER_PAGE = 25;
 

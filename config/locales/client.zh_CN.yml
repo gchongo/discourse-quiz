@@ -116,6 +116,7 @@ zh_CN:
           options: "选项（每行一个）"
           correct_answer: "正确答案"
           correct_answers: "正确答案（可多选）"
+          correct_answers_need_options: "请先在「选项」中填写至少一个选项，再勾选正确答案。"
           explanation: "解析"
           active: "启用"
           use_new_category: "使用新分类"

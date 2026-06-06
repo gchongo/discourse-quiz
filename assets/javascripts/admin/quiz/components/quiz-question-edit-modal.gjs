@@ -142,6 +142,15 @@ export default class QuizQuestionEditModal extends Component {
     if (this.isTrueFalse) {
       this.correctIndex = 0;
       this.correctIndices = [];
+    } else if (this.isMultipleChoice) {
+      this.correctIndices = this.correctIndices.filter(
+        (index) => index >= 0 && index < this.parsedOptions.length
+      );
+    } else {
+      this.correctIndices = [];
+      if (this.correctIndex >= this.parsedOptions.length) {
+        this.correctIndex = Math.max(0, this.parsedOptions.length - 1);
+      }
     }
   }
 
@@ -296,51 +305,61 @@ export default class QuizQuestionEditModal extends Component {
           {{/if}}
 
           {{#if this.isTrueFalse}}
-            <fieldset class="quiz-admin-form__field">
-              <legend>{{i18n "discourse_quiz.admin.form.correct_answer"}}</legend>
-              {{#each this.trueFalseOptions as |option index|}}
-                <label class="quiz-admin-form__radio">
-                  <input
-                    type="radio"
-                    name="quiz-correct-index"
-                    checked={{eq this.correctIndex index}}
-                    {{on "change" (fn this.selectCorrectIndex index)}}
-                  />
-                  <span>{{option}}</span>
-                </label>
-              {{/each}}
-            </fieldset>
-          {{else if this.isMultipleChoice}}
-            {{#if this.parsedOptions.length}}
-              <fieldset class="quiz-admin-form__field">
-                <legend>{{i18n "discourse_quiz.admin.form.correct_answers"}}</legend>
-                {{#each this.parsedOptions as |option index|}}
+            <div class="quiz-admin-form__field">
+              <span>{{i18n "discourse_quiz.admin.form.correct_answer"}}</span>
+              <div class="quiz-admin-form__answers">
+                {{#each this.trueFalseOptions as |option index|}}
                   <label class="quiz-admin-form__radio">
                     <input
-                      type="checkbox"
-                      checked={{this.isCorrectIndexSelected index}}
-                      {{on "change" (fn this.toggleCorrectIndex index)}}
+                      type="radio"
+                      name="quiz-correct-index"
+                      checked={{eq this.correctIndex index}}
+                      {{on "change" (fn this.selectCorrectIndex index)}}
                     />
                     <span>{{option}}</span>
                   </label>
                 {{/each}}
-              </fieldset>
-            {{/if}}
+              </div>
+            </div>
+          {{else if this.isMultipleChoice}}
+            <div class="quiz-admin-form__field">
+              <span>{{i18n "discourse_quiz.admin.form.correct_answers"}}</span>
+              {{#if this.parsedOptions.length}}
+                <div class="quiz-admin-form__answers">
+                  {{#each this.parsedOptions as |option index|}}
+                    <label class="quiz-admin-form__radio">
+                      <input
+                        type="checkbox"
+                        checked={{this.isCorrectIndexSelected index}}
+                        {{on "change" (fn this.toggleCorrectIndex index)}}
+                      />
+                      <span>{{option}}</span>
+                    </label>
+                  {{/each}}
+                </div>
+              {{else}}
+                <p class="quiz-admin-form__hint">
+                  {{i18n "discourse_quiz.admin.form.correct_answers_need_options"}}
+                </p>
+              {{/if}}
+            </div>
           {{else if this.parsedOptions.length}}
-            <fieldset class="quiz-admin-form__field">
-              <legend>{{i18n "discourse_quiz.admin.form.correct_answer"}}</legend>
-              {{#each this.parsedOptions as |option index|}}
-                <label class="quiz-admin-form__radio">
-                  <input
-                    type="radio"
-                    name="quiz-correct-index"
-                    checked={{eq this.correctIndex index}}
-                    {{on "change" (fn this.selectCorrectIndex index)}}
-                  />
-                  <span>{{option}}</span>
-                </label>
-              {{/each}}
-            </fieldset>
+            <div class="quiz-admin-form__field">
+              <span>{{i18n "discourse_quiz.admin.form.correct_answer"}}</span>
+              <div class="quiz-admin-form__answers">
+                {{#each this.parsedOptions as |option index|}}
+                  <label class="quiz-admin-form__radio">
+                    <input
+                      type="radio"
+                      name="quiz-correct-index"
+                      checked={{eq this.correctIndex index}}
+                      {{on "change" (fn this.selectCorrectIndex index)}}
+                    />
+                    <span>{{option}}</span>
+                  </label>
+                {{/each}}
+              </div>
+            </div>
           {{/if}}
 
           <label class="quiz-admin-form__field">

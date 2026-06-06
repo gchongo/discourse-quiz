@@ -116,6 +116,7 @@ en:
           options: "Options (one per line)"
           correct_answer: "Correct answer"
           correct_answers: "Correct answers"
+          correct_answers_need_options: "Add at least one option above, then select the correct answers here."
           explanation: "Explanation"
           active: "Active"
           use_new_category: "Use a new category"

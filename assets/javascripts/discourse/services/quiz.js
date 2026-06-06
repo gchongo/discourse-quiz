@@ -115,6 +115,22 @@ export default class QuizService extends Service {
     return i18n("discourse_quiz.home_selected_count", { count });
   }
 
+  get currentRangeSummary() {
+    if (this.selectAllMode) {
+      return i18n("discourse_quiz.current_range_all");
+    }
+
+    const count = this.selectedCategories.length;
+
+    if (count <= 3) {
+      return i18n("discourse_quiz.current_range_multi", {
+        categories: this.selectedCategories.join("、"),
+      });
+    }
+
+    return i18n("discourse_quiz.current_range_count", { count });
+  }
+
   isCategorySelected(category) {
     return !this.selectAllMode && this.selectedCategories.includes(category);
   }

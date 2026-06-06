@@ -88,6 +88,10 @@ export default class QuizResultDisplay extends Component {
           <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
         {{/if}}
 
+        <p class="quiz-status-hint quiz-current-range">{{this.quiz.currentRangeSummary}}</p>
+        <div class="quiz-question-category">{{this.question.category_name}}</div>
+        <div class="quiz-question-text">{{this.question.question_text}}</div>
+
         {{#if this.question.options}}
           <ul class="quiz-options-list">
             {{#each this.question.options as |option index|}}
