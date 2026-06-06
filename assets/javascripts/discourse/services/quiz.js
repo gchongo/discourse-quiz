@@ -45,7 +45,9 @@ export default class QuizService extends Service {
   @tracked paywallActive = false;
   @tracked errorMessage = null;
   @tracked practiceMode = "normal";
-  @tracked selectedQuestionTypes = [...QUESTION_TYPES];
+  @tracked typeFilterSingleChoice = true;
+  @tracked typeFilterTrueFalse = true;
+  @tracked typeFilterMultipleChoice = true;
   @tracked sessionSeenQuestionIds = [];
 
   get isEnabled() {
@@ -93,12 +95,24 @@ export default class QuizService extends Service {
   get canStart() {
     return (
       (this.selectAllMode || this.selectedCategories.length > 0) &&
-      this.selectedQuestionTypes.length > 0
+      this.hasQuestionTypeFilter
+    );
+  }
+
+  get hasQuestionTypeFilter() {
+    return (
+      this.typeFilterSingleChoice ||
+      this.typeFilterTrueFalse ||
+      this.typeFilterMultipleChoice
     );
   }
 
   get filtersAllQuestionTypes() {
-    return this.selectedQuestionTypes.length === QUESTION_TYPES.length;
+    return (
+      this.typeFilterSingleChoice &&
+      this.typeFilterTrueFalse &&
+      this.typeFilterMultipleChoice
+    );
   }
 
   get canUsePracticeModes() {
@@ -126,17 +140,7 @@ export default class QuizService extends Service {
   }
 
   get selectedTypesSummary() {
-    if (this.filtersAllQuestionTypes) {
-      return i18n("discourse_quiz.home_selected_types_all");
-    }
-
-    const labels = this.selectedQuestionTypes.map((type) =>
-      i18n(`discourse_quiz.admin.form.question_types.${type}`)
-    );
-
-    return i18n("discourse_quiz.home_selected_types_named", {
-      types: labels.join("、"),
-    });
+    return this.questionTypesSummary("discourse_quiz.home_selected_types_all", "discourse_quiz.home_selected_types_named");
   }
 
   get currentRangeSummary() {
@@ -156,29 +160,64 @@ export default class QuizService extends Service {
   }
 
   get currentTypesSummary() {
+    return this.questionTypesSummary("discourse_quiz.current_types_all", "discourse_quiz.current_types_named");
+  }
+
+  questionTypesSummary(allKey, namedKey) {
     if (this.filtersAllQuestionTypes) {
-      return i18n("discourse_quiz.current_types_all");
+      return i18n(allKey);
     }
 
-    const labels = this.selectedQuestionTypes.map((type) =>
-      i18n(`discourse_quiz.admin.form.question_types.${type}`)
-    );
+    const labels = this.activeQuestionTypeLabels();
 
-    return i18n("discourse_quiz.current_types_named", {
+    return i18n(namedKey, {
       types: labels.join("、"),
     });
+  }
+
+  activeQuestionTypeLabels() {
+    const labels = [];
+
+    if (this.typeFilterSingleChoice) {
+      labels.push(i18n("discourse_quiz.admin.form.question_types.single_choice"));
+    }
+
+    if (this.typeFilterTrueFalse) {
+      labels.push(i18n("discourse_quiz.admin.form.question_types.true_false"));
+    }
+
+    if (this.typeFilterMultipleChoice) {
+      labels.push(i18n("discourse_quiz.admin.form.question_types.multiple_choice"));
+    }
+
+    return labels;
+  }
+
+  activeQuestionTypeFilters() {
+    const types = [];
+
+    if (this.typeFilterSingleChoice) {
+      types.push("single_choice");
+    }
+
+    if (this.typeFilterTrueFalse) {
+      types.push("true_false");
+    }
+
+    if (this.typeFilterMultipleChoice) {
+      types.push("multiple_choice");
+    }
+
+    return types;
   }
 
   isCategorySelected(category) {
     return !this.selectAllMode && this.selectedCategories.includes(category);
   }
 
-  isQuestionTypeSelected(type) {
-    return this.selectedQuestionTypes.includes(type);
-  }
-
   @action
   openPanel() {
+    this.loadQuestionTypePreference();
     this.panelVisible = true;
     this.isMinimized = false;
     this.syncLayoutClasses();
@@ -189,6 +228,7 @@ export default class QuizService extends Service {
   togglePanel() {
     this.panelVisible = !this.panelVisible;
     if (this.panelVisible) {
+      this.loadQuestionTypePreference();
       this.isMinimized = false;
       this.showHome();
     }
@@ -230,7 +270,6 @@ export default class QuizService extends Service {
     this.loadDockPreference();
     this.loadPositionPreference();
     this.loadPracticeModePreference();
-    this.loadQuestionTypePreference();
     this._resizeHandler = () => this.handleViewportResize();
     window.addEventListener("resize", this._resizeHandler, { passive: true });
     this.handleViewportResize();
@@ -428,31 +467,42 @@ export default class QuizService extends Service {
   resetSelection() {
     this.selectAllMode = true;
     this.selectedCategories = [];
-    this.selectedQuestionTypes = [...QUESTION_TYPES];
+    this.typeFilterSingleChoice = true;
+    this.typeFilterTrueFalse = true;
+    this.typeFilterMultipleChoice = true;
     this.saveQuestionTypePreference();
   }
 
   @action
-  toggleQuestionType(type) {
-    if (!QUESTION_TYPES.includes(type)) {
+  toggleTypeFilterSingleChoice() {
+    this.toggleTypeFilter("typeFilterSingleChoice");
+  }
+
+  @action
+  toggleTypeFilterTrueFalse() {
+    this.toggleTypeFilter("typeFilterTrueFalse");
+  }
+
+  @action
+  toggleTypeFilterMultipleChoice() {
+    this.toggleTypeFilter("typeFilterMultipleChoice");
+  }
+
+  toggleTypeFilter(propertyName) {
+    if (!this[propertyName] && !this.hasOtherTypeFilters(propertyName)) {
       return;
     }
 
-    if (this.isQuestionTypeSelected(type)) {
-      if (this.selectedQuestionTypes.length === 1) {
-        return;
-      }
-
-      this.selectedQuestionTypes = this.selectedQuestionTypes.filter(
-        (value) => value !== type
-      );
-    } else {
-      this.selectedQuestionTypes = [...this.selectedQuestionTypes, type].sort(
-        (a, b) => QUESTION_TYPES.indexOf(a) - QUESTION_TYPES.indexOf(b)
-      );
-    }
-
+    this[propertyName] = !this[propertyName];
     this.saveQuestionTypePreference();
+  }
+
+  hasOtherTypeFilters(excludedProperty) {
+    return (
+      (excludedProperty !== "typeFilterSingleChoice" && this.typeFilterSingleChoice) ||
+      (excludedProperty !== "typeFilterTrueFalse" && this.typeFilterTrueFalse) ||
+      (excludedProperty !== "typeFilterMultipleChoice" && this.typeFilterMultipleChoice)
+    );
   }
 
   @action
@@ -680,7 +730,7 @@ export default class QuizService extends Service {
       return [];
     }
 
-    return this.selectedQuestionTypes;
+    return this.activeQuestionTypeFilters();
   }
 
   loadQuestionTypePreference() {
@@ -692,25 +742,47 @@ export default class QuizService extends Service {
       }
 
       const parsed = JSON.parse(stored);
-      const types = Array.isArray(parsed)
-        ? parsed.filter((type) => QUESTION_TYPES.includes(type))
-        : [];
 
-      if (types.length > 0) {
-        this.selectedQuestionTypes = types.sort(
-          (a, b) => QUESTION_TYPES.indexOf(a) - QUESTION_TYPES.indexOf(b)
-        );
+      if (Array.isArray(parsed)) {
+        this.applyQuestionTypeFilters({
+          single_choice: parsed.includes("single_choice"),
+          true_false: parsed.includes("true_false"),
+          multiple_choice: parsed.includes("multiple_choice"),
+        });
+        return;
+      }
+
+      if (parsed && typeof parsed === "object") {
+        this.applyQuestionTypeFilters(parsed);
       }
     } catch {
       // localStorage may be unavailable or JSON invalid
     }
   }
 
+  applyQuestionTypeFilters(filters) {
+    const single = Boolean(filters.single_choice);
+    const trueFalse = Boolean(filters.true_false);
+    const multiple = Boolean(filters.multiple_choice);
+
+    if (!single && !trueFalse && !multiple) {
+      return;
+    }
+
+    this.typeFilterSingleChoice = single;
+    this.typeFilterTrueFalse = trueFalse;
+    this.typeFilterMultipleChoice = multiple;
+  }
+
   saveQuestionTypePreference() {
     try {
       localStorage.setItem(
         QUESTION_TYPES_PREF_KEY,
-        JSON.stringify(this.selectedQuestionTypes)
+        JSON.stringify({
+          single_choice: this.typeFilterSingleChoice,
+          true_false: this.typeFilterTrueFalse,
+          multiple_choice: this.typeFilterMultipleChoice,
+        })
       );
     } catch {
       // localStorage may be unavailable

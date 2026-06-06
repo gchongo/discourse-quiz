@@ -196,6 +196,7 @@ export default class QuizPanel extends Component {
           </div>
         </div>
         <div class="quiz-panel-content">
+          {{#if this.quiz.panelVisible}}
           {{#unless this.quiz.isMinimized}}
             {{#if this.quiz.loading}}
               <p class="quiz-panel-placeholder">{{i18n "discourse_quiz.loading"}}</p>
@@ -225,6 +226,7 @@ export default class QuizPanel extends Component {
               {{/if}}
             {{/if}}
           {{/unless}}
+          {{/if}}
         </div>
       </div>
     {{/if}}

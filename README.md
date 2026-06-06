@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.12.1)
+## Current features (v0.12.2)
 
 - Quiz home screen with toggle list (multi-category selection, X-style) before starting
 - Desktop and mobile quiz panel entry with show/hide controls
@@ -109,6 +109,22 @@ id,category_name,question_text,question_type,options,correct_index,correct_indic
 bin/rspec plugins/discourse-quiz
 bin/qunit plugins/discourse-quiz/test/javascripts
 ```
+
+## Emergency: site broken after plugin update
+
+If the forum homepage will not load after deploying `discourse-quiz`, disable the plugin first, then redeploy the fixed version:
+
+```bash
+./launcher enter app
+cd /var/www/discourse
+su discourse -c 'bundle exec rails runner "SiteSetting.quiz_plugin_enabled = false"'
+exit
+./launcher restart app
+```
+
+After pulling **v0.12.2** or later, re-enable `quiz_plugin_enabled` and rebuild.
+
+Clear browser localStorage keys `discourse-quiz-question-types` and hard-refresh if the quiz home screen still misbehaves.
 
 ## Troubleshooting admin `/admin/quiz/questions.json` 503
 

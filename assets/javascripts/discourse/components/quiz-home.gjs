@@ -12,18 +12,6 @@ import QuizCategoryRow from "./quiz-category-row";
 export default class QuizHome extends Component {
   @service quiz;
 
-  get singleChoiceActive() {
-    return this.quiz.selectedQuestionTypes.includes("single_choice");
-  }
-
-  get trueFalseActive() {
-    return this.quiz.selectedQuestionTypes.includes("true_false");
-  }
-
-  get multipleChoiceActive() {
-    return this.quiz.selectedQuestionTypes.includes("multiple_choice");
-  }
-
   @action
   startQuiz() {
     this.quiz.startQuiz();
@@ -46,22 +34,22 @@ export default class QuizHome extends Component {
         <div class="quiz-home-modes__buttons" role="group">
           <button
             type="button"
-            class="btn btn-default quiz-home-mode-btn {{if this.singleChoiceActive 'active'}}"
-            {{on "click" (fn this.quiz.toggleQuestionType "single_choice")}}
+            class="btn btn-default quiz-home-mode-btn {{if this.quiz.typeFilterSingleChoice 'active'}}"
+            {{on "click" this.quiz.toggleTypeFilterSingleChoice}}
           >
             {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
           </button>
           <button
             type="button"
-            class="btn btn-default quiz-home-mode-btn {{if this.trueFalseActive 'active'}}"
-            {{on "click" (fn this.quiz.toggleQuestionType "true_false")}}
+            class="btn btn-default quiz-home-mode-btn {{if this.quiz.typeFilterTrueFalse 'active'}}"
+            {{on "click" this.quiz.toggleTypeFilterTrueFalse}}
           >
             {{i18n "discourse_quiz.admin.form.question_types.true_false"}}
           </button>
           <button
             type="button"
-            class="btn btn-default quiz-home-mode-btn {{if this.multipleChoiceActive 'active'}}"
-            {{on "click" (fn this.quiz.toggleQuestionType "multiple_choice")}}
+            class="btn btn-default quiz-home-mode-btn {{if this.quiz.typeFilterMultipleChoice 'active'}}"
+            {{on "click" this.quiz.toggleTypeFilterMultipleChoice}}
           >
             {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
           </button>
