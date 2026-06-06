@@ -1,3 +1,14 @@
 en:
+  discourse_quiz:
+    admin:
+      title: "Community quiz"
+    errors:
+      invalid_options: "Options must be a non-empty array."
+      invalid_correct_index: "Correct index must be within the bounds of the options array."
+      no_active_questions: "No active questions available."
+      import_empty: "Import payload is empty."
+      import_not_array: "Import payload must be a JSON array."
+      import_invalid_json: "Import payload is not valid JSON."
   site_settings:
-    quiz_plugin_enabled: "Enable the quiz panel entry and show/hide UI."
+    quiz_plugin_enabled: "Enable the quiz panel and question bank."
+    quiz_categories: "Optional category name filter for the quiz panel (leave blank for all)."

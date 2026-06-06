@@ -1,3 +1,14 @@
 zh_CN:
+  discourse_quiz:
+    admin:
+      title: "社区竞答"
+    errors:
+      invalid_options: "选项必须是非空数组。"
+      invalid_correct_index: "正确选项索引必须在选项范围内。"
+      no_active_questions: "当前没有可用的题目。"
+      import_empty: "导入内容为空。"
+      import_not_array: "导入内容必须是 JSON 数组。"
+      import_invalid_json: "导入内容不是有效的 JSON。"
   site_settings:
-    quiz_plugin_enabled: "启用答题面板入口与显示/隐藏界面。"
+    quiz_plugin_enabled: "启用答题面板与题库。"
+    quiz_categories: "答题面板可选分类过滤（留空表示全部）。"

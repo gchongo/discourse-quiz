@@ -3,6 +3,7 @@ import { service } from "@ember/service";
 import DButton from "discourse/ui-kit/d-button";
 import { i18n } from "discourse-i18n";
 import { htmlSafe } from "@ember/template";
+import QuizQuestionDisplay from "./quiz-question-display";
 
 export default class QuizPanel extends Component {
   @service quiz;
@@ -61,7 +62,13 @@ export default class QuizPanel extends Component {
         </div>
         <div class="quiz-panel-content">
           {{#unless this.quiz.isMinimized}}
-            <p class="quiz-panel-placeholder">{{i18n "gamified_quiz.placeholder"}}</p>
+            {{#if this.quiz.loading}}
+              <p class="quiz-panel-placeholder">{{i18n "discourse_quiz.loading"}}</p>
+            {{else if this.quiz.errorMessage}}
+              <p class="quiz-panel-error">{{this.quiz.errorMessage}}</p>
+            {{else if this.quiz.currentQuestion}}
+              <QuizQuestionDisplay @question={{this.quiz.currentQuestion}} />
+            {{/if}}
           {{/unless}}
         </div>
       </div>

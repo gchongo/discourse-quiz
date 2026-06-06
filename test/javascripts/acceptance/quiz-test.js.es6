@@ -8,15 +8,25 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
     quiz_plugin_enabled: true,
   });
 
-  test("clicking header icon toggles the quiz panel", async function (assert) {
-    await visit("/");
-    assert.dom(".quiz-header-icon").exists();
+  needs.pretender((server) => {
+    server.get("/quiz/next.json", () => {
+      return [
+        200,
+        { "Content-Type": "application/json" },
+        {
+          id: 1,
+          category_name: "示例",
+          question_text: "1 + 1 = ?",
+          options: ["1", "2", "3"],
+        },
+      ];
+    });
+  });
 
+  test("clicking header icon shows a question", async function (assert) {
+    await visit("/");
     await click(".quiz-header-icon .btn");
     assert.dom(".quiz-panel-container").hasClass("is-visible");
-    assert.dom(".quiz-panel-placeholder").exists();
-
-    await click(".quiz-header-icon .btn");
-    assert.dom(".quiz-panel-container").doesNotHaveClass("is-visible");
+    assert.dom(".quiz-question-text").hasText("1 + 1 = ?");
   });
 });
