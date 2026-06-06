@@ -6,6 +6,7 @@ zh_CN:
       invalid_options: "选项必须是非空数组。"
       invalid_correct_index: "正确选项索引必须在选项范围内。"
       no_active_questions: "当前没有可用的题目。"
+      database_unavailable: "题库尚未就绪，请联系管理员。"
       import_empty: "导入内容为空。"
       import_not_array: "导入内容必须是 JSON 数组。"
       import_invalid_json: "导入内容不是有效的 JSON。"

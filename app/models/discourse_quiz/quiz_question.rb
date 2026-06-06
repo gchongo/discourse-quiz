@@ -19,9 +19,10 @@ module DiscourseQuiz
       distinct.order(:category_name).pluck(:category_name)
     end
 
-    def self.pick_random(category_name: nil)
+    def self.pick_random(category_names: [])
       scope = active
-      scope = scope.by_category(category_name) if category_name.present?
+      names = Array(category_names).map(&:to_s).map(&:strip).reject(&:blank?)
+      scope = scope.where(category_name: names) if names.present?
       scope.order(Arel.sql("RANDOM()")).first
     end
 

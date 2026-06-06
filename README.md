@@ -51,6 +51,29 @@ bin/rspec plugins/discourse-quiz
 bin/qunit plugins/discourse-quiz/test/javascripts
 ```
 
+## Troubleshooting `/quiz/next.json` 500
+
+Inside the container:
+
+```bash
+./launcher enter app
+cd /var/www/discourse
+su discourse -c 'bundle exec rails runner "
+  puts \"table: #{ActiveRecord::Base.connection.table_exists?(:discourse_quiz_questions)}\"
+  puts \"count: #{DiscourseQuiz::QuizQuestion.count}\"
+"'
+```
+
+If `table: false`, run `bundle exec rake db:migrate` and rebuild.
+
+If `count: 0`, seed the sample question:
+
+```bash
+su discourse -c 'bundle exec rails runner "DiscourseQuiz::SeedQuestions.seed!"'
+```
+
+Check `quiz_categories` site setting: use **category names** (e.g. `示例,历史`), not category IDs.
+
 ## Troubleshooting migrate failures
 
 If rebuild fails on `db:migrate` for this plugin:

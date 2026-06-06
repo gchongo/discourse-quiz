@@ -28,8 +28,8 @@ describe DiscourseQuiz::QuizQuestion do
     end
 
     it "filters by category" do
-      expect(described_class.pick_random(category_name: "历史")).to eq(history)
-      expect(described_class.pick_random(category_name: "科学")).to be_nil
+      expect(described_class.pick_random(category_names: ["历史"])).to eq(history)
+      expect(described_class.pick_random(category_names: ["科学"])).to be_nil
     end
   end
 end

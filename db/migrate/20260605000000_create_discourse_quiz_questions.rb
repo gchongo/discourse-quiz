@@ -5,6 +5,7 @@ class CreateDiscourseQuizQuestions < ActiveRecord::Migration[7.2]
     create_questions_table
     ensure_position_column
     ensure_indexes
+    seed_sample_question
   end
 
   def down
@@ -42,5 +43,20 @@ class CreateDiscourseQuizQuestions < ActiveRecord::Migration[7.2]
     add_index :discourse_quiz_questions, :category_name, if_not_exists: true
     add_index :discourse_quiz_questions, :active, if_not_exists: true
     add_index :discourse_quiz_questions, :position, if_not_exists: true
+  end
+
+  def seed_sample_question
+    return unless table_exists?(:discourse_quiz_questions)
+    return if select_value("SELECT COUNT(*) FROM discourse_quiz_questions").to_i > 0
+
+    now = connection.quote(Time.zone.now)
+    options = connection.quote(%w[1 2 3].to_json)
+
+    execute <<~SQL
+      INSERT INTO discourse_quiz_questions
+        (category_name, question_text, options, correct_index, explanation, active, position, created_at, updated_at)
+      VALUES
+        ('示例', '1 + 1 = ?', #{options}::jsonb, 1, '基础算术：1 + 1 = 2。', TRUE, 0, #{now}, #{now})
+    SQL
   end
 end

@@ -6,6 +6,7 @@ en:
       invalid_options: "Options must be a non-empty array."
       invalid_correct_index: "Correct index must be within the bounds of the options array."
       no_active_questions: "No active questions available."
+      database_unavailable: "Quiz database is not ready. Please contact the administrator."
       import_empty: "Import payload is empty."
       import_not_array: "Import payload must be a JSON array."
       import_invalid_json: "Import payload is not valid JSON."

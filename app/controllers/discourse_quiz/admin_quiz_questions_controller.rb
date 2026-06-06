@@ -9,7 +9,7 @@ module DiscourseQuiz
       questions = questions.by_category(params[:category_name]) if params[:category_name].present?
 
       render_json_dump(
-        questions: serialize_data(questions.to_a, AdminQuizQuestionSerializer),
+        questions: serialize_data(questions.to_a, ::AdminQuizQuestionSerializer),
         categories: QuizQuestion.category_names,
       )
     end
