@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.15.5)
+## Current features (v0.15.6)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Category selection and practice/question-type preferences persist in `localStorage`

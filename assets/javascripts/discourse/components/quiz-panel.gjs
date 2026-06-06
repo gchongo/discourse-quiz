@@ -162,7 +162,7 @@ export default class QuizPanel extends Component {
           {{on "pointerdown" this.onHeaderPointerDown}}
         >
           <div class="quiz-panel-title-row">
-            {{#if this.quiz.isPlaying}}
+            {{#if (and this.quiz.isPlaying (not this.quiz.isMinimized))}}
               <DButton
                 @icon="arrow-left"
                 @action={{this.quiz.showHome}}
