@@ -355,6 +355,14 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
   min-width: 0;
   max-width: 100%;
 
+  .quiz-question-type {
+    text-align: center;
+    font-size: var(--font-down-2);
+    color: var(--tertiary);
+    margin: 0 0 0.35em;
+    font-weight: 600;
+  }
+
   .quiz-question-category {
     text-align: center;
     font-size: var(--font-down-2);
@@ -754,6 +762,20 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     margin: 0;
     font-weight: normal;
     color: var(--primary);
+  }
+
+  .quiz-admin-answer-btn {
+    width: 100%;
+    margin: 0;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+
+    &.is-selected {
+      background: var(--tertiary-low);
+      border-color: var(--tertiary);
+      color: var(--tertiary);
+    }
   }
 
   &__checkbox {

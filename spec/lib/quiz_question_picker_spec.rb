@@ -34,6 +34,28 @@ describe DiscourseQuiz::QuizQuestionPicker do
 
       expect(picker.pick).to eq(history_q)
     end
+
+    it "filters by question type" do
+      multiple_q =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "历史",
+          question_text: "Multi",
+          question_type: "multiple_choice",
+          options: %w[A B C],
+          correct_index: 0,
+          correct_indices: [0, 1],
+        )
+
+      picker =
+        described_class.new(
+          user: user,
+          category_names: ["历史"],
+          practice_mode: "normal",
+          question_types: ["multiple_choice"],
+        )
+
+      expect(picker.pick).to eq(multiple_q)
+    end
   end
 
   describe "wrong_only mode" do

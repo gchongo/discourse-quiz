@@ -246,6 +246,7 @@ module DiscourseQuiz
         category_names: effective_category_filters,
         practice_mode: practice_mode,
         exclude_question_ids: session_exclude_question_ids,
+        question_types: effective_question_type_filters,
       )
     end
 
@@ -260,6 +261,13 @@ module DiscourseQuiz
     def normalized_practice_mode
       mode = params[:practice_mode].to_s
       QuizQuestionPicker::MODES.include?(mode) ? mode : "normal"
+    end
+
+    def effective_question_type_filters
+      Array(params[:question_types])
+        .map(&:to_s)
+        .select { |type| QuestionTypes::ALL.include?(type) }
+        .uniq
     end
 
     def empty_questions_message(reason)

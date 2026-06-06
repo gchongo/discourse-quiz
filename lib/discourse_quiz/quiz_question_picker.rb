@@ -7,11 +7,18 @@ module DiscourseQuiz
 
     attr_reader :empty_reason
 
-    def initialize(user:, category_names: [], practice_mode: "normal", exclude_question_ids: [])
+    def initialize(
+      user:,
+      category_names: [],
+      practice_mode: "normal",
+      exclude_question_ids: [],
+      question_types: []
+    )
       @user = user
       @category_names = normalize_category_names(category_names)
       @practice_mode = MODES.include?(practice_mode.to_s) ? practice_mode.to_s : "normal"
       @exclude_question_ids = normalize_question_ids(exclude_question_ids)
+      @question_types = normalize_question_types(question_types)
       @empty_reason = nil
     end
 
@@ -83,6 +90,11 @@ module DiscourseQuiz
     def base_scope
       scope = QuizQuestion.active
       scope = scope.where(category_name: @category_names) if @category_names.present?
+
+      if @question_types.present? && QuizQuestion.question_type_column?
+        scope = scope.where(question_type: @question_types)
+      end
+
       scope
     end
 
@@ -103,6 +115,10 @@ module DiscourseQuiz
 
     def normalize_question_ids(question_ids)
       Array(question_ids).map(&:to_i).reject(&:zero?).uniq
+    end
+
+    def normalize_question_types(question_types)
+      Array(question_types).map(&:to_s).select { |type| QuestionTypes::ALL.include?(type) }.uniq
     end
   end
 end

@@ -8,6 +8,8 @@ const DOCK_PREF_KEY = "discourse-quiz-docked";
 const POSITION_PREF_KEY = "discourse-quiz-panel-position";
 const MODE_PREF_KEY = "discourse-quiz-practice-mode";
 const PRACTICE_MODES = ["normal", "wrong_only", "unseen"];
+const QUESTION_TYPES = ["single_choice", "true_false", "multiple_choice"];
+const QUESTION_TYPES_PREF_KEY = "discourse-quiz-question-types";
 const NARROW_BREAKPOINT = 1100;
 const PANEL_WIDTH = 300;
 const HTML_CLASS_VISIBLE = "has-quiz-panel";
@@ -43,6 +45,7 @@ export default class QuizService extends Service {
   @tracked paywallActive = false;
   @tracked errorMessage = null;
   @tracked practiceMode = "normal";
+  @tracked selectedQuestionTypes = [...QUESTION_TYPES];
   @tracked sessionSeenQuestionIds = [];
 
   get isEnabled() {
@@ -88,7 +91,14 @@ export default class QuizService extends Service {
   }
 
   get canStart() {
-    return this.selectAllMode || this.selectedCategories.length > 0;
+    return (
+      (this.selectAllMode || this.selectedCategories.length > 0) &&
+      this.selectedQuestionTypes.length > 0
+    );
+  }
+
+  get filtersAllQuestionTypes() {
+    return this.selectedQuestionTypes.length === QUESTION_TYPES.length;
   }
 
   get canUsePracticeModes() {
@@ -115,6 +125,20 @@ export default class QuizService extends Service {
     return i18n("discourse_quiz.home_selected_count", { count });
   }
 
+  get selectedTypesSummary() {
+    if (this.filtersAllQuestionTypes) {
+      return i18n("discourse_quiz.home_selected_types_all");
+    }
+
+    const labels = this.selectedQuestionTypes.map((type) =>
+      i18n(`discourse_quiz.admin.form.question_types.${type}`)
+    );
+
+    return i18n("discourse_quiz.home_selected_types_named", {
+      types: labels.join("、"),
+    });
+  }
+
   get currentRangeSummary() {
     if (this.selectAllMode) {
       return i18n("discourse_quiz.current_range_all");
@@ -131,8 +155,26 @@ export default class QuizService extends Service {
     return i18n("discourse_quiz.current_range_count", { count });
   }
 
+  get currentTypesSummary() {
+    if (this.filtersAllQuestionTypes) {
+      return i18n("discourse_quiz.current_types_all");
+    }
+
+    const labels = this.selectedQuestionTypes.map((type) =>
+      i18n(`discourse_quiz.admin.form.question_types.${type}`)
+    );
+
+    return i18n("discourse_quiz.current_types_named", {
+      types: labels.join("、"),
+    });
+  }
+
   isCategorySelected(category) {
     return !this.selectAllMode && this.selectedCategories.includes(category);
+  }
+
+  isQuestionTypeSelected(type) {
+    return this.selectedQuestionTypes.includes(type);
   }
 
   @action
@@ -188,6 +230,7 @@ export default class QuizService extends Service {
     this.loadDockPreference();
     this.loadPositionPreference();
     this.loadPracticeModePreference();
+    this.loadQuestionTypePreference();
     this._resizeHandler = () => this.handleViewportResize();
     window.addEventListener("resize", this._resizeHandler, { passive: true });
     this.handleViewportResize();
@@ -385,6 +428,31 @@ export default class QuizService extends Service {
   resetSelection() {
     this.selectAllMode = true;
     this.selectedCategories = [];
+    this.selectedQuestionTypes = [...QUESTION_TYPES];
+    this.saveQuestionTypePreference();
+  }
+
+  @action
+  toggleQuestionType(type) {
+    if (!QUESTION_TYPES.includes(type)) {
+      return;
+    }
+
+    if (this.isQuestionTypeSelected(type)) {
+      if (this.selectedQuestionTypes.length === 1) {
+        return;
+      }
+
+      this.selectedQuestionTypes = this.selectedQuestionTypes.filter(
+        (value) => value !== type
+      );
+    } else {
+      this.selectedQuestionTypes = [...this.selectedQuestionTypes, type].sort(
+        (a, b) => QUESTION_TYPES.indexOf(a) - QUESTION_TYPES.indexOf(b)
+      );
+    }
+
+    this.saveQuestionTypePreference();
   }
 
   @action
@@ -558,6 +626,10 @@ export default class QuizService extends Service {
       params.append("exclude_question_ids[]", id);
     });
 
+    this.effectiveQuestionTypeFilters().forEach((type) => {
+      params.append("question_types[]", type);
+    });
+
     const query = params.toString();
     return query ? `/quiz/next.json?${query}` : "/quiz/next.json";
   }
@@ -601,6 +673,48 @@ export default class QuizService extends Service {
     }
 
     return this.selectedCategories;
+  }
+
+  effectiveQuestionTypeFilters() {
+    if (this.filtersAllQuestionTypes) {
+      return [];
+    }
+
+    return this.selectedQuestionTypes;
+  }
+
+  loadQuestionTypePreference() {
+    try {
+      const stored = localStorage.getItem(QUESTION_TYPES_PREF_KEY);
+
+      if (!stored) {
+        return;
+      }
+
+      const parsed = JSON.parse(stored);
+      const types = Array.isArray(parsed)
+        ? parsed.filter((type) => QUESTION_TYPES.includes(type))
+        : [];
+
+      if (types.length > 0) {
+        this.selectedQuestionTypes = types.sort(
+          (a, b) => QUESTION_TYPES.indexOf(a) - QUESTION_TYPES.indexOf(b)
+        );
+      }
+    } catch {
+      // localStorage may be unavailable or JSON invalid
+    }
+  }
+
+  saveQuestionTypePreference() {
+    try {
+      localStorage.setItem(
+        QUESTION_TYPES_PREF_KEY,
+        JSON.stringify(this.selectedQuestionTypes)
+      );
+    } catch {
+      // localStorage may be unavailable
+    }
   }
 
   pruneSelectedCategories() {

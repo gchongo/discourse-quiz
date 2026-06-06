@@ -100,6 +100,25 @@ describe DiscourseQuiz::QuizController do
       )
     end
 
+    it "filters by question_types param" do
+      sign_in(user)
+
+      multiple =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "示例",
+          question_text: "Pick many",
+          question_type: "multiple_choice",
+          options: %w[A B C],
+          correct_index: 0,
+          correct_indices: [0, 2],
+        )
+
+      get "/quiz/next.json", params: { category_name: "示例", question_types: ["multiple_choice"] }
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["id"]).to eq(multiple.id)
+      expect(response.parsed_body["question_type"]).to eq("multiple_choice")
+    end
+
     it "submits multiple-choice answers" do
       sign_in(user)
 

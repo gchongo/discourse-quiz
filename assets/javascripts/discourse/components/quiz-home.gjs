@@ -30,6 +30,34 @@ export default class QuizHome extends Component {
       </div>
 
       <div class="quiz-home-modes">
+        <span class="quiz-home-modes__label">{{i18n "discourse_quiz.home_question_type"}}</span>
+        <div class="quiz-home-modes__buttons" role="group">
+          <button
+            type="button"
+            class="btn btn-default quiz-home-mode-btn {{if (this.quiz.isQuestionTypeSelected 'single_choice') 'active'}}"
+            {{on "click" (fn this.quiz.toggleQuestionType "single_choice")}}
+          >
+            {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
+          </button>
+          <button
+            type="button"
+            class="btn btn-default quiz-home-mode-btn {{if (this.quiz.isQuestionTypeSelected 'true_false') 'active'}}"
+            {{on "click" (fn this.quiz.toggleQuestionType "true_false")}}
+          >
+            {{i18n "discourse_quiz.admin.form.question_types.true_false"}}
+          </button>
+          <button
+            type="button"
+            class="btn btn-default quiz-home-mode-btn {{if (this.quiz.isQuestionTypeSelected 'multiple_choice') 'active'}}"
+            {{on "click" (fn this.quiz.toggleQuestionType "multiple_choice")}}
+          >
+            {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
+          </button>
+        </div>
+        <p class="quiz-status-hint">{{i18n "discourse_quiz.home_question_type_hint"}}</p>
+      </div>
+
+      <div class="quiz-home-modes">
         <span class="quiz-home-modes__label">{{i18n "discourse_quiz.home_practice_mode"}}</span>
         <div class="quiz-home-modes__buttons" role="group">
           <button
@@ -92,6 +120,7 @@ export default class QuizHome extends Component {
 
       <div class="quiz-home-footer">
         <p class="quiz-home-summary">{{this.quiz.selectedSummary}}</p>
+        <p class="quiz-home-summary">{{this.quiz.selectedTypesSummary}}</p>
 
         <DButton
           @label="discourse_quiz.home_reset"

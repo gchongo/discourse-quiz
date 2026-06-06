@@ -325,16 +325,18 @@ export default class QuizQuestionEditModal extends Component {
             <div class="quiz-admin-form__field">
               <span>{{i18n "discourse_quiz.admin.form.correct_answers"}}</span>
               {{#if this.parsedOptions.length}}
+                <p class="quiz-admin-form__hint">
+                  {{i18n "discourse_quiz.admin.form.correct_answers_hint"}}
+                </p>
                 <div class="quiz-admin-form__answers">
                   {{#each this.parsedOptions as |option index|}}
-                    <label class="quiz-admin-form__radio">
-                      <input
-                        type="checkbox"
-                        checked={{this.isCorrectIndexSelected index}}
-                        {{on "change" (fn this.toggleCorrectIndex index)}}
-                      />
-                      <span>{{option}}</span>
-                    </label>
+                    <button
+                      type="button"
+                      class="btn btn-default quiz-admin-answer-btn {{if (this.isCorrectIndexSelected index) 'is-selected'}}"
+                      {{on "click" (fn this.toggleCorrectIndex index)}}
+                    >
+                      {{option}}
+                    </button>
                   {{/each}}
                 </div>
               {{else}}

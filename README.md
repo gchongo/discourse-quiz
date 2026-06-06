@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.11.3)
+## Current features (v0.12.0)
 
 - Quiz home screen with toggle list (multi-category selection, X-style) before starting
 - Desktop and mobile quiz panel entry with show/hide controls
@@ -23,6 +23,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Session de-duplication: while practicing, avoids repeating questions until the selected range is exhausted
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
 - Question types: single choice (default), true/false, and multiple choice (all correct options required)
+- Quiz home screen question-type filter: choose single choice, true/false, and/or multiple choice before starting
 - User summary stats (own profile only at `/u/:username/summary`): lifetime correct count and never-correct question count
 
 ## Installation
@@ -188,7 +189,7 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/quiz/categories.json` | Active categories for the home screen + status |
-| GET | `/quiz/next.json` | Random active question; optional `category_names[]`, `practice_mode` (`normal`, `wrong_only`, `unseen`), `exclude_question_ids[]` (session de-duplication) |
+| GET | `/quiz/next.json` | Random active question; optional `category_names[]`, `question_types[]` (`single_choice`, `true_false`, `multiple_choice`), `practice_mode` (`normal`, `wrong_only`, `unseen`), `exclude_question_ids[]` (session de-duplication) |
 | GET | `/quiz/status.json` | Current guest/login quiz status |
 | GET | `/quiz/summary_stats.json` | Logged-in user's lifetime correct and wrong-question counts |
 | POST | `/quiz/submit.json` | Submit `question_id` + `answer_index` (single/true-false) or `answer_indices[]` (multiple choice) |
