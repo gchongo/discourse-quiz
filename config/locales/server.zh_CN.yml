@@ -11,6 +11,7 @@ zh_CN:
       import_not_array: "导入内容必须是 JSON 数组。"
       import_invalid_json: "导入内容不是有效的 JSON。"
       import_invalid_csv: "导入内容不是有效的 CSV。"
+      category_rename_blank: "请填写当前分类和新分类名称。"
       question_not_found: "题目不存在。"
       invalid_answer_index: "所选答案无效。"
       paywall_reached: "已达到答题次数上限，请登录后继续。"

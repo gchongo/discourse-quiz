@@ -2,16 +2,17 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { ajax } from "discourse/lib/ajax";
-import { popupAjaxError } from "discourse/lib/ajax-error";
 import DButton from "discourse/ui-kit/d-button";
 import DModal from "discourse/ui-kit/d-modal";
 import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
-import { eq } from "discourse/truth-helpers";
+import { and, eq, not } from "discourse/truth-helpers";
 import { i18n } from "discourse-i18n";
 
 export default class QuizQuestionEditModal extends Component {
   @tracked categoryName;
+  @tracked newCategoryName = "";
+  @tracked useNewCategory = false;
   @tracked questionText;
   @tracked optionsText;
   @tracked correctIndex;
@@ -22,7 +23,7 @@ export default class QuizQuestionEditModal extends Component {
 
   constructor() {
     super(...arguments);
-    const question = this.args.model.question;
+    const question = this.args.model.question || {};
 
     this.categoryName = question.category_name || "";
     this.questionText = question.question_text || "";
@@ -30,6 +31,22 @@ export default class QuizQuestionEditModal extends Component {
     this.correctIndex = question.correct_index ?? 0;
     this.explanation = question.explanation || "";
     this.active = question.active !== false;
+    const categories = this.args.model.categories || [];
+    const isNew = !question.id;
+
+    if (isNew && !this.categoryName && categories.length) {
+      this.categoryName = [...categories].sort((a, b) => a.localeCompare(b, "zh-CN"))[0];
+    }
+
+    this.useNewCategory = isNew && !categories.length;
+  }
+
+  get isNew() {
+    return !this.args.model.question?.id;
+  }
+
+  get modalTitle() {
+    return i18n(this.isNew ? "discourse_quiz.admin.create_title" : "discourse_quiz.admin.edit_title");
   }
 
   get parsedOptions() {
@@ -41,7 +58,7 @@ export default class QuizQuestionEditModal extends Component {
 
   get categoryOptions() {
     const categories = [...(this.args.model.categories || [])];
-    const current = this.categoryName?.trim();
+    const current = this.effectiveCategoryName;
 
     if (current && !categories.includes(current)) {
       categories.push(current);
@@ -50,9 +67,35 @@ export default class QuizQuestionEditModal extends Component {
     return categories.sort((a, b) => a.localeCompare(b, "zh-CN"));
   }
 
+  get effectiveCategoryName() {
+    if (this.useNewCategory || !this.categoryOptions.length) {
+      return this.newCategoryName.trim();
+    }
+
+    return this.categoryName?.trim() || "";
+  }
+
   @action
   updateCategory(event) {
     this.categoryName = event.target.value;
+    this.useNewCategory = false;
+  }
+
+  @action
+  enableNewCategory() {
+    this.useNewCategory = true;
+    this.newCategoryName = "";
+  }
+
+  @action
+  useExistingCategories() {
+    this.useNewCategory = false;
+    this.newCategoryName = "";
+  }
+
+  @action
+  updateNewCategory(event) {
+    this.newCategoryName = event.target.value;
   }
 
   @action
@@ -84,25 +127,34 @@ export default class QuizQuestionEditModal extends Component {
     this.active = event.target.checked;
   }
 
+  questionPayload() {
+    return {
+      category_name: this.effectiveCategoryName,
+      question_text: this.questionText,
+      options: this.parsedOptions,
+      correct_index: this.correctIndex,
+      explanation: this.explanation,
+      active: this.active,
+    };
+  }
+
   @action
   async saveQuestion() {
     this.saveError = null;
     this.saving = true;
 
     try {
-      await ajax(`/admin/quiz/questions/${this.args.model.question.id}.json`, {
-        type: "PUT",
-        data: {
-          question: {
-            category_name: this.categoryName,
-            question_text: this.questionText,
-            options: this.parsedOptions,
-            correct_index: this.correctIndex,
-            explanation: this.explanation,
-            active: this.active,
-          },
-        },
-      });
+      if (this.isNew) {
+        await ajax("/admin/quiz/questions.json", {
+          type: "POST",
+          data: { question: this.questionPayload() },
+        });
+      } else {
+        await ajax(`/admin/quiz/questions/${this.args.model.question.id}.json`, {
+          type: "PUT",
+          data: { question: this.questionPayload() },
+        });
+      }
 
       await this.args.model.onSaved?.();
       this.args.closeModal();
@@ -117,12 +169,24 @@ export default class QuizQuestionEditModal extends Component {
   }
 
   <template>
-    <DModal @title={{i18n "discourse_quiz.admin.edit_title"}} @closeModal={{@closeModal}}>
+    <DModal @title={{this.modalTitle}} @closeModal={{@closeModal}}>
       <:body>
         <div class="quiz-admin-form">
-          <label class="quiz-admin-form__field">
+          <div class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.category"}}</span>
-            {{#if this.categoryOptions.length}}
+            {{#if this.useNewCategory}}
+              <input
+                type="text"
+                value={{this.newCategoryName}}
+                placeholder={{i18n "discourse_quiz.admin.form.new_category_placeholder"}}
+                {{on "input" this.updateNewCategory}}
+              />
+              {{#if this.categoryOptions.length}}
+                <button type="button" class="btn btn-link quiz-admin-link-btn" {{on "click" this.useExistingCategories}}>
+                  {{i18n "discourse_quiz.admin.form.use_existing_categories"}}
+                </button>
+              {{/if}}
+            {{else if this.categoryOptions.length}}
               <select {{on "change" this.updateCategory}}>
                 {{#each this.categoryOptions as |category|}}
                   <option value={{category}} selected={{eq this.categoryName category}}>
@@ -130,10 +194,18 @@ export default class QuizQuestionEditModal extends Component {
                   </option>
                 {{/each}}
               </select>
+              <button type="button" class="btn btn-link quiz-admin-link-btn" {{on "click" this.enableNewCategory}}>
+                {{i18n "discourse_quiz.admin.form.use_new_category"}}
+              </button>
             {{else}}
-              <input type="text" value={{this.categoryName}} {{on "input" this.updateCategory}} />
+              <input
+                type="text"
+                value={{this.newCategoryName}}
+                placeholder={{i18n "discourse_quiz.admin.form.new_category_placeholder"}}
+                {{on "input" this.updateNewCategory}}
+              />
             {{/if}}
-          </label>
+          </div>
 
           <label class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.question"}}</span>
@@ -182,7 +254,7 @@ export default class QuizQuestionEditModal extends Component {
         <DButton
           @label={{if this.saving "discourse_quiz.admin.saving" "discourse_quiz.admin.save"}}
           @action={{this.saveQuestion}}
-          @disabled={{this.saving}}
+          @disabled={{or this.saving (not this.effectiveCategoryName)}}
           class="btn-primary"
         />
       </:footer>

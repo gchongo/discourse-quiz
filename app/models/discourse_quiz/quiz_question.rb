@@ -14,6 +14,14 @@ module DiscourseQuiz
 
     scope :active, -> { where(active: true) }
     scope :by_category, ->(name) { where(category_name: name) if name.present? }
+    scope :search_query,
+          ->(query) {
+            if query.present?
+              sanitized = ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)
+              pattern = "%#{sanitized}%"
+              where("question_text ILIKE ? OR category_name ILIKE ?", pattern, pattern)
+            end
+          }
 
     def self.position_column?
       connection.column_exists?(table_name, :position)

@@ -8,7 +8,7 @@ import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
 import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
-import { eq } from "discourse/truth-helpers";
+import { eq, not } from "discourse/truth-helpers";
 import QuizQuestionEditModal from "./quiz-question-edit-modal";
 
 const IMPORT_EXAMPLE = `[
@@ -21,8 +21,10 @@ const IMPORT_EXAMPLE = `[
   }
 ]`;
 
-const CSV_EXAMPLE = `category_name,question_text,options,correct_index,explanation,active
-历史,中国历史上第一个统一的封建王朝是哪个？,夏朝|商朝|秦朝|汉朝,2,秦朝是中国历史上第一个统一的中央集权封建王朝。,true`;
+const CSV_EXAMPLE = `id,category_name,question_text,options,correct_index,explanation,active
+,历史,中国历史上第一个统一的封建王朝是哪个？,夏朝|商朝|秦朝|汉朝,2,秦朝是中国历史上第一个统一的中央集权封建王朝。,true`;
+
+const PER_PAGE = 25;
 
 export default class AdminQuizIndex extends Component {
   @service modal;
@@ -30,17 +32,70 @@ export default class AdminQuizIndex extends Component {
   @tracked questions = [];
   @tracked categories = [];
   @tracked selectedCategory = "";
+  @tracked searchQuery = "";
+  @tracked page = 1;
+  @tracked total = 0;
   @tracked importJson = IMPORT_EXAMPLE;
   @tracked importFormat = "json";
+  @tracked dryRun = false;
+  @tracked upsert = false;
   @tracked importResult = null;
   @tracked importErrors = [];
   @tracked loadError = null;
   @tracked loading = true;
   @tracked importing = false;
+  @tracked exporting = false;
+  @tracked renameFrom = "";
+  @tracked renameTo = "";
+  @tracked renaming = false;
+  @tracked renameResult = null;
 
   constructor() {
     super(...arguments);
     this.loadQuestions();
+  }
+
+  get totalPages() {
+    return Math.max(1, Math.ceil(this.total / PER_PAGE));
+  }
+
+  get canGoPrev() {
+    return this.page > 1;
+  }
+
+  get canGoNext() {
+    return this.page < this.totalPages;
+  }
+
+  buildListUrl() {
+    const params = new URLSearchParams();
+    params.set("page", String(this.page));
+    params.set("per_page", String(PER_PAGE));
+
+    if (this.selectedCategory) {
+      params.set("category_name", this.selectedCategory);
+    }
+
+    if (this.searchQuery.trim()) {
+      params.set("q", this.searchQuery.trim());
+    }
+
+    return `/admin/quiz/questions.json?${params.toString()}`;
+  }
+
+  buildExportUrl(format) {
+    const params = new URLSearchParams();
+    params.set("export_format", format);
+
+    if (this.selectedCategory) {
+      params.set("category_name", this.selectedCategory);
+    }
+
+    if (this.searchQuery.trim()) {
+      params.set("q", this.searchQuery.trim());
+    }
+
+    return `/admin/quiz/questions/export.json?${params.toString()}`;
   }
 
   @action
@@ -49,13 +104,11 @@ export default class AdminQuizIndex extends Component {
     this.loadError = null;
 
     try {
-      const url = this.selectedCategory
-        ? `/admin/quiz/questions.json?category_name=${encodeURIComponent(this.selectedCategory)}`
-        : "/admin/quiz/questions.json";
-
-      const data = await ajax(url);
+      const data = await ajax(this.buildListUrl());
       this.questions = data.questions || [];
       this.categories = data.categories || [];
+      this.total = data.total || 0;
+      this.page = data.page || this.page;
       this.loadError = data.error || null;
     } catch (e) {
       this.loadError = e.jqXHR?.responseJSON?.error || null;
@@ -70,6 +123,45 @@ export default class AdminQuizIndex extends Component {
   @action
   onCategoryChange(event) {
     this.selectedCategory = event.target.value;
+    this.page = 1;
+    this.loadQuestions();
+  }
+
+  @action
+  onSearchInput(event) {
+    this.searchQuery = event.target.value;
+  }
+
+  @action
+  applySearch() {
+    this.page = 1;
+    this.loadQuestions();
+  }
+
+  @action
+  clearSearch() {
+    this.searchQuery = "";
+    this.page = 1;
+    this.loadQuestions();
+  }
+
+  @action
+  goPrevPage() {
+    if (!this.canGoPrev) {
+      return;
+    }
+
+    this.page -= 1;
+    this.loadQuestions();
+  }
+
+  @action
+  goNextPage() {
+    if (!this.canGoNext) {
+      return;
+    }
+
+    this.page += 1;
     this.loadQuestions();
   }
 
@@ -77,6 +169,16 @@ export default class AdminQuizIndex extends Component {
   updateImportJson(event) {
     this.importJson = event.target.value;
     this.importFormat = "json";
+  }
+
+  @action
+  toggleDryRun(event) {
+    this.dryRun = event.target.checked;
+  }
+
+  @action
+  toggleUpsert(event) {
+    this.upsert = event.target.checked;
   }
 
   @action
@@ -125,12 +227,17 @@ export default class AdminQuizIndex extends Component {
         data: {
           questions_json: this.importJson,
           import_format: this.importFormat,
+          dry_run: this.dryRun,
+          upsert: this.upsert,
         },
       });
 
       this.importResult = result;
       this.importErrors = result.errors || [];
-      this.loadQuestions();
+
+      if (!this.dryRun) {
+        this.loadQuestions();
+      }
     } catch (e) {
       popupAjaxError(e);
     } finally {
@@ -138,8 +245,37 @@ export default class AdminQuizIndex extends Component {
     }
   }
 
+  downloadFile(filename, content, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   @action
-  editQuestion(question) {
+  async exportQuestions(format) {
+    this.exporting = true;
+
+    try {
+      const result = await ajax(this.buildExportUrl(format));
+
+      if (format === "csv") {
+        this.downloadFile("discourse-quiz-questions.csv", result.data, "text/csv;charset=utf-8");
+      } else {
+        const content = JSON.stringify(result.data, null, 2);
+        this.downloadFile("discourse-quiz-questions.json", content, "application/json;charset=utf-8");
+      }
+    } catch (e) {
+      popupAjaxError(e);
+    } finally {
+      this.exporting = false;
+    }
+  }
+
+  openQuestionModal(question) {
     this.modal.show(QuizQuestionEditModal, {
       model: {
         question,
@@ -147,6 +283,16 @@ export default class AdminQuizIndex extends Component {
         onSaved: () => this.loadQuestions(),
       },
     });
+  }
+
+  @action
+  createQuestion() {
+    this.openQuestionModal({});
+  }
+
+  @action
+  editQuestion(question) {
+    this.openQuestionModal(question);
   }
 
   @action
@@ -160,6 +306,41 @@ export default class AdminQuizIndex extends Component {
       this.loadQuestions();
     } catch (e) {
       popupAjaxError(e);
+    }
+  }
+
+  @action
+  onRenameFromChange(event) {
+    this.renameFrom = event.target.value;
+  }
+
+  @action
+  onRenameToChange(event) {
+    this.renameTo = event.target.value;
+  }
+
+  @action
+  async renameCategory() {
+    this.renameResult = null;
+    this.renaming = true;
+
+    try {
+      const result = await ajax("/admin/quiz/categories/rename.json", {
+        type: "PUT",
+        data: {
+          from_name: this.renameFrom,
+          to_name: this.renameTo,
+        },
+      });
+
+      this.renameResult = result;
+      this.renameFrom = "";
+      this.renameTo = "";
+      this.loadQuestions();
+    } catch (e) {
+      popupAjaxError(e);
+    } finally {
+      this.renaming = false;
     }
   }
 
@@ -200,6 +381,17 @@ export default class AdminQuizIndex extends Component {
           {{on "input" this.updateImportJson}}
         ></textarea>
 
+        <div class="quiz-admin-import__options">
+          <label class="quiz-admin-form__checkbox">
+            <input type="checkbox" checked={{this.dryRun}} {{on "change" this.toggleDryRun}} />
+            <span>{{i18n "discourse_quiz.admin.dry_run"}}</span>
+          </label>
+          <label class="quiz-admin-form__checkbox">
+            <input type="checkbox" checked={{this.upsert}} {{on "change" this.toggleUpsert}} />
+            <span>{{i18n "discourse_quiz.admin.upsert"}}</span>
+          </label>
+        </div>
+
         <DButton
           @label={{if this.importing "discourse_quiz.admin.importing" "discourse_quiz.admin.import_button"}}
           @action={{this.bulkImport}}
@@ -209,11 +401,20 @@ export default class AdminQuizIndex extends Component {
 
         {{#if this.importResult}}
           <p class="quiz-import-result">
-            {{i18n
-              "discourse_quiz.admin.import_result"
-              imported=this.importResult.imported
-              total=this.importResult.total
-            }}
+            {{#if this.importResult.dry_run}}
+              {{i18n
+                "discourse_quiz.admin.dry_run_result"
+                valid=this.importResult.valid
+                total=this.importResult.total
+              }}
+            {{else}}
+              {{i18n
+                "discourse_quiz.admin.import_result_full"
+                imported=this.importResult.imported
+                updated=this.importResult.updated
+                total=this.importResult.total
+              }}
+            {{/if}}
           </p>
         {{/if}}
 
@@ -241,10 +442,65 @@ export default class AdminQuizIndex extends Component {
         {{/if}}
       </section>
 
+      <section class="quiz-admin-categories">
+        <h2>{{i18n "discourse_quiz.admin.category_manage_title"}}</h2>
+        <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.category_manage_hint"}}</p>
+        <div class="quiz-admin-category-rename">
+          <label>
+            {{i18n "discourse_quiz.admin.rename_from"}}
+            <select {{on "change" this.onRenameFromChange}}>
+              <option value="" selected={{eq this.renameFrom ""}}>
+                {{i18n "discourse_quiz.admin.rename_select"}}
+              </option>
+              {{#each this.categories as |category|}}
+                <option value={{category}} selected={{eq this.renameFrom category}}>
+                  {{category}}
+                </option>
+              {{/each}}
+            </select>
+          </label>
+          <label>
+            {{i18n "discourse_quiz.admin.rename_to"}}
+            <input type="text" value={{this.renameTo}} {{on "input" this.onRenameToChange}} />
+          </label>
+          <DButton
+            @label={{if this.renaming "discourse_quiz.admin.renaming" "discourse_quiz.admin.rename_button"}}
+            @action={{this.renameCategory}}
+            @disabled={{or this.renaming (not this.renameFrom) (not this.renameTo)}}
+            class="btn-default"
+          />
+        </div>
+        {{#if this.renameResult}}
+          <p class="quiz-import-result">
+            {{i18n "discourse_quiz.admin.rename_result" count=this.renameResult.updated}}
+          </p>
+        {{/if}}
+      </section>
+
       <section class="quiz-admin-list">
         {{#if this.loadError}}
           <p class="quiz-admin-error">{{this.loadError}}</p>
         {{/if}}
+
+        <div class="quiz-admin-list__toolbar">
+          <DButton
+            @label="discourse_quiz.admin.create_button"
+            @action={{this.createQuestion}}
+            class="btn-primary"
+          />
+          <DButton
+            @label={{if this.exporting "discourse_quiz.admin.exporting" "discourse_quiz.admin.export_json"}}
+            @action={{fn this.exportQuestions "json"}}
+            @disabled={{this.exporting}}
+            class="btn-default"
+          />
+          <DButton
+            @label={{if this.exporting "discourse_quiz.admin.exporting" "discourse_quiz.admin.export_csv"}}
+            @action={{fn this.exportQuestions "csv"}}
+            @disabled={{this.exporting}}
+            class="btn-default"
+          />
+        </div>
 
         <div class="quiz-admin-filters">
           <label>
@@ -260,11 +516,44 @@ export default class AdminQuizIndex extends Component {
               {{/each}}
             </select>
           </label>
+
+          <label class="quiz-admin-search">
+            {{i18n "discourse_quiz.admin.search"}}
+            <input type="text" value={{this.searchQuery}} {{on "input" this.onSearchInput}} />
+          </label>
+          <DButton @label="discourse_quiz.admin.search_button" @action={{this.applySearch}} class="btn-default" />
+          {{#if this.searchQuery}}
+            <DButton @label="discourse_quiz.admin.clear_search" @action={{this.clearSearch}} class="btn-default" />
+          {{/if}}
+        </div>
+
+        <div class="quiz-admin-pagination">
+          <span>
+            {{i18n
+              "discourse_quiz.admin.pagination"
+              page=this.page
+              total_pages=this.totalPages
+              total=this.total
+            }}
+          </span>
+          <DButton
+            @label="discourse_quiz.admin.prev_page"
+            @action={{this.goPrevPage}}
+            @disabled={{not this.canGoPrev}}
+            class="btn-default btn-small"
+          />
+          <DButton
+            @label="discourse_quiz.admin.next_page"
+            @action={{this.goNextPage}}
+            @disabled={{not this.canGoNext}}
+            class="btn-default btn-small"
+          />
         </div>
 
         <table class="quiz-questions-table table">
           <thead>
             <tr>
+              <th>{{i18n "discourse_quiz.admin.table.id"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.category"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.question"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.active"}}</th>
@@ -274,6 +563,7 @@ export default class AdminQuizIndex extends Component {
           <tbody>
             {{#each this.questions as |question|}}
               <tr>
+                <td>{{question.id}}</td>
                 <td>{{question.category_name}}</td>
                 <td>{{question.question_text}}</td>
                 <td>{{if question.active (i18n "discourse_quiz.admin.yes") (i18n "discourse_quiz.admin.no")}}</td>

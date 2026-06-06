@@ -11,6 +11,7 @@ en:
       import_not_array: "Import payload must be a JSON array."
       import_invalid_json: "Import payload is not valid JSON."
       import_invalid_csv: "Import payload is not valid CSV."
+      category_rename_blank: "Both category names are required."
       question_not_found: "Question not found."
       invalid_answer_index: "Answer index is out of range."
       paywall_reached: "You have reached the quiz limit. Log in to continue."

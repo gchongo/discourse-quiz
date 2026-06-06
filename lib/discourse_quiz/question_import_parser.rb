@@ -43,7 +43,7 @@ module DiscourseQuiz
       hash = item.is_a?(Hash) ? item.stringify_keys : {}
       options = normalize_options(hash["options"])
 
-      {
+      item = {
         "category_name" => hash["category_name"].to_s.strip,
         "question_text" => hash["question_text"].to_s.strip,
         "options" => options,
@@ -52,12 +52,14 @@ module DiscourseQuiz
         "active" => parse_active(hash["active"], default: true),
         "position" => hash["position"].to_i,
       }
+      item["id"] = hash["id"].to_i if hash["id"].present?
+      item
     end
 
     def self.normalize_csv_row(row)
       options = normalize_options(row["options"])
 
-      {
+      item = {
         "category_name" => row["category_name"].to_s.strip,
         "question_text" => row["question_text"].to_s.strip,
         "options" => options,
@@ -65,6 +67,8 @@ module DiscourseQuiz
         "explanation" => row["explanation"].to_s.presence,
         "active" => parse_active(row["active"], default: true),
       }
+      item["id"] = row["id"].to_s.strip.to_i if row["id"].present? && row["id"].to_s.strip.present?
+      item
     end
 
     def self.normalize_options(value)

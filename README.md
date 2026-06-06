@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.7.0)
+## Current features (v0.8.0)
 
 - Quiz home screen with toggle list (multi-category selection, X-style) before starting
 - Desktop and mobile quiz panel entry with show/hide controls
@@ -17,7 +17,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Logged-in answer history in `discourse_quiz_user_attempts`
 - Gamification points for correct answers (when `discourse-gamification` is enabled)
 - Daily point cap with learning-only mode after the cap
-- Admin page with category filter, bulk JSON/CSV import, file upload, and per-row edit
+- Admin page with add/edit, search, pagination, category rename, export, dry-run import, and upsert import
 - Optional site setting `quiz_categories` to limit panel questions by category name
 
 ## Installation
@@ -63,15 +63,21 @@ Upload a `.json` or `.csv` file, or paste content into the textarea.
 Use `|` to separate multiple options in the `options` column:
 
 ```csv
-category_name,question_text,options,correct_index,explanation,active
-历史,中国历史上第一个统一的封建王朝是哪个？,夏朝|商朝|秦朝|汉朝,2,秦朝是中国历史上第一个统一的中央集权封建王朝。,true
+id,category_name,question_text,options,correct_index,explanation,active
+,历史,中国历史上第一个统一的封建王朝是哪个？,夏朝|商朝|秦朝|汉朝,2,秦朝是中国历史上第一个统一的中央集权封建王朝。,true
 ```
 
-`correct_index` is zero-based. Import failures are shown row by row in the admin UI.
+`correct_index` is zero-based. Leave `id` blank for new rows. Include `id` when using **upsert** import.
 
-### Edit an existing question
+### Admin workflows
 
-Use the pencil icon in the question table to open the edit modal. Updates keep the same question ID and answer history.
+- **Add question**: click **Add question** in the list toolbar
+- **Edit question**: pencil icon in the table (keeps the same question ID)
+- **Export**: export JSON/CSV for the current filter/search
+- **Dry run**: validate import without writing to the database
+- **Upsert**: update existing rows when `id` is present
+- **Rename category**: rename a category across all questions in the bank
+- **Search / pagination**: find questions by text or category in large banks
 
 ## Testing
 
@@ -162,9 +168,12 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | GET | `/quiz/next.json` | Random active question; optional `category_names[]` filter |
 | GET | `/quiz/status.json` | Current guest/login quiz status |
 | POST | `/quiz/submit.json` | Submit `question_id` + `answer_index`, returns result |
-| GET | `/admin/quiz/questions.json` | Admin question list |
+| GET | `/admin/quiz/questions.json` | Admin question list (`page`, `per_page`, `q`, `category_name`) |
+| GET | `/admin/quiz/questions/export.json` | Export JSON or CSV (`export_format`) |
+| POST | `/admin/quiz/questions.json` | Create one question |
 | PUT | `/admin/quiz/questions/:id.json` | Update one question |
-| POST | `/admin/quiz/questions/bulk_import.json` | Bulk import JSON or CSV (`import_format`) |
+| PUT | `/admin/quiz/categories/rename.json` | Rename a category across the bank |
+| POST | `/admin/quiz/questions/bulk_import.json` | Bulk import JSON or CSV (`import_format`, `dry_run`, `upsert`) |
 
 ## Gamification
 
@@ -175,4 +184,6 @@ Install and enable the official `discourse-gamification` plugin, then set:
 
 ## Next steps
 
-- v0.6.0: Source topic audit job (`source_topic_id`, scheduled validation)
+- Phase B: wrong-answer practice mode, fewer repeated correct answers, panel stats
+- Phase C: admin analytics and user attempt history
+- Later: v0.6 source topic audit (`source_topic_id`, scheduled validation)
