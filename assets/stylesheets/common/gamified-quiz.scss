@@ -537,12 +537,22 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
   }
 
   .quiz-result-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75em;
     padding: 0.75em 1em;
     border-radius: var(--d-border-radius);
+    margin-top: 1em;
     margin-bottom: 1em;
     font-weight: 600;
-    overflow-wrap: anywhere;
-    word-break: break-word;
+
+    &__message {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
 
     &.is-correct {
       background: var(--success-low);
@@ -570,7 +580,7 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
   }
 
   .quiz-explanation {
-    margin-top: 1em;
+    margin-top: 0;
     padding: 0.75em;
     border-radius: var(--d-border-radius);
     background: var(--primary-very-low);
@@ -599,9 +609,11 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
   }
 
   .quiz-points-earned {
-    margin: 0 0 0.75em;
+    flex: 0 0 auto;
+    margin: 0;
     font-weight: 600;
     color: var(--success);
+    white-space: nowrap;
   }
 
   .quiz-status-hint {

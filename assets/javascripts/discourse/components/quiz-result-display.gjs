@@ -69,22 +69,6 @@ export default class QuizResultDisplay extends Component {
   <template>
     {{#if this.result}}
       <div class="quiz-result-display">
-        <div
-          class="quiz-result-banner {{if this.result.correct 'is-correct' 'is-incorrect'}}"
-        >
-          {{#if this.result.correct}}
-            {{i18n "discourse_quiz.correct"}}
-          {{else}}
-            {{this.incorrectMessage}}
-          {{/if}}
-        </div>
-
-        {{#if this.result.points_awarded}}
-          <p class="quiz-points-earned">
-            {{i18n "discourse_quiz.points_earned" count=this.result.points_awarded}}
-          </p>
-        {{/if}}
-
         {{#if this.quiz.isLearningOnly}}
           <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
         {{/if}}
@@ -117,6 +101,23 @@ export default class QuizResultDisplay extends Component {
             {{/if}}
           </ul>
         {{/if}}
+
+        <div
+          class="quiz-result-banner {{if this.result.correct 'is-correct' 'is-incorrect'}}"
+        >
+          <span class="quiz-result-banner__message">
+            {{#if this.result.correct}}
+              {{i18n "discourse_quiz.correct"}}
+            {{else}}
+              {{this.incorrectMessage}}
+            {{/if}}
+          </span>
+          {{#if this.result.points_awarded}}
+            <span class="quiz-points-earned">
+              {{i18n "discourse_quiz.points_earned" count=this.result.points_awarded}}
+            </span>
+          {{/if}}
+        </div>
 
         {{#if this.result.explanation}}
           <div class="quiz-explanation">
