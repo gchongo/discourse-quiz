@@ -42,8 +42,6 @@ export default class QuizService extends Service {
   @tracked paywallActive = false;
   @tracked errorMessage = null;
   @tracked practiceMode = "normal";
-  @tracked sessionCorrect = 0;
-  @tracked sessionIncorrect = 0;
 
   get isEnabled() {
     return this.siteSettings.quiz_plugin_enabled;
@@ -93,10 +91,6 @@ export default class QuizService extends Service {
 
   get canUsePracticeModes() {
     return Boolean(this.currentUser);
-  }
-
-  get hasSessionStats() {
-    return this.sessionCorrect > 0 || this.sessionIncorrect > 0;
   }
 
   get selectedSummary() {
@@ -382,8 +376,6 @@ export default class QuizService extends Service {
     this.submittedAnswerIndex = null;
     this.errorMessage = null;
     this.paywallActive = false;
-    this.sessionCorrect = 0;
-    this.sessionIncorrect = 0;
 
     await this.loadHome();
   }
@@ -499,12 +491,6 @@ export default class QuizService extends Service {
       });
       this.answerResult = result;
       this.quizStatus = result.status || this.quizStatus;
-
-      if (result.correct) {
-        this.sessionCorrect += 1;
-      } else {
-        this.sessionIncorrect += 1;
-      }
     } catch (e) {
       this.answerResult = null;
       this.submittedAnswerIndex = null;

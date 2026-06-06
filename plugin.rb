@@ -2,7 +2,7 @@
 
 # name: discourse-quiz
 # about: Quiz panel with question bank for Discourse.
-# version: 0.9.0
+# version: 0.9.1
 # authors: howhy.day
 # url: https://github.com/howhy-day/discourse-quiz
 
@@ -23,8 +23,21 @@ require_relative "lib/discourse_quiz/question_import_parser"
 require_relative "lib/discourse_quiz/question_exporter"
 require_relative "lib/discourse_quiz/quiz_question_picker"
 require_relative "lib/discourse_quiz/quiz_stats_service"
+require_relative "lib/discourse_quiz/user_summary_extension"
 
 after_initialize do
+
+  ::UserSummary.prepend(DiscourseQuiz::UserSummaryExtension)
+
+  add_to_serializer(
+    :user_summary,
+    :quiz_summary_stats,
+    include_condition: -> do
+      SiteSetting.quiz_plugin_enabled && scope.user&.id == object.user_id &&
+        DiscourseQuiz::QuizUserAttempt.table_ready?
+    end,
+  ) { object.quiz_summary_stats }
+
   add_admin_route(
     "discourse_quiz.admin.title",
     "discourse-quiz",

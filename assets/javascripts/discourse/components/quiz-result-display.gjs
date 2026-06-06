@@ -48,16 +48,6 @@ export default class QuizResultDisplay extends Component {
           <p class="quiz-status-hint">{{i18n "discourse_quiz.learning_only"}}</p>
         {{/if}}
 
-        {{#if this.quiz.hasSessionStats}}
-          <p class="quiz-status-hint">
-            {{i18n
-              "discourse_quiz.session_stats"
-              correct=this.quiz.sessionCorrect
-              incorrect=this.quiz.sessionIncorrect
-            }}
-          </p>
-        {{/if}}
-
         {{#if this.question.options}}
           <ul class="quiz-options-list">
             {{#each this.question.options as |option index|}}

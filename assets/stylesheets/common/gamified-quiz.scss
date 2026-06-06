@@ -259,18 +259,6 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     }
   }
 
-  .quiz-home-stats {
-    margin-bottom: 0.75em;
-
-    p {
-      margin: 0 0 0.25em;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-  }
-
   .quiz-home-list {
     flex: 1 1 auto;
     min-height: 0;

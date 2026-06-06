@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.9.0)
+## Current features (v0.9.1)
 
 - Quiz home screen with toggle list (multi-category selection, X-style) before starting
 - Desktop and mobile quiz panel entry with show/hide controls
@@ -20,7 +20,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Admin page with add/edit, search, pagination, category rename, export, dry-run import, and upsert import
 - Optional site setting `quiz_categories` to limit panel questions by category name
 - Practice modes (logged-in): random, wrong-answer review, unseen questions
-- Panel stats: today correct/wrong, wrong-pending count, unseen count, session summary
+- User summary stats (own profile only at `/u/:username/summary`): today correct/wrong and wrong-pending count
 
 ## Installation
 

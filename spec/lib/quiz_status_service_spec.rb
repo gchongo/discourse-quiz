@@ -48,11 +48,9 @@ describe DiscourseQuiz::QuizStatusService do
       expect(status[:daily_max_reached]).to eq(true)
     end
 
-    it "includes practice stats" do
+    it "does not include panel stats" do
       status = described_class.new(user, 0).get_status
-      expect(status[:stats]).to be_present
-      expect(status[:stats]).to have_key(:wrong_pending)
-      expect(status[:stats]).to have_key(:unseen_pending)
+      expect(status).not_to have_key(:stats)
     end
   end
 end

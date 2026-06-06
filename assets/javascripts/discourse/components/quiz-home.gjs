@@ -61,34 +61,6 @@ export default class QuizHome extends Component {
         {{/unless}}
       </div>
 
-      {{#if this.quiz.quizStatus.stats}}
-        <div class="quiz-home-stats">
-          <p class="quiz-status-hint">
-            {{i18n
-              "discourse_quiz.home_stats_today"
-              correct=this.quiz.quizStatus.stats.today_correct
-              incorrect=this.quiz.quizStatus.stats.today_incorrect
-            }}
-          </p>
-          {{#if this.quiz.quizStatus.stats.wrong_pending}}
-            <p class="quiz-status-hint">
-              {{i18n
-                "discourse_quiz.home_stats_wrong_pending"
-                count=this.quiz.quizStatus.stats.wrong_pending
-              }}
-            </p>
-          {{/if}}
-          {{#if this.quiz.quizStatus.stats.unseen_pending}}
-            <p class="quiz-status-hint">
-              {{i18n
-                "discourse_quiz.home_stats_unseen_pending"
-                count=this.quiz.quizStatus.stats.unseen_pending
-              }}
-            </p>
-          {{/if}}
-        </div>
-      {{/if}}
-
       <div class="quiz-home-list">
         <div class="quiz-category-row">
           <span class="quiz-category-row__label">
