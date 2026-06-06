@@ -6,6 +6,8 @@ import { i18n } from "discourse-i18n";
 
 const DOCK_PREF_KEY = "discourse-quiz-docked";
 const POSITION_PREF_KEY = "discourse-quiz-panel-position";
+const MODE_PREF_KEY = "discourse-quiz-practice-mode";
+const PRACTICE_MODES = ["normal", "wrong_only", "unseen"];
 const NARROW_BREAKPOINT = 1100;
 const PANEL_WIDTH = 300;
 const HTML_CLASS_VISIBLE = "has-quiz-panel";
@@ -39,6 +41,9 @@ export default class QuizService extends Service {
   @tracked quizStatus = null;
   @tracked paywallActive = false;
   @tracked errorMessage = null;
+  @tracked practiceMode = "normal";
+  @tracked sessionCorrect = 0;
+  @tracked sessionIncorrect = 0;
 
   get isEnabled() {
     return this.siteSettings.quiz_plugin_enabled;
@@ -84,6 +89,14 @@ export default class QuizService extends Service {
 
   get canStart() {
     return this.selectAllMode || this.selectedCategories.length > 0;
+  }
+
+  get canUsePracticeModes() {
+    return Boolean(this.currentUser);
+  }
+
+  get hasSessionStats() {
+    return this.sessionCorrect > 0 || this.sessionIncorrect > 0;
   }
 
   get selectedSummary() {
@@ -161,6 +174,7 @@ export default class QuizService extends Service {
 
     this.loadDockPreference();
     this.loadPositionPreference();
+    this.loadPracticeModePreference();
     this._resizeHandler = () => this.handleViewportResize();
     window.addEventListener("resize", this._resizeHandler, { passive: true });
     this.handleViewportResize();
@@ -368,8 +382,24 @@ export default class QuizService extends Service {
     this.submittedAnswerIndex = null;
     this.errorMessage = null;
     this.paywallActive = false;
+    this.sessionCorrect = 0;
+    this.sessionIncorrect = 0;
 
     await this.loadHome();
+  }
+
+  @action
+  setPracticeMode(mode) {
+    if (!PRACTICE_MODES.includes(mode)) {
+      return;
+    }
+
+    if (mode !== "normal" && !this.canUsePracticeModes) {
+      return;
+    }
+
+    this.practiceMode = mode;
+    this.savePracticeModePreference();
   }
 
   @action
@@ -422,14 +452,25 @@ export default class QuizService extends Service {
       this.currentQuestion = null;
       const status = e?.jqXHR?.responseJSON?.status;
 
-      if (e?.jqXHR?.status === 403 && status) {
-        this.quizStatus = status;
+      const errorCode = e?.jqXHR?.responseJSON?.error_code;
+
+      if (e?.jqXHR?.status === 403) {
+        if (status) {
+          this.quizStatus = status;
+        }
+
+        if (errorCode === "practice_mode_requires_login") {
+          this.errorMessage = i18n("discourse_quiz.practice_mode_requires_login");
+          this.panelPhase = "home";
+          return;
+        }
+
         this.paywallActive = true;
         return;
       }
 
       if (e?.jqXHR?.status === 404) {
-        this.errorMessage = i18n("discourse_quiz.no_questions_in_range");
+        this.errorMessage = this.emptyRangeMessage(errorCode);
       } else {
         this.errorMessage = i18n("discourse_quiz.load_error");
       }
@@ -458,6 +499,12 @@ export default class QuizService extends Service {
       });
       this.answerResult = result;
       this.quizStatus = result.status || this.quizStatus;
+
+      if (result.correct) {
+        this.sessionCorrect += 1;
+      } else {
+        this.sessionIncorrect += 1;
+      }
     } catch (e) {
       this.answerResult = null;
       this.submittedAnswerIndex = null;
@@ -474,17 +521,51 @@ export default class QuizService extends Service {
   }
 
   buildNextUrl() {
-    const filters = this.effectiveCategoryFilters();
+    const params = new URLSearchParams();
 
-    if (filters.length === 0) {
-      return "/quiz/next.json";
+    if (this.practiceMode !== "normal") {
+      params.set("practice_mode", this.practiceMode);
     }
 
-    const query = filters
-      .map((name) => `category_names[]=${encodeURIComponent(name)}`)
-      .join("&");
+    this.effectiveCategoryFilters().forEach((name) => {
+      params.append("category_names[]", name);
+    });
 
-    return `/quiz/next.json?${query}`;
+    const query = params.toString();
+    return query ? `/quiz/next.json?${query}` : "/quiz/next.json";
+  }
+
+  emptyRangeMessage(errorCode) {
+    switch (errorCode) {
+      case "no_wrong_questions":
+        return i18n("discourse_quiz.no_wrong_questions");
+      case "no_unseen_questions":
+        return i18n("discourse_quiz.no_unseen_questions");
+      default:
+        return i18n("discourse_quiz.no_questions_in_range");
+    }
+  }
+
+  loadPracticeModePreference() {
+    try {
+      const stored = localStorage.getItem(MODE_PREF_KEY);
+
+      if (PRACTICE_MODES.includes(stored)) {
+        if (stored === "normal" || this.canUsePracticeModes) {
+          this.practiceMode = stored;
+        }
+      }
+    } catch {
+      // localStorage may be unavailable
+    }
+  }
+
+  savePracticeModePreference() {
+    try {
+      localStorage.setItem(MODE_PREF_KEY, this.practiceMode);
+    } catch {
+      // localStorage may be unavailable
+    }
   }
 
   effectiveCategoryFilters() {

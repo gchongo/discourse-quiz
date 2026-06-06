@@ -2,7 +2,8 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
 import { on } from "@ember/modifier";
-import { not, or } from "discourse/truth-helpers";
+import { eq, not, or } from "discourse/truth-helpers";
+import { fn } from "@ember/helper";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
 import DToggleSwitch from "discourse/ui-kit/d-toggle-switch";
@@ -27,6 +28,66 @@ export default class QuizHome extends Component {
         <h2 class="quiz-home-title">{{i18n "discourse_quiz.home_title"}}</h2>
         <p class="quiz-home-subtitle">{{i18n "discourse_quiz.home_subtitle"}}</p>
       </div>
+
+      <div class="quiz-home-modes">
+        <span class="quiz-home-modes__label">{{i18n "discourse_quiz.home_practice_mode"}}</span>
+        <div class="quiz-home-modes__buttons" role="group">
+          <button
+            type="button"
+            class="btn btn-default quiz-home-mode-btn {{if (eq this.quiz.practiceMode 'normal') 'active'}}"
+            {{on "click" (fn this.quiz.setPracticeMode "normal")}}
+          >
+            {{i18n "discourse_quiz.home_mode_normal"}}
+          </button>
+          <button
+            type="button"
+            class="btn btn-default quiz-home-mode-btn {{if (eq this.quiz.practiceMode 'wrong_only') 'active'}}"
+            {{on "click" (fn this.quiz.setPracticeMode "wrong_only")}}
+            disabled={{not this.quiz.canUsePracticeModes}}
+          >
+            {{i18n "discourse_quiz.home_mode_wrong_only"}}
+          </button>
+          <button
+            type="button"
+            class="btn btn-default quiz-home-mode-btn {{if (eq this.quiz.practiceMode 'unseen') 'active'}}"
+            {{on "click" (fn this.quiz.setPracticeMode "unseen")}}
+            disabled={{not this.quiz.canUsePracticeModes}}
+          >
+            {{i18n "discourse_quiz.home_mode_unseen"}}
+          </button>
+        </div>
+        {{#unless this.quiz.canUsePracticeModes}}
+          <p class="quiz-status-hint">{{i18n "discourse_quiz.home_mode_login_hint"}}</p>
+        {{/unless}}
+      </div>
+
+      {{#if this.quiz.quizStatus.stats}}
+        <div class="quiz-home-stats">
+          <p class="quiz-status-hint">
+            {{i18n
+              "discourse_quiz.home_stats_today"
+              correct=this.quiz.quizStatus.stats.today_correct
+              incorrect=this.quiz.quizStatus.stats.today_incorrect
+            }}
+          </p>
+          {{#if this.quiz.quizStatus.stats.wrong_pending}}
+            <p class="quiz-status-hint">
+              {{i18n
+                "discourse_quiz.home_stats_wrong_pending"
+                count=this.quiz.quizStatus.stats.wrong_pending
+              }}
+            </p>
+          {{/if}}
+          {{#if this.quiz.quizStatus.stats.unseen_pending}}
+            <p class="quiz-status-hint">
+              {{i18n
+                "discourse_quiz.home_stats_unseen_pending"
+                count=this.quiz.quizStatus.stats.unseen_pending
+              }}
+            </p>
+          {{/if}}
+        </div>
+      {{/if}}
 
       <div class="quiz-home-list">
         <div class="quiz-category-row">

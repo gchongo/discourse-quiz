@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.8.3)
+## Current features (v0.9.0)
 
 - Quiz home screen with toggle list (multi-category selection, X-style) before starting
 - Desktop and mobile quiz panel entry with show/hide controls
@@ -19,6 +19,8 @@ Discourse quiz plugin with a dedicated question bank.
 - Daily point cap with learning-only mode after the cap
 - Admin page with add/edit, search, pagination, category rename, export, dry-run import, and upsert import
 - Optional site setting `quiz_categories` to limit panel questions by category name
+- Practice modes (logged-in): random, wrong-answer review, unseen questions
+- Panel stats: today correct/wrong, wrong-pending count, unseen count, session summary
 
 ## Installation
 
@@ -165,7 +167,7 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/quiz/categories.json` | Active categories for the home screen + status |
-| GET | `/quiz/next.json` | Random active question; optional `category_names[]` filter |
+| GET | `/quiz/next.json` | Random active question; optional `category_names[]`, `practice_mode` (`normal`, `wrong_only`, `unseen`) |
 | GET | `/quiz/status.json` | Current guest/login quiz status |
 | POST | `/quiz/submit.json` | Submit `question_id` + `answer_index`, returns result |
 | GET | `/admin/quiz/questions.json` | Admin question list (`page`, `per_page`, `q`, `category_name`) |
@@ -184,6 +186,6 @@ Install and enable the official `discourse-gamification` plugin, then set:
 
 ## Next steps
 
-- Phase B: wrong-answer practice mode, fewer repeated correct answers, panel stats
+- Phase B (remaining): session de-duplication, down-weight recently correct questions
 - Phase C: admin analytics and user attempt history
 - Later: v0.6 source topic audit (`source_topic_id`, scheduled validation)

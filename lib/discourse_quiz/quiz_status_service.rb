@@ -28,7 +28,21 @@ module DiscourseQuiz
         daily_max: daily_max,
         daily_max_reached: daily_max_reached,
         mode: daily_max_reached ? "learning_only" : "normal",
+        stats: quiz_stats,
       }
+    end
+
+    def quiz_stats
+      QuizStatsService.new(@user).summary(
+        category_names: category_allowlist,
+      )
+    end
+
+    def category_allowlist
+      setting = SiteSetting.quiz_categories.to_s.strip
+      return [] if setting.blank?
+
+      setting.split(",").map(&:strip).reject(&:blank?)
     end
 
     def guest_status

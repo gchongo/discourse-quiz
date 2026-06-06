@@ -59,6 +59,52 @@ describe DiscourseQuiz::QuizController do
       expect(response.status).to eq(403)
       expect(response.parsed_body["status"]["mode"]).to eq("paywall")
     end
+
+    it "requires login for wrong_only practice mode" do
+      get "/quiz/next.json", params: { practice_mode: "wrong_only" }
+      expect(response.status).to eq(403)
+      expect(response.parsed_body["error_code"]).to eq("practice_mode_requires_login")
+    end
+
+    it "returns wrong-only questions for logged in users" do
+      sign_in(user)
+
+      DiscourseQuiz::QuizUserAttempt.create!(
+        user_id: user.id,
+        question_id: question.id,
+        answer_index: 0,
+        is_correct: false,
+        created_at: Time.zone.now,
+      )
+
+      get "/quiz/next.json", params: { practice_mode: "wrong_only" }
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["id"]).to eq(question.id)
+    end
+
+    it "returns unseen questions for logged in users" do
+      sign_in(user)
+
+      other =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "体育",
+          question_text: "Marathon?",
+          options: %w[A B],
+          correct_index: 0,
+        )
+
+      DiscourseQuiz::QuizUserAttempt.create!(
+        user_id: user.id,
+        question_id: question.id,
+        answer_index: 1,
+        is_correct: true,
+        created_at: Time.zone.now,
+      )
+
+      get "/quiz/next.json", params: { practice_mode: "unseen" }
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["id"]).to eq(other.id)
+    end
   end
 
   describe "GET /quiz/status" do

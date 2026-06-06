@@ -17,12 +17,18 @@ module DiscourseQuiz
         )
       end
 
-      question = QuizQuestion.pick_random(category_names: effective_category_filters)
+      picker = build_question_picker
+      return if performed?
+
+      question = picker.pick
 
       unless question
         return(
           render_json_dump(
-            { error: I18n.t("discourse_quiz.errors.no_active_questions") },
+            {
+              error: empty_questions_message(picker.empty_reason),
+              error_code: picker.empty_reason || :no_active_questions,
+            },
             status: 404,
           )
         )
@@ -186,6 +192,47 @@ module DiscourseQuiz
         available = QuizQuestion.active_category_names
         names.select { |name| available.include?(name) }
       end
+    end
+
+    def build_question_picker
+      practice_mode = normalized_practice_mode
+
+      if practice_mode != "normal" && current_user.nil?
+        render_json_dump(
+          {
+            error: I18n.t("discourse_quiz.errors.practice_mode_requires_login"),
+            error_code: :practice_mode_requires_login,
+            status: quiz_status,
+          },
+          status: 403,
+        )
+        return nil
+      end
+
+      QuizQuestionPicker.new(
+        user: current_user,
+        category_names: effective_category_filters,
+        practice_mode: practice_mode,
+      )
+    end
+
+    def normalized_practice_mode
+      mode = params[:practice_mode].to_s
+      QuizQuestionPicker::MODES.include?(mode) ? mode : "normal"
+    end
+
+    def empty_questions_message(reason)
+      key =
+        case reason
+        when :no_wrong_questions
+          "discourse_quiz.errors.no_wrong_questions"
+        when :no_unseen_questions
+          "discourse_quiz.errors.no_unseen_questions"
+        else
+          "discourse_quiz.errors.no_active_questions"
+        end
+
+      I18n.t(key)
     end
   end
 end

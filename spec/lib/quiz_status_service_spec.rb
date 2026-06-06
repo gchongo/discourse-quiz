@@ -47,5 +47,12 @@ describe DiscourseQuiz::QuizStatusService do
       expect(status[:mode]).to eq("learning_only")
       expect(status[:daily_max_reached]).to eq(true)
     end
+
+    it "includes practice stats" do
+      status = described_class.new(user, 0).get_status
+      expect(status[:stats]).to be_present
+      expect(status[:stats]).to have_key(:wrong_pending)
+      expect(status[:stats]).to have_key(:unseen_pending)
+    end
   end
 end
