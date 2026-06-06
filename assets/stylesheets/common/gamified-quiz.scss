@@ -269,6 +269,18 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
     margin-bottom: 1em;
   }
 
+  .quiz-home-learning-notice {
+    margin: 0;
+    padding: 0.65em 0.75em;
+    text-align: center;
+    font-size: var(--font-down-1);
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--highlight);
+    background: var(--highlight-low);
+    border-radius: var(--d-border-radius);
+  }
+
   .quiz-home-categories {
     flex: 0 0 auto;
     display: flex;
