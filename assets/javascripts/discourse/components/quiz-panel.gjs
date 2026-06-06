@@ -45,14 +45,14 @@ export default class QuizPanel extends Component {
               />
             {{else}}
               <DButton
-                @icon={{if this.quiz.isDocked "external-link-alt" "columns"}}
+                @icon={{if this.quiz.isDocked "up-right-from-square" "table-columns"}}
                 @action={{this.quiz.toggleDock}}
                 @title={{if this.quiz.isDocked "gamified_quiz.undock_panel" "gamified_quiz.dock_panel"}}
                 class="btn-default quiz-panel-control-btn"
               />
             {{/if}}
             <DButton
-              @icon="times"
+              @icon="xmark"
               @action={{this.quiz.closePanel}}
               @title="gamified_quiz.close_panel"
               class="btn-default quiz-panel-control-btn quiz-panel-close-btn"

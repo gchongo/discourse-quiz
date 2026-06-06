@@ -17,7 +17,7 @@ export default class QuizButton extends Component {
           class={{dConcatClass "icon" "btn-flat" (if this.quiz.panelVisible "active")}}
           title={{i18n "gamified_quiz.button_title"}}
         >
-          {{~dIcon "question-circle"~}}
+          {{~dIcon "circle-question"~}}
         </DButton>
       </li>
     {{/if}}

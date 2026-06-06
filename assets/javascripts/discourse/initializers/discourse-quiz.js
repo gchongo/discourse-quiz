@@ -36,7 +36,7 @@ export default {
           }
 
           get defaultPrefixValue() {
-            return "question-circle";
+            return "circle-question";
           }
         };
       });
