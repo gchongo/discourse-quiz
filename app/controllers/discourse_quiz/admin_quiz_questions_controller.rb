@@ -123,6 +123,7 @@ module DiscourseQuiz
     def filtered_questions_scope
       scope = QuizQuestion.ordered_for_admin
       scope = scope.by_category(params[:category_name]) if params[:category_name].present?
+      scope = scope.by_question_type(params[:question_type]) if params[:question_type].present?
       scope = scope.search_query(params[:q]) if params[:q].present?
       scope
     end

@@ -108,6 +108,8 @@ en:
         rename_result: "%{count} questions updated."
         category_filter: "Category"
         all_categories: "All categories"
+        question_type_filter: "Question type"
+        all_question_types: "All types"
         confirm_delete: "Delete this question?"
         yes: "Yes"
         no: "No"
@@ -132,6 +134,7 @@ en:
         table:
           id: "ID"
           category: "Category"
+          question_type: "Type"
           question: "Question"
           active: "Active"
           actions: "Actions"

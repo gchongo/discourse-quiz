@@ -108,6 +108,8 @@ zh_CN:
         rename_result: "已更新 %{count} 道题目。"
         category_filter: "题目分类"
         all_categories: "全部分类"
+        question_type_filter: "题型"
+        all_question_types: "全部题型"
         confirm_delete: "确定删除这道题目吗？"
         yes: "是"
         no: "否"
@@ -132,6 +134,7 @@ zh_CN:
         table:
           id: "ID"
           category: "分类"
+          question_type: "题型"
           question: "题目"
           active: "启用"
           actions: "操作"

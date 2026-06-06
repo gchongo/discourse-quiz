@@ -50,6 +50,7 @@ export default class AdminQuizIndex extends Component {
   @tracked questions = [];
   @tracked categories = [];
   @tracked selectedCategory = "";
+  @tracked selectedQuestionType = "";
   @tracked searchQuery = "";
   @tracked page = 1;
   @tracked total = 0;
@@ -94,6 +95,10 @@ export default class AdminQuizIndex extends Component {
       params.set("category_name", this.selectedCategory);
     }
 
+    if (this.selectedQuestionType) {
+      params.set("question_type", this.selectedQuestionType);
+    }
+
     if (this.searchQuery.trim()) {
       params.set("q", this.searchQuery.trim());
     }
@@ -107,6 +112,10 @@ export default class AdminQuizIndex extends Component {
 
     if (this.selectedCategory) {
       params.set("category_name", this.selectedCategory);
+    }
+
+    if (this.selectedQuestionType) {
+      params.set("question_type", this.selectedQuestionType);
     }
 
     if (this.searchQuery.trim()) {
@@ -141,6 +150,13 @@ export default class AdminQuizIndex extends Component {
   @action
   onCategoryChange(event) {
     this.selectedCategory = event.target.value;
+    this.page = 1;
+    this.loadQuestions();
+  }
+
+  @action
+  onQuestionTypeChange(event) {
+    this.selectedQuestionType = event.target.value;
     this.page = 1;
     this.loadQuestions();
   }
@@ -545,6 +561,30 @@ export default class AdminQuizIndex extends Component {
             </select>
           </div>
 
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-question-type-filter">
+              {{i18n "discourse_quiz.admin.question_type_filter"}}
+            </label>
+            <select
+              id="quiz-question-type-filter"
+              class="quiz-admin-field__control"
+              {{on "change" this.onQuestionTypeChange}}
+            >
+              <option value="" selected={{eq this.selectedQuestionType ""}}>
+                {{i18n "discourse_quiz.admin.all_question_types"}}
+              </option>
+              <option value="single_choice" selected={{eq this.selectedQuestionType "single_choice"}}>
+                {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
+              </option>
+              <option value="true_false" selected={{eq this.selectedQuestionType "true_false"}}>
+                {{i18n "discourse_quiz.admin.form.question_types.true_false"}}
+              </option>
+              <option value="multiple_choice" selected={{eq this.selectedQuestionType "multiple_choice"}}>
+                {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
+              </option>
+            </select>
+          </div>
+
           <div class="quiz-admin-field quiz-admin-field--grow">
             <label class="quiz-admin-field__label" for="quiz-search-query">
               {{i18n "discourse_quiz.admin.search"}}
@@ -594,6 +634,7 @@ export default class AdminQuizIndex extends Component {
             <tr>
               <th>{{i18n "discourse_quiz.admin.table.id"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.category"}}</th>
+              <th>{{i18n "discourse_quiz.admin.table.question_type"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.question"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.active"}}</th>
               <th>{{i18n "discourse_quiz.admin.table.actions"}}</th>
@@ -604,8 +645,23 @@ export default class AdminQuizIndex extends Component {
               <tr>
                 <td>{{question.id}}</td>
                 <td>{{question.category_name}}</td>
+                <td>
+                  {{#if (eq question.question_type "multiple_choice")}}
+                    {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
+                  {{else if (eq question.question_type "true_false")}}
+                    {{i18n "discourse_quiz.admin.form.question_types.true_false"}}
+                  {{else}}
+                    {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
+                  {{/if}}
+                </td>
                 <td>{{question.question_text}}</td>
-                <td>{{if question.active (i18n "discourse_quiz.admin.yes") (i18n "discourse_quiz.admin.no")}}</td>
+                <td>
+                  {{#if question.active}}
+                    {{i18n "discourse_quiz.admin.yes"}}
+                  {{else}}
+                    {{i18n "discourse_quiz.admin.no"}}
+                  {{/if}}
+                </td>
                 <td class="quiz-admin-actions">
                   <DButton
                     @icon="pencil"

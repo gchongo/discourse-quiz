@@ -193,6 +193,30 @@ describe DiscourseQuiz::AdminQuizQuestionsController do
       expect(response.parsed_body["questions"].length).to eq(1)
       expect(response.parsed_body["questions"].first["question_text"]).to include("苹果")
     end
+
+    it "filters by question_type" do
+      single =
+        DiscourseQuiz::QuizQuestion.create!(
+          category_name: "历史",
+          question_text: "单选题",
+          question_type: "single_choice",
+          options: %w[A B],
+          correct_index: 0,
+        )
+
+      DiscourseQuiz::QuizQuestion.create!(
+        category_name: "历史",
+        question_text: "多选题",
+        question_type: "multiple_choice",
+        options: %w[A B C],
+        correct_index: 0,
+        correct_indices: [0, 1],
+      )
+
+      get "/admin/quiz/questions.json", params: { question_type: "single_choice" }
+      expect(response.parsed_body["questions"].length).to eq(1)
+      expect(response.parsed_body["questions"].first["id"]).to eq(single.id)
+    end
   end
 
   describe "GET /admin/quiz/questions/export" do

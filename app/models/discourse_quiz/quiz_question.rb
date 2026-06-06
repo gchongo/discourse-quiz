@@ -17,6 +17,12 @@ module DiscourseQuiz
 
     scope :active, -> { where(active: true) }
     scope :by_category, ->(name) { where(category_name: name) if name.present? }
+    scope :by_question_type,
+          ->(type) {
+            if type.present? && question_type_column? && QuestionTypes::ALL.include?(type.to_s)
+              where(question_type: type.to_s)
+            end
+          }
     scope :search_query,
           ->(query) {
             if query.present?
