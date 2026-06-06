@@ -25,7 +25,6 @@ export default class QuizHome extends Component {
   <template>
     <div class="quiz-home">
       <div class="quiz-home-header">
-        <h2 class="quiz-home-title">{{i18n "discourse_quiz.home_title"}}</h2>
         <p class="quiz-home-subtitle">{{i18n "discourse_quiz.home_subtitle"}}</p>
       </div>
 
@@ -59,7 +58,7 @@ export default class QuizHome extends Component {
 
       <div class="quiz-home-modes">
         <span class="quiz-home-modes__label">{{i18n "discourse_quiz.home_practice_mode"}}</span>
-        <div class="quiz-home-modes__buttons" role="group">
+        <div class="quiz-home-modes__buttons quiz-home-modes__buttons--nowrap" role="group">
           <button
             type="button"
             class="btn btn-default quiz-home-mode-btn {{if (eq this.quiz.practiceMode 'normal') 'active'}}"

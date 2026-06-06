@@ -119,6 +119,22 @@ export default class QuizQuestionEditModal extends Component {
     }));
   }
 
+  get singleChoiceAnswerOptions() {
+    return this.parsedOptions.map((option, index) => ({
+      option,
+      index,
+      selected: this.correctIndex === index,
+    }));
+  }
+
+  get trueFalseAnswerOptions() {
+    return this.trueFalseOptions.map((option, index) => ({
+      option,
+      index,
+      selected: this.correctIndex === index,
+    }));
+  }
+
   @action
   updateCategory(event) {
     this.categoryName = event.target.value;
@@ -321,17 +337,18 @@ export default class QuizQuestionEditModal extends Component {
           {{#if this.isTrueFalse}}
             <div class="quiz-admin-form__field">
               <span>{{i18n "discourse_quiz.admin.form.correct_answer"}}</span>
+              <p class="quiz-admin-form__hint">
+                {{i18n "discourse_quiz.admin.form.correct_answer_hint"}}
+              </p>
               <div class="quiz-admin-form__answers">
-                {{#each this.trueFalseOptions as |option index|}}
-                  <label class="quiz-admin-form__radio">
-                    <input
-                      type="radio"
-                      name="quiz-correct-index"
-                      checked={{eq this.correctIndex index}}
-                      {{on "change" (fn this.selectCorrectIndex index)}}
-                    />
-                    <span>{{option}}</span>
-                  </label>
+                {{#each this.trueFalseAnswerOptions as |entry|}}
+                  <button
+                    type="button"
+                    class="btn btn-default quiz-admin-answer-btn {{if entry.selected 'is-selected'}}"
+                    {{on "click" (fn this.selectCorrectIndex entry.index)}}
+                  >
+                    {{entry.option}}
+                  </button>
                 {{/each}}
               </div>
             </div>
@@ -362,17 +379,18 @@ export default class QuizQuestionEditModal extends Component {
           {{else if this.parsedOptions.length}}
             <div class="quiz-admin-form__field">
               <span>{{i18n "discourse_quiz.admin.form.correct_answer"}}</span>
+              <p class="quiz-admin-form__hint">
+                {{i18n "discourse_quiz.admin.form.correct_answer_hint"}}
+              </p>
               <div class="quiz-admin-form__answers">
-                {{#each this.parsedOptions as |option index|}}
-                  <label class="quiz-admin-form__radio">
-                    <input
-                      type="radio"
-                      name="quiz-correct-index"
-                      checked={{eq this.correctIndex index}}
-                      {{on "change" (fn this.selectCorrectIndex index)}}
-                    />
-                    <span>{{option}}</span>
-                  </label>
+                {{#each this.singleChoiceAnswerOptions as |entry|}}
+                  <button
+                    type="button"
+                    class="btn btn-default quiz-admin-answer-btn {{if entry.selected 'is-selected'}}"
+                    {{on "click" (fn this.selectCorrectIndex entry.index)}}
+                  >
+                    {{entry.option}}
+                  </button>
                 {{/each}}
               </div>
             </div>

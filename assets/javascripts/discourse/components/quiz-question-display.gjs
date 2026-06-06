@@ -109,8 +109,6 @@ export default class QuizQuestionDisplay extends Component {
           }}
         </p>
       {{/if}}
-      <p class="quiz-status-hint quiz-current-range">{{this.quiz.currentRangeSummary}}</p>
-      <p class="quiz-status-hint quiz-current-range">{{this.quiz.currentTypesSummary}}</p>
       <div class="quiz-question-type">{{this.questionTypeLabel}}</div>
       <div class="quiz-question-category">{{this.question.category_name}}</div>
       <div class="quiz-question-text">{{this.question.question_text}}</div>

@@ -1,5 +1,5 @@
 :root {
-  --quiz-panel-width: 300px;
+  --quiz-panel-width: 340px;
 }
 
 html.has-quiz-panel-docked #main-outlet-wrapper {
@@ -242,6 +242,18 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
       display: flex;
       flex-wrap: wrap;
       gap: 0.35em;
+
+      &--nowrap {
+        flex-wrap: nowrap;
+
+        .quiz-home-mode-btn {
+          flex: 1 1 0;
+          min-width: 0;
+          padding-inline: 0.4em;
+          font-size: var(--font-down-1);
+          white-space: nowrap;
+        }
+      }
     }
   }
 

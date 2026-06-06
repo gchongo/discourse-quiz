@@ -11,7 +11,7 @@ const PRACTICE_MODES = ["normal", "wrong_only", "unseen"];
 const QUESTION_TYPES = ["single_choice", "true_false", "multiple_choice"];
 const QUESTION_TYPES_PREF_KEY = "discourse-quiz-question-types";
 const NARROW_BREAKPOINT = 1100;
-const PANEL_WIDTH = 300;
+const PANEL_WIDTH = 340;
 const HTML_CLASS_VISIBLE = "has-quiz-panel";
 const HTML_CLASS_DOCKED = "has-quiz-panel-docked";
 

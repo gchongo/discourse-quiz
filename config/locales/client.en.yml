@@ -125,6 +125,7 @@ en:
           correct_answer: "Correct answer"
           correct_answers: "Correct answers"
           correct_answers_need_options: "Add at least one option above, then select the correct answers here."
+          correct_answer_hint: "Click an option below to mark the correct answer."
           correct_answers_hint: "Click the options below to mark the correct answers."
           explanation: "Explanation"
           active: "Active"

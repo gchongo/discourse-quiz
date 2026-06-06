@@ -31,7 +31,7 @@ export default class QuizPanel extends Component {
       return "";
     }
 
-    let styles = "--quiz-panel-width: 300px;";
+    let styles = "--quiz-panel-width: 340px;";
 
     if (this.quiz.isDraggable && this.quiz.hasCustomPosition) {
       styles += `--quiz-panel-left: ${this.quiz.panelLeft}px; --quiz-panel-top: ${this.quiz.panelTop}px;`;

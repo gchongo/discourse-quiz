@@ -125,6 +125,7 @@ zh_CN:
           correct_answer: "正确答案"
           correct_answers: "正确答案（可多选）"
           correct_answers_need_options: "请先在「选项」中填写至少一个选项，再勾选正确答案。"
+          correct_answer_hint: "点击下方选项标记正确答案。"
           correct_answers_hint: "点击下方选项标记正确答案（可多选）。"
           explanation: "解析"
           active: "启用"
