@@ -2,8 +2,7 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
-import dNumber from "discourse/ui-kit/helpers/d-number";
-import { i18n } from "discourse-i18n";
+import DUserStat from "discourse/ui-kit/d-user-stat";
 
 export default class QuizSummaryStats extends Component {
   @service siteSettings;
@@ -40,24 +39,16 @@ export default class QuizSummaryStats extends Component {
   <template>
     {{#if this.enabled}}
       <li class="user-summary-stat-outlet quiz-lifetime-correct">
-        <div class="user-stat">
-          <span
-            class="value"
-            title={{i18n "discourse_quiz.user_summary.lifetime_correct"}}
-          >
-            {{dNumber this.stats.lifetime_correct}}
-          </span>
-        </div>
+        <DUserStat
+          @value={{this.stats.lifetime_correct}}
+          @label="discourse_quiz.user_summary.lifetime_correct"
+        />
       </li>
       <li class="user-summary-stat-outlet quiz-wrong-questions">
-        <div class="user-stat">
-          <span
-            class="value"
-            title={{i18n "discourse_quiz.user_summary.wrong_questions"}}
-          >
-            {{dNumber this.stats.wrong_questions}}
-          </span>
-        </div>
+        <DUserStat
+          @value={{this.stats.wrong_questions}}
+          @label="discourse_quiz.user_summary.wrong_questions"
+        />
       </li>
     {{/if}}
   </template>
