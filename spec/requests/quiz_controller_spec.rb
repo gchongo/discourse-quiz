@@ -115,6 +115,33 @@ describe DiscourseQuiz::QuizController do
     end
   end
 
+  describe "GET /quiz/summary_stats" do
+    it "requires login" do
+      get "/quiz/summary_stats.json"
+      expect(response.status).to eq(403)
+    end
+
+    it "returns quiz summary stats for the current user" do
+      sign_in(user)
+
+      DiscourseQuiz::QuizUserAttempt.create!(
+        user_id: user.id,
+        question_id: question.id,
+        answer_index: 0,
+        is_correct: false,
+        created_at: Time.zone.now,
+      )
+
+      get "/quiz/summary_stats.json"
+      expect(response.status).to eq(200)
+
+      stats = response.parsed_body["quiz_summary_stats"]
+      expect(stats["today_correct"]).to eq(0)
+      expect(stats["today_incorrect"]).to eq(1)
+      expect(stats["wrong_pending"]).to eq(1)
+    end
+  end
+
   describe "GET /quiz/categories" do
     it "returns active category names with status" do
       get "/quiz/categories.json"

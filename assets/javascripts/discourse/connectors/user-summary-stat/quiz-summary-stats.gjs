@@ -1,16 +1,39 @@
 import Component from "@glimmer/component";
+import { tracked } from "@glimmer/tracking";
 import { service } from "@ember/service";
+import { ajax } from "discourse/lib/ajax";
 import DUserStat from "discourse/ui-kit/d-user-stat";
 
 export default class QuizSummaryStats extends Component {
   @service siteSettings;
+  @service currentUser;
 
-  get stats() {
-    return this.args.outletArgs?.model?.quiz_summary_stats;
+  @tracked stats = null;
+
+  static shouldRender(args, { siteSettings, currentUser }) {
+    return (
+      siteSettings.quiz_plugin_enabled &&
+      currentUser &&
+      args.user?.id === currentUser.id
+    );
+  }
+
+  constructor() {
+    super(...arguments);
+    this.loadStats();
   }
 
   get enabled() {
-    return this.siteSettings.quiz_plugin_enabled && this.stats;
+    return Boolean(this.stats);
+  }
+
+  async loadStats() {
+    try {
+      const data = await ajax("/quiz/summary_stats.json");
+      this.stats = data.quiz_summary_stats;
+    } catch {
+      this.stats = null;
+    }
   }
 
   <template>

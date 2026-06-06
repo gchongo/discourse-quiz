@@ -62,6 +62,32 @@ module DiscourseQuiz
       render_json_dump(quiz_status)
     end
 
+    def summary_stats
+      raise Discourse::InvalidAccess unless current_user
+
+      unless DiscourseQuiz::QuizUserAttempt.table_ready?
+        return(
+          render_json_dump(
+            { error: I18n.t("discourse_quiz.errors.database_unavailable") },
+            status: 503,
+          )
+        )
+      end
+
+      summary =
+        QuizStatsService.new(current_user).summary(
+          category_names: site_category_allowlist,
+        )
+
+      render_json_dump(
+        quiz_summary_stats: {
+          today_correct: summary[:today_correct],
+          today_incorrect: summary[:today_incorrect],
+          wrong_pending: summary[:wrong_pending],
+        },
+      )
+    end
+
     def submit
       unless table_ready?
         return(
