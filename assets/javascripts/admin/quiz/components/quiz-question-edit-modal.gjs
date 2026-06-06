@@ -32,7 +32,9 @@ export default class QuizQuestionEditModal extends Component {
     this.questionType = question.question_type || "single_choice";
     this.optionsText = (question.options || []).join("\n");
     this.correctIndex = question.correct_index ?? 0;
-    this.correctIndices = [...(question.correct_indices || [])];
+    this.correctIndices = Array.isArray(question.correct_indices)
+      ? question.correct_indices.map((value) => Number(value)).filter((value) => Number.isFinite(value))
+      : [];
     this.explanation = question.explanation || "";
     this.active = question.active !== false;
     const categories = this.args.model.categories || [];
@@ -103,8 +105,18 @@ export default class QuizQuestionEditModal extends Component {
     return this.categoryName?.trim() || "";
   }
 
-  isCorrectIndexSelected(index) {
-    return this.correctIndices.includes(index);
+  get normalizedCorrectIndices() {
+    return Array.isArray(this.correctIndices) ? this.correctIndices : [];
+  }
+
+  get multipleChoiceAnswerOptions() {
+    const selected = new Set(this.normalizedCorrectIndices);
+
+    return this.parsedOptions.map((option, index) => ({
+      option,
+      index,
+      selected: selected.has(index),
+    }));
   }
 
   @action
@@ -143,7 +155,7 @@ export default class QuizQuestionEditModal extends Component {
       this.correctIndex = 0;
       this.correctIndices = [];
     } else if (this.isMultipleChoice) {
-      this.correctIndices = this.correctIndices.filter(
+      this.correctIndices = this.normalizedCorrectIndices.filter(
         (index) => index >= 0 && index < this.parsedOptions.length
       );
     } else {
@@ -162,7 +174,7 @@ export default class QuizQuestionEditModal extends Component {
       this.correctIndex = Math.max(0, this.parsedOptions.length - 1);
     }
 
-    this.correctIndices = this.correctIndices.filter(
+    this.correctIndices = this.normalizedCorrectIndices.filter(
       (index) => index >= 0 && index < this.parsedOptions.length
     );
   }
@@ -174,10 +186,12 @@ export default class QuizQuestionEditModal extends Component {
 
   @action
   toggleCorrectIndex(index) {
-    if (this.isCorrectIndexSelected(index)) {
-      this.correctIndices = this.correctIndices.filter((value) => value !== index);
+    const current = this.normalizedCorrectIndices;
+
+    if (current.includes(index)) {
+      this.correctIndices = current.filter((value) => value !== index);
     } else {
-      this.correctIndices = [...this.correctIndices, index].sort((a, b) => a - b);
+      this.correctIndices = [...current, index].sort((a, b) => a - b);
     }
   }
 
@@ -198,7 +212,7 @@ export default class QuizQuestionEditModal extends Component {
       question_type: this.questionType,
       options: this.isTrueFalse ? this.trueFalseOptions : this.parsedOptions,
       correct_index: this.correctIndex,
-      correct_indices: this.isMultipleChoice ? this.correctIndices : [],
+      correct_indices: this.isMultipleChoice ? this.normalizedCorrectIndices : [],
       explanation: this.explanation,
       active: this.active,
     };
@@ -329,13 +343,13 @@ export default class QuizQuestionEditModal extends Component {
                   {{i18n "discourse_quiz.admin.form.correct_answers_hint"}}
                 </p>
                 <div class="quiz-admin-form__answers">
-                  {{#each this.parsedOptions as |option index|}}
+                  {{#each this.multipleChoiceAnswerOptions as |entry|}}
                     <button
                       type="button"
-                      class="btn btn-default quiz-admin-answer-btn {{if (this.isCorrectIndexSelected index) 'is-selected'}}"
-                      {{on "click" (fn this.toggleCorrectIndex index)}}
+                      class="btn btn-default quiz-admin-answer-btn {{if entry.selected 'is-selected'}}"
+                      {{on "click" (fn this.toggleCorrectIndex entry.index)}}
                     >
-                      {{option}}
+                      {{entry.option}}
                     </button>
                   {{/each}}
                 </div>
