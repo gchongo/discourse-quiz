@@ -4,8 +4,6 @@ import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
 
-const DOCK_PREF_KEY = "discourse-quiz-docked";
-const POSITION_PREF_KEY = "discourse-quiz-panel-position";
 const MODE_PREF_KEY = "discourse-quiz-practice-mode";
 const PRACTICE_MODES = ["normal", "wrong_only", "unseen"];
 const QUESTION_TYPES = ["single_choice", "true_false", "multiple_choice"];
@@ -220,12 +218,19 @@ export default class QuizService extends Service {
     return !this.selectAllMode && this.selectedCategories.includes(category);
   }
 
+  resetPanelLayoutForOpen() {
+    this.isDocked = true;
+    this.panelLeft = null;
+    this.panelTop = null;
+    this.isMinimized = false;
+  }
+
   @action
   openPanel() {
+    this.resetPanelLayoutForOpen();
     this.loadQuestionTypePreference();
     this.loadCategoryPreference();
     this.panelVisible = true;
-    this.isMinimized = false;
     this.syncLayoutClasses();
     this.showHome();
   }
@@ -234,9 +239,9 @@ export default class QuizService extends Service {
   togglePanel() {
     this.panelVisible = !this.panelVisible;
     if (this.panelVisible) {
+      this.resetPanelLayoutForOpen();
       this.loadQuestionTypePreference();
       this.loadCategoryPreference();
-      this.isMinimized = false;
       this.showHome();
     }
     this.syncLayoutClasses();
@@ -256,7 +261,6 @@ export default class QuizService extends Service {
 
     this.isDocked = !this.isDocked;
     this.isMinimized = false;
-    this.saveDockPreference();
     this.syncLayoutClasses();
   }
 
@@ -274,8 +278,6 @@ export default class QuizService extends Service {
       return;
     }
 
-    this.loadDockPreference();
-    this.loadPositionPreference();
     this.loadPracticeModePreference();
     this._resizeHandler = () => this.handleViewportResize();
     window.addEventListener("resize", this._resizeHandler, { passive: true });
@@ -310,14 +312,10 @@ export default class QuizService extends Service {
     this.ensurePanelInViewport();
   }
 
-  setPanelPosition(left, top, { persist = true, width = PANEL_WIDTH, height = 120 } = {}) {
+  setPanelPosition(left, top, { width = PANEL_WIDTH, height = 120 } = {}) {
     const clamped = this.clampPanelPosition(left, top, width, height);
     this.panelLeft = clamped.left;
     this.panelTop = clamped.top;
-
-    if (persist) {
-      this.savePositionPreference();
-    }
   }
 
   ensurePanelInViewport() {
@@ -338,11 +336,7 @@ export default class QuizService extends Service {
       }
     }
 
-    this.setPanelPosition(this.panelLeft, this.panelTop, {
-      persist: true,
-      width,
-      height,
-    });
+    this.setPanelPosition(this.panelLeft, this.panelTop, { width, height });
   }
 
   clampPanelPosition(left, top, width = PANEL_WIDTH, height = 120) {
@@ -385,64 +379,6 @@ export default class QuizService extends Service {
 
     const html = document.documentElement;
     html.classList.remove(HTML_CLASS_VISIBLE, HTML_CLASS_DOCKED);
-  }
-
-  loadPositionPreference() {
-    try {
-      const stored = localStorage.getItem(POSITION_PREF_KEY);
-
-      if (!stored) {
-        return;
-      }
-
-      const { left, top } = JSON.parse(stored);
-
-      if (Number.isFinite(left) && Number.isFinite(top)) {
-        this.panelLeft = left;
-        this.panelTop = top;
-      }
-    } catch {
-      // localStorage may be unavailable or JSON invalid
-    }
-  }
-
-  savePositionPreference() {
-    if (!this.hasCustomPosition) {
-      return;
-    }
-
-    try {
-      localStorage.setItem(
-        POSITION_PREF_KEY,
-        JSON.stringify({ left: this.panelLeft, top: this.panelTop })
-      );
-    } catch {
-      // localStorage may be unavailable
-    }
-  }
-
-  loadDockPreference() {
-    try {
-      const stored = localStorage.getItem(DOCK_PREF_KEY);
-
-      if (stored !== null) {
-        this.isDocked = stored === "true";
-      }
-    } catch {
-      // localStorage may be unavailable
-    }
-  }
-
-  saveDockPreference() {
-    if (!this.canDock) {
-      return;
-    }
-
-    try {
-      localStorage.setItem(DOCK_PREF_KEY, String(this.isDocked));
-    } catch {
-      // localStorage may be unavailable
-    }
   }
 
   @action

@@ -99,7 +99,7 @@ export default class QuizPanel extends Component {
     const rect = panel.getBoundingClientRect();
 
     if (!this.quiz.hasCustomPosition) {
-      this.quiz.setPanelPosition(rect.left, rect.top, { persist: false });
+      this.quiz.setPanelPosition(rect.left, rect.top);
     }
 
     this.isDragging = true;
@@ -137,7 +137,6 @@ export default class QuizPanel extends Component {
     }
 
     this.isDragging = false;
-    this.quiz.savePositionPreference();
     this.stopDragging();
   }
 
