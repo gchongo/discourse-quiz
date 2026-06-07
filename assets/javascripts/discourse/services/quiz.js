@@ -249,6 +249,7 @@ export default class QuizService extends Service {
 
   @action
   closePanel() {
+    this.isMinimized = false;
     this.panelVisible = false;
     this.syncLayoutClasses();
   }
