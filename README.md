@@ -12,7 +12,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Home skeleton loading: only shown when no cached categories are available
 - Reset button resets category selection only (labeled「重置分类」)
 - Desktop and mobile quiz panel entry with show/hide controls
-- Desktop docked panel pushes main content aside; narrow viewports auto-switch to floating
+- Desktop docked panel sits in `#main-outlet-wrapper` grid (third column, like the sidebar); narrow viewports auto-switch to floating
 - Desktop minimize/expand for browsing topics while keeping the panel available
 - Panel mounted in a persistent outlet so quiz state survives topic navigation
 - Desktop floating/minimized panel can be dragged by the title bar; position is remembered

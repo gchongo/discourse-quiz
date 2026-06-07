@@ -2,34 +2,69 @@
   --quiz-panel-width: 340px;
 }
 
-// Reserve space for the docked panel without breaking .wrap centering on wide screens.
-// margin-right on #main-outlet-wrapper shifts the entire centered layout right;
-// body padding keeps symmetric auto margins within the remaining viewport width.
-html.has-quiz-panel-docked body {
-  box-sizing: border-box;
-  padding-right: var(--quiz-panel-width);
-  transition: padding-right 0.2s ease;
+// Docked panel lives in #main-outlet-wrapper grid (like sidebar-wrapper), not fixed to the viewport.
+html.has-quiz-panel-docked body.has-sidebar-page #main-outlet-wrapper {
+  grid-template-areas:
+    "sidebar content quiz"
+    "sidebar below-content quiz";
+  grid-template-columns: var(--d-sidebar-width) minmax(0, 1fr) var(--quiz-panel-width);
+  max-width: calc(var(--d-sidebar-width) + var(--d-max-width) + var(--quiz-panel-width));
 }
 
-html.rtl.has-quiz-panel-docked body {
-  padding-right: 0;
-  padding-left: var(--quiz-panel-width);
-  transition: padding-left 0.2s ease;
+html.has-quiz-panel-docked body:not(.has-sidebar-page) #main-outlet-wrapper {
+  grid-template-areas:
+    "content quiz"
+    "below-content quiz";
+  grid-template-columns: minmax(0, 1fr) var(--quiz-panel-width);
+  max-width: calc(var(--d-max-width) + var(--quiz-panel-width));
 }
 
-// Fill the padded body width so header/main content extend to the panel edge (no gap).
-html.has-quiz-panel-docked .d-header-wrap .wrap,
-html.has-quiz-panel-docked #main-outlet-wrapper.wrap {
-  max-width: 100%;
-  transition: max-width 0.2s ease;
+html.has-quiz-panel-docked body.has-sidebar-page .d-header-wrap .wrap {
+  max-width: calc(var(--d-sidebar-width) + var(--d-max-width) + var(--quiz-panel-width));
 }
 
+html.has-quiz-panel-docked body:not(.has-sidebar-page) .d-header-wrap .wrap {
+  max-width: calc(var(--d-max-width) + var(--quiz-panel-width));
+}
+
+html.rtl.has-quiz-panel-docked body.has-sidebar-page #main-outlet-wrapper {
+  grid-template-areas:
+    "quiz content sidebar"
+    "quiz below-content sidebar";
+  grid-template-columns: var(--quiz-panel-width) minmax(0, 1fr) var(--d-sidebar-width);
+}
+
+html.rtl.has-quiz-panel-docked body:not(.has-sidebar-page) #main-outlet-wrapper {
+  grid-template-areas:
+    "quiz content"
+    "quiz below-content";
+  grid-template-columns: var(--quiz-panel-width) minmax(0, 1fr);
+}
+
+// Keep outlet out of the page grid when floating, mobile, or closed; docked mode uses grid-area: quiz.
 .quiz-panel-outlet {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
   pointer-events: none;
+  z-index: 1000;
 
   .quiz-panel-container {
     pointer-events: auto;
   }
+}
+
+html.has-quiz-panel-docked .quiz-panel-outlet {
+  position: sticky;
+  top: var(--main-outlet-offset);
+  align-self: start;
+  grid-area: quiz;
+  width: var(--quiz-panel-width);
+  height: auto;
+  z-index: auto;
 }
 
 .quiz-header-icon {
@@ -52,18 +87,18 @@ html.has-quiz-panel-docked #main-outlet-wrapper.wrap {
     display: flex;
   }
 
-  &.is-docked {
-    position: fixed;
-    right: 0;
-    top: var(--header-offset);
-    width: var(--quiz-panel-width);
+  &.is-docked:not(.is-minimized) {
+    position: relative;
+    width: 100%;
     height: auto;
-    max-height: calc(100vh - var(--header-offset));
+    max-height: calc(var(--composer-vh, 1dvh) * 100 - var(--main-outlet-offset, 0px));
     overflow-y: auto;
     border-left: 1px solid var(--primary-low);
+    border-radius: 0;
+    box-shadow: none;
 
-    &.is-quiz-active:not(.is-minimized) {
-      height: calc(100vh - var(--header-offset));
+    &.is-quiz-active {
+      height: calc(var(--composer-vh, 1dvh) * 100 - var(--main-outlet-offset, 0px));
       overflow: hidden;
     }
   }
@@ -100,6 +135,7 @@ html.has-quiz-panel-docked #main-outlet-wrapper.wrap {
 
   &.is-docked.is-minimized,
   &.is-floating.is-minimized {
+    position: fixed;
     top: auto;
     height: auto;
     max-height: none;
