@@ -167,6 +167,8 @@ html.has-quiz-panel-docked .quiz-panel-outlet {
     bottom: 0;
     left: 0;
     right: 0;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: auto;
     max-height: 85vh;
@@ -175,26 +177,27 @@ html.has-quiz-panel-docked .quiz-panel-outlet {
     border-radius: 16px 16px 0 0;
     transition: max-height 0.3s ease-out;
 
-    .quiz-panel-content {
-      overflow: hidden;
-      transition:
-        max-height 0.3s ease-out,
-        opacity 0.25s ease-out;
-      max-height: calc(85vh - var(--quiz-mobile-header-height));
-      opacity: 1;
+    &:not(.is-minimized) {
+      .quiz-panel-content {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        transition:
+          max-height 0.3s ease-out,
+          opacity 0.25s ease-out;
+        max-height: calc(85vh - var(--quiz-mobile-header-height));
+        opacity: 1;
+      }
     }
 
     &.is-quiz-active:not(.is-minimized) {
       height: 85vh;
       max-height: 85vh;
-      overflow: hidden;
 
       .quiz-panel-content {
-        flex: 1 1 auto;
-        min-height: 0;
         max-height: none;
-        overflow-x: hidden;
-        overflow-y: auto;
       }
     }
 
