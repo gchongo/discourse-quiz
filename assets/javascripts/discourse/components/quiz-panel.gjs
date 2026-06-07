@@ -200,7 +200,6 @@ export default class QuizPanel extends Component {
         </div>
         <div class="quiz-panel-content">
           {{#if this.quiz.panelVisible}}
-          {{#unless this.quiz.isMinimized}}
             {{#if this.quiz.paywallActive}}
               <QuizPaywall @status={{this.quiz.quizStatus}} />
             {{else if (and this.quiz.loading (not (eq this.quiz.panelPhase "home")))}}
@@ -228,7 +227,6 @@ export default class QuizPanel extends Component {
                 <QuizQuestionDisplay @question={{this.quiz.currentQuestion}} />
               {{/if}}
             {{/if}}
-          {{/unless}}
           {{/if}}
         </div>
       </div>

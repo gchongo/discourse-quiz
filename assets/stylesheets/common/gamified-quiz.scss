@@ -1,5 +1,6 @@
 :root {
   --quiz-panel-width: 340px;
+  --quiz-mobile-header-height: 3.25rem;
 }
 
 // Docked panel lives in #main-outlet-wrapper grid (like sidebar-wrapper), not fixed to the viewport.
@@ -169,25 +170,56 @@ html.has-quiz-panel-docked .quiz-panel-outlet {
     width: 100%;
     height: auto;
     max-height: 85vh;
-    overflow-y: auto;
+    overflow: hidden;
     z-index: 1001;
     border-radius: 16px 16px 0 0;
-    transition: transform 0.3s ease-in-out;
+    transition: max-height 0.3s ease-out;
+
+    .quiz-panel-content {
+      overflow: hidden;
+      transition:
+        max-height 0.3s ease-out,
+        opacity 0.25s ease-out;
+      max-height: calc(85vh - var(--quiz-mobile-header-height));
+      opacity: 1;
+    }
 
     &.is-quiz-active:not(.is-minimized) {
       height: 85vh;
+      max-height: 85vh;
       overflow: hidden;
+
+      .quiz-panel-content {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
     }
 
     &.is-minimized {
       height: auto;
-      max-height: none;
+      max-height: var(--quiz-mobile-header-height);
       overflow: hidden;
-      transform: none;
+
+      .quiz-panel-header {
+        border-bottom: none;
+      }
 
       .quiz-panel-content {
-        display: none;
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+        overflow: hidden;
       }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &.is-mobile,
+    &.is-mobile .quiz-panel-content {
+      transition: none;
     }
   }
 
