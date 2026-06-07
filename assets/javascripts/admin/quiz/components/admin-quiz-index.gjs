@@ -484,6 +484,7 @@ export default class AdminQuizIndex extends Component {
               {{i18n
                 "discourse_quiz.admin.dry_run_result"
                 valid=this.importResult.valid
+                skipped=this.importResult.skipped
                 total=this.importResult.total
               }}
             {{else}}
@@ -491,6 +492,7 @@ export default class AdminQuizIndex extends Component {
                 "discourse_quiz.admin.import_result_full"
                 imported=this.importResult.imported
                 updated=this.importResult.updated
+                skipped=this.importResult.skipped
                 total=this.importResult.total
               }}
             {{/if}}

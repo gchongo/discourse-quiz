@@ -5,6 +5,8 @@ en:
       duplicate_warning: "This question text matches existing question ID(s): %{ids}."
       duplicate_import_existing: "Question text matches existing question ID(s): %{ids}."
       duplicate_import_batch: "Duplicate question text in this import (first seen on row %{row})."
+      duplicate_import_skip_existing: "Skipped duplicate question text (matches existing ID(s): %{ids})."
+      duplicate_import_skip_batch: "Skipped duplicate question text in this import (first seen on row %{row})."
     errors:
       invalid_options: "Options must be a non-empty array."
       invalid_correct_index: "Correct index must be within the bounds of the options array."

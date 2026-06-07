@@ -192,6 +192,7 @@ module DiscourseQuiz
     def import_questions(payload, dry_run:, upsert:)
       imported = 0
       updated = 0
+      skipped = 0
       valid = 0
       errors = []
       warnings = []
@@ -209,13 +210,25 @@ module DiscourseQuiz
 
         if question.valid?
           valid += 1
-          append_import_duplicate_warnings(
-            warnings,
-            row: row,
+
+          skip_reason = duplicate_import_skip_reason(
             question: question,
             seen_import_keys: seen_import_keys,
             key_to_ids: key_to_ids,
           )
+
+          if skip_reason
+            skipped += 1
+            warnings << {
+              row: row,
+              skipped: true,
+              message: duplicate_import_skip_message(skip_reason),
+            }
+            next
+          end
+
+          mark_import_key_seen!(seen_import_keys, question, row)
+
           next if dry_run
 
           if question.persisted?
@@ -235,6 +248,7 @@ module DiscourseQuiz
       {
         imported: imported,
         updated: updated,
+        skipped: skipped,
         valid: valid,
         errors: errors,
         warnings: warnings,
@@ -244,31 +258,48 @@ module DiscourseQuiz
       }
     end
 
-    def append_import_duplicate_warnings(warnings, row:, question:, seen_import_keys:, key_to_ids:)
+    def duplicate_import_skip_reason(question:, seen_import_keys:, key_to_ids:)
+      key = QuizDuplicateDetector.normalized_key(question.question_text)
+      return nil if key.blank?
+
+      if seen_import_keys[key]
+        return { type: :batch, first_row: seen_import_keys[key] }
+      end
+
+      if !question.persisted?
+        duplicate_ids =
+          QuizDuplicateDetector.duplicate_ids_for_text(
+            question.question_text,
+            key_to_ids: key_to_ids,
+          )
+        if duplicate_ids.present?
+          return { type: :existing, ids: duplicate_ids }
+        end
+      end
+
+      nil
+    end
+
+    def duplicate_import_skip_message(skip_reason)
+      case skip_reason[:type]
+      when :batch
+        I18n.t(
+          "discourse_quiz.admin.duplicate_import_skip_batch",
+          row: skip_reason[:first_row],
+        )
+      when :existing
+        I18n.t(
+          "discourse_quiz.admin.duplicate_import_skip_existing",
+          ids: skip_reason[:ids].join(", "),
+        )
+      end
+    end
+
+    def mark_import_key_seen!(seen_import_keys, question, row)
       key = QuizDuplicateDetector.normalized_key(question.question_text)
       return if key.blank?
 
-      if seen_import_keys[key]
-        warnings << {
-          row: row,
-          message: I18n.t("discourse_quiz.admin.duplicate_import_batch", row: seen_import_keys[key]),
-        }
-      else
-        seen_import_keys[key] = row
-      end
-
-      duplicate_ids =
-        QuizDuplicateDetector.duplicate_ids_for_text(
-          question.question_text,
-          exclude_id: question.id,
-          key_to_ids: key_to_ids,
-        )
-      return if duplicate_ids.blank?
-
-      warnings << {
-        row: row,
-        message: I18n.t("discourse_quiz.admin.duplicate_import_existing", ids: duplicate_ids.join(", ")),
-      }
+      seen_import_keys[key] ||= row
     end
 
     def build_import_question(item, upsert:)

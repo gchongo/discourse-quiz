@@ -95,7 +95,7 @@ describe DiscourseQuiz::AdminQuizQuestionsController do
       expect(DiscourseQuiz::QuizQuestion.count).to eq(0)
     end
 
-    it "returns duplicate warnings for repeated import rows and existing questions" do
+    it "skips duplicate import rows and existing questions" do
       existing =
         DiscourseQuiz::QuizQuestion.create!(
           category_name: "历史",
@@ -129,14 +129,55 @@ describe DiscourseQuiz::AdminQuizQuestionsController do
 
       body = response.parsed_body
       expect(response.status).to eq(200)
-      expect(body["imported"]).to eq(3)
+      expect(body["imported"]).to eq(1)
+      expect(body["skipped"]).to eq(2)
       expect(body["warnings"].length).to eq(2)
+      expect(DiscourseQuiz::QuizQuestion.count).to eq(2)
 
       batch_warning = body["warnings"].find { |warning| warning["row"] == 2 }
       existing_warning = body["warnings"].find { |warning| warning["row"] == 3 }
 
+      expect(batch_warning["skipped"]).to eq(true)
       expect(batch_warning["message"]).to include("1")
+      expect(existing_warning["skipped"]).to eq(true)
       expect(existing_warning["message"]).to include(existing.id.to_s)
+    end
+
+    it "reports skipped duplicates during dry run without saving" do
+      DiscourseQuiz::QuizQuestion.create!(
+        category_name: "历史",
+        question_text: "重复题干",
+        options: %w[A B],
+        correct_index: 0,
+      )
+
+      payload = [
+        {
+          category_name: "历史",
+          question_text: "新题目",
+          options: %w[A B],
+          correct_index: 0,
+        },
+        {
+          category_name: "历史",
+          question_text: "新题目",
+          options: %w[C D],
+          correct_index: 1,
+        },
+      ].to_json
+
+      post "/admin/quiz/questions/bulk_import.json",
+           params: {
+             questions_json: payload,
+             dry_run: true,
+           }
+
+      body = response.parsed_body
+      expect(response.status).to eq(200)
+      expect(body["dry_run"]).to eq(true)
+      expect(body["skipped"]).to eq(1)
+      expect(body["valid"]).to eq(2)
+      expect(DiscourseQuiz::QuizQuestion.count).to eq(1)
     end
 
     it "supports upsert by id" do
