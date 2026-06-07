@@ -17,6 +17,13 @@ html.rtl.has-quiz-panel-docked body {
   transition: padding-left 0.2s ease;
 }
 
+// Fill the padded body width so header/main content extend to the panel edge (no gap).
+html.has-quiz-panel-docked .d-header-wrap .wrap,
+html.has-quiz-panel-docked #main-outlet-wrapper.wrap {
+  max-width: 100%;
+  transition: max-width 0.2s ease;
+}
+
 .quiz-panel-outlet {
   pointer-events: none;
 
