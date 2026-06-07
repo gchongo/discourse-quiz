@@ -1,6 +1,7 @@
 :root {
   --quiz-panel-width: 340px;
   --quiz-mobile-header-height: 3.25rem;
+  --quiz-chat-footer-height: 3.75rem;
 }
 
 // Docked panel lives in #main-outlet-wrapper grid (like sidebar-wrapper), not fixed to the viewport.
@@ -324,6 +325,14 @@ html.has-quiz-panel-docked .quiz-panel-outlet {
   .quiz-panel-error {
     color: var(--danger);
   }
+}
+
+html.has-full-page-chat .quiz-panel-container.is-mobile.is-minimized {
+  bottom: calc(
+    env(safe-area-inset-bottom, 0px) +
+    var(--footer-nav-height, 0px) +
+    var(--quiz-chat-footer-height, 3.75rem)
+  );
 }
 
 .quiz-home {
