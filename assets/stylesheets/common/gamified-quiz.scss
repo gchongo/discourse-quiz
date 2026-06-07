@@ -2,15 +2,19 @@
   --quiz-panel-width: 340px;
 }
 
-html.has-quiz-panel-docked #main-outlet-wrapper {
-  margin-right: var(--quiz-panel-width);
-  transition: margin-right 0.2s ease;
+// Reserve space for the docked panel without breaking .wrap centering on wide screens.
+// margin-right on #main-outlet-wrapper shifts the entire centered layout right;
+// body padding keeps symmetric auto margins within the remaining viewport width.
+html.has-quiz-panel-docked body {
+  box-sizing: border-box;
+  padding-right: var(--quiz-panel-width);
+  transition: padding-right 0.2s ease;
 }
 
-html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
-  margin-right: 0;
-  margin-left: var(--quiz-panel-width);
-  transition: margin-left 0.2s ease;
+html.rtl.has-quiz-panel-docked body {
+  padding-right: 0;
+  padding-left: var(--quiz-panel-width);
+  transition: padding-left 0.2s ease;
 }
 
 .quiz-panel-outlet {
