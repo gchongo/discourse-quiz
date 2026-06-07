@@ -171,31 +171,33 @@ export default class QuizPanel extends Component {
             {{/if}}
             <span class="quiz-panel-title">{{i18n "gamified_quiz.panel_title"}}</span>
           </div>
-          <div class="quiz-panel-controls">
-            {{#if this.quiz.canDock}}
-              <DButton
-                @icon={{if this.quiz.isDocked "up-right-from-square" "table-columns"}}
-                @action={{this.quiz.toggleDock}}
-                @title={{if this.quiz.isDocked "gamified_quiz.undock_panel" "gamified_quiz.dock_panel"}}
-                class="btn-default quiz-panel-control-btn"
-              />
-            {{/if}}
+          <div class="quiz-panel-header-actions">
             <DButton
-              @icon={{if this.quiz.isMinimized "chevron-up" "chevron-down"}}
+              @icon={{if this.quiz.isMinimized "angles-up" "angles-down"}}
               @action={{this.quiz.toggleMinimize}}
               @title={{if
                 this.quiz.isMinimized
                 "gamified_quiz.expand_panel"
                 "gamified_quiz.minimize_panel"
               }}
-              class="btn-default quiz-panel-control-btn"
+              class="btn-default quiz-panel-control-btn quiz-panel-minimize-btn"
             />
-            <DButton
-              @icon="xmark"
-              @action={{this.quiz.closePanel}}
-              @title="gamified_quiz.close_panel"
-              class="btn-default quiz-panel-control-btn quiz-panel-close-btn"
-            />
+            <div class="quiz-panel-controls">
+              {{#if this.quiz.canDock}}
+                <DButton
+                  @icon={{if this.quiz.isDocked "up-right-from-square" "table-columns"}}
+                  @action={{this.quiz.toggleDock}}
+                  @title={{if this.quiz.isDocked "gamified_quiz.undock_panel" "gamified_quiz.dock_panel"}}
+                  class="btn-default quiz-panel-control-btn"
+                />
+              {{/if}}
+              <DButton
+                @icon="xmark"
+                @action={{this.quiz.closePanel}}
+                @title="gamified_quiz.close_panel"
+                class="btn-default quiz-panel-control-btn quiz-panel-close-btn"
+              />
+            </div>
           </div>
         </div>
         <div class="quiz-panel-content">
