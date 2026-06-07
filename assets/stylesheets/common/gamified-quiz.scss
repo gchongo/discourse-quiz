@@ -424,6 +424,37 @@ html.rtl.has-quiz-panel-docked #main-outlet-wrapper {
   border-radius: var(--d-border-radius);
 }
 
+.quiz-guest-notice {
+  margin: 0;
+  padding: 0.85em 0.75em;
+  text-align: center;
+  background: var(--highlight-bg);
+  border: 1px solid var(--highlight);
+  border-radius: var(--d-border-radius);
+
+  &__icon {
+    font-size: var(--font-up-2);
+    color: var(--tertiary);
+    margin-bottom: 0.45em;
+  }
+
+  &__message {
+    margin: 0 0 0.75em;
+    font-size: var(--font-down-1);
+    font-weight: 600;
+    line-height: 1.55;
+    color: var(--primary);
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5em;
+    flex-wrap: wrap;
+  }
+}
+
 .quiz-options-list {
   list-style: none;
   margin: 0;

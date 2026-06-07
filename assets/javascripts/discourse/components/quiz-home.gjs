@@ -8,6 +8,7 @@ import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
 import DToggleSwitch from "discourse/ui-kit/d-toggle-switch";
 import QuizCategoryRow from "./quiz-category-row";
+import QuizGuestNotice from "./quiz-guest-notice";
 
 export default class QuizHome extends Component {
   @service quiz;
@@ -80,19 +81,11 @@ export default class QuizHome extends Component {
             {{i18n "discourse_quiz.home_mode_unseen"}}
           </button>
         </div>
-        {{#unless this.quiz.canUsePracticeModes}}
-          <p class="quiz-status-hint">{{i18n "discourse_quiz.home_mode_login_hint"}}</p>
-        {{/unless}}
       </div>
 
       <div class="quiz-home-actions">
         {{#if this.quiz.quizStatus.is_guest}}
-          <p class="quiz-status-hint">
-            {{i18n
-              "discourse_quiz.guest_attempts_left"
-              count=this.quiz.quizStatus.attempts_left
-            }}
-          </p>
+          <QuizGuestNotice @attemptsLeft={{this.quiz.quizStatus.attempts_left}} />
         {{/if}}
 
         {{#if this.quiz.isLearningOnly}}
