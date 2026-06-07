@@ -211,7 +211,10 @@ html.has-quiz-panel-docked .quiz-panel-outlet {
       }
 
       .quiz-panel-content {
+        flex: 0 0 0;
+        min-height: 0;
         max-height: 0;
+        padding: 0;
         opacity: 0;
         pointer-events: none;
         overflow: hidden;
@@ -327,12 +330,9 @@ html.has-quiz-panel-docked .quiz-panel-outlet {
   }
 }
 
+// .c-footer height already includes safe-area padding; do not add insets again.
 html.has-full-page-chat .quiz-panel-container.is-mobile.is-minimized {
-  bottom: calc(
-    env(safe-area-inset-bottom, 0px) +
-    var(--footer-nav-height, 0px) +
-    var(--quiz-chat-footer-height, 63px)
-  );
+  bottom: var(--quiz-chat-footer-height, 63px);
 }
 
 .quiz-home {
