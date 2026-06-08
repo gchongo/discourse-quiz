@@ -76,6 +76,23 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
     assert.dom(".quiz-question-text").hasText("1 + 1 = ?");
   });
 
+  test("clicking header icon while minimized expands the panel without resetting", async function (assert) {
+    await visit("/");
+    await click(".quiz-header-icon .btn");
+    await click(".quiz-home-start-btn");
+    await click(".quiz-panel-minimize-btn");
+
+    assert.dom(".quiz-panel-container").hasClass("is-minimized");
+    assert.dom(".quiz-question-text").exists();
+
+    await click(".quiz-header-icon .btn");
+
+    assert.dom(".quiz-panel-container").hasClass("is-visible");
+    assert.dom(".quiz-panel-container").doesNotHaveClass("is-minimized");
+    assert.dom(".quiz-question-text").hasText("1 + 1 = ?");
+    assert.dom(".quiz-home").doesNotExist();
+  });
+
   test("submitting an answer shows the result", async function (assert) {
     await visit("/");
     await click(".quiz-header-icon .btn");

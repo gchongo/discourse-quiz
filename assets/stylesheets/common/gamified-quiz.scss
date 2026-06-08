@@ -302,6 +302,26 @@ html.has-quiz-panel-docked .quiz-panel-outlet {
       color: var(--primary);
     }
 
+    .quiz-panel-info-btn {
+      flex-shrink: 0;
+      margin: 0;
+      padding: 0.15em;
+      min-width: auto;
+      min-height: auto;
+      line-height: 1;
+
+      .d-icon {
+        margin-right: 0;
+        font-size: var(--font-down-1);
+        color: var(--primary-medium);
+      }
+
+      &:hover .d-icon,
+      &:focus-visible .d-icon {
+        color: var(--primary);
+      }
+    }
+
     .quiz-panel-back-btn {
       flex-shrink: 0;
     }
@@ -1200,4 +1220,34 @@ label.quiz-option-radio {
     align-items: center;
     gap: 0.5em;
   }
+}
+
+.quiz-rules-modal__body {
+  color: var(--primary);
+  line-height: var(--line-height-large);
+
+  h3 {
+    margin: 1em 0 0.35em;
+    font-size: var(--font-up-0-rem);
+  }
+
+  p {
+    margin: 0 0 0.75em;
+  }
+
+  ul {
+    margin: 0 0 0.75em;
+    padding-left: 1.25em;
+  }
+
+  li + li {
+    margin-top: 0.35em;
+  }
+}
+
+.quiz-rules-modal__status {
+  padding: 0.65em 0.75em;
+  border-radius: var(--d-border-radius);
+  background: var(--primary-very-low);
+  font-weight: 600;
 }

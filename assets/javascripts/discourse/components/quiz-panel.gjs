@@ -13,10 +13,12 @@ import QuizHome from "./quiz-home";
 import QuizQuestionDisplay from "./quiz-question-display";
 import QuizResultDisplay from "./quiz-result-display";
 import QuizPaywall from "./quiz-paywall";
+import QuizRulesModal from "./quiz-rules-modal";
 
 export default class QuizPanel extends Component {
   @service quiz;
   @service siteSettings;
+  @service modal;
 
   @tracked isDragging = false;
 
@@ -89,7 +91,11 @@ export default class QuizPanel extends Component {
       return;
     }
 
-    if (event.target.closest(".quiz-panel-controls, .quiz-panel-back-btn, .btn")) {
+    if (
+      event.target.closest(
+        ".quiz-panel-controls, .quiz-panel-back-btn, .quiz-panel-info-btn, .btn"
+      )
+    ) {
       return;
     }
 
@@ -147,6 +153,15 @@ export default class QuizPanel extends Component {
     this._panelElement = null;
   }
 
+  @action
+  showRules() {
+    this.modal.show(QuizRulesModal, {
+      model: {
+        quizStatus: this.quiz.quizStatus,
+      },
+    });
+  }
+
   <template>
     {{#if this.quiz.isEnabled}}
       <div
@@ -170,6 +185,12 @@ export default class QuizPanel extends Component {
               />
             {{/if}}
             <span class="quiz-panel-title">{{i18n "gamified_quiz.panel_title"}}</span>
+            <DButton
+              @icon="circle-info"
+              @action={{this.showRules}}
+              @title="discourse_quiz.rules_modal.button_title"
+              class="btn-transparent quiz-panel-info-btn"
+            />
           </div>
           <div class="quiz-panel-header-actions">
             <DButton

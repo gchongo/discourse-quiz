@@ -237,6 +237,12 @@ export default class QuizService extends Service {
 
   @action
   togglePanel() {
+    if (this.panelVisible && this.isMinimized) {
+      this.isMinimized = false;
+      this.syncLayoutClasses();
+      return;
+    }
+
     this.panelVisible = !this.panelVisible;
     if (this.panelVisible) {
       this.resetPanelLayoutForOpen();
