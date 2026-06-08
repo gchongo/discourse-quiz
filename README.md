@@ -2,9 +2,11 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.16.0)
+## Current features (v0.17.0)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
+- Home **today's points** progress bar (earned / daily max); rules info dialog no longer shows this line
+- Home link to **milestone rewards** when `quiz_rewards_enabled` (optional, separate from quiz play)
 - Category selection and practice/question-type preferences persist in `localStorage`
 - Category list cache: cached categories show immediately on home open while refreshing in the background
 - Home layout: start button below practice mode; category list below start button (optional)
@@ -23,6 +25,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Question bank table: `discourse_quiz_questions`
 - Panel loads one random active question from the bank
 - Question types: single choice (default), true/false, and multiple choice (all correct options required)
+- Question and result headers: **type** (left, tertiary) and **category** (center) on one row to avoid layout jump
 - Answer UI uses radio buttons for single/true-false and checkboxes for multiple choice
 - Result page reuses the same option control styling; feedback appears below options and above the explanation
 - Correct-answer feedback shows points on the same line, right-aligned
@@ -36,7 +39,8 @@ Discourse quiz plugin with a dedicated question bank.
 - Session de-duplication: while practicing, avoids repeating questions until the selected range is exhausted
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
 - User summary stats (own profile only at `/u/:username/summary`): lifetime correct count, never-correct question count, and accuracy rate
-- Admin page with add/edit, search, pagination, category rename, export, dry-run import, and upsert import
+- **Milestone rewards** (optional): cumulative score thresholds, claim prizes without deducting points; admin CRUD + fulfillment queue
+- Admin question bank: add/edit, search, pagination, category rename, export, dry-run import, and upsert import
 - Bulk import **auto-skips duplicate question text** (within the batch and vs. existing bank); reports `skipped` count
 - Admin duplicate-question detection with list summary, row highlighting, save/import warnings, and bulk disable (keep lowest ID per group)
 - Admin mobile question list uses card layout; desktop keeps the table with ID, question type, and compact active indicators; bulk-disable-duplicates control is a small button after Search
@@ -60,9 +64,38 @@ hooks:
 
 Enable `quiz_plugin_enabled` in admin settings.
 
+## Milestone rewards (optional)
+
+Independent module — does **not** change quiz submit, scoring, or daily caps. Disabled by default (`quiz_rewards_enabled`).
+
+### How it works
+
+- Users earn cumulative points (never deducted on claim).
+- Each reward has a **points threshold**; when cumulative score ≥ threshold, the user can **claim** once.
+- Claims are **pending** until an admin marks **fulfilled** or **cancelled**.
+- Limited stock is optional; cancelling a claim restores stock.
+
+### Enable
+
+1. Set `quiz_rewards_enabled` to **true**.
+2. Optionally set `quiz_rewards_intro` (shown at top of `/quiz/rewards`).
+3. Choose score source:
+   - `quiz_rewards_use_gamification_score` **true** (default): total `discourse-gamification` score.
+   - **false**: sum of quiz `points_awarded` from scored correct answers only.
+4. Admin → Plugins → **Community quiz** → **Milestone rewards**: add prizes (name, category, image URL, threshold, stock, sort order).
+
+### User paths
+
+- Public page: `/quiz/rewards`
+- Panel home: **Milestone rewards** link (when enabled)
+
+### Admin fulfillment
+
+- Same admin area → **Claims** table: mark **fulfilled** or **cancelled**.
+
 ## Admin bulk import format
 
-Admin path: `/admin/plugins/discourse-quiz`
+Admin path: `/admin/plugins/discourse-quiz` (questions tab)
 
 Upload a `.json` or `.csv` file, or paste content into the textarea.
 
@@ -109,7 +142,7 @@ id,category_name,question_text,question_type,options,correct_index,correct_indic
 
 `question_type` is `single_choice` (default), `true_false`, or `multiple_choice`. `correct_index` is zero-based. For multiple choice, set `correct_indices` (JSON array or `0|2|3` in CSV). Leave `id` blank for new rows. Include `id` when using **upsert** import.
 
-### Admin workflows
+### Admin workflows (questions)
 
 - **Add question**: click **Add question** in the list toolbar
 - **Edit question**: pencil icon in the table (keeps the same question ID)
@@ -217,6 +250,13 @@ DELETE FROM schema_migrations WHERE version IN ('20260606100000', '2026060511000
 
 Then pull the fixed plugin and rebuild.
 
+Recent plugin migrations:
+
+| Version | Purpose |
+|---------|---------|
+| `20260606120000` | `points_awarded` on `discourse_quiz_user_attempts` (tiered scoring) |
+| `20260608130000` | `discourse_quiz_rewards` + `discourse_quiz_reward_claims` (milestone rewards) |
+
 Then run `rake db:migrate` again after pulling the fixed plugin code.
 
 ## API
@@ -228,6 +268,9 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | GET | `/quiz/status.json` | Current guest/login quiz status |
 | GET | `/quiz/summary_stats.json` | Logged-in user's lifetime correct, never-correct question count, and accuracy rate |
 | POST | `/quiz/submit.json` | Submit `question_id` + `answer_index` (single/true-false) or `answer_indices[]` (multiple choice); returns actual `points_awarded` |
+| GET | `/quiz/rewards.json` | Active rewards + cumulative points (requires `quiz_rewards_enabled`) |
+| GET | `/quiz/rewards/claims.json` | Logged-in user's claim history + cumulative points |
+| POST | `/quiz/rewards/:id/claim.json` | Claim a reward (no point deduction) |
 | GET | `/admin/quiz/questions.json` | Admin question list (`page`, `per_page`, `q`, `category_name`, `question_type`) + duplicate summary |
 | GET | `/admin/quiz/questions/export.json` | Export JSON or CSV (`export_format`) |
 | POST | `/admin/quiz/questions.json` | Create one question (may include `duplicate_warning`) |
@@ -235,6 +278,11 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | PUT | `/admin/quiz/categories/rename.json` | Rename a category across the bank |
 | POST | `/admin/quiz/questions/bulk_import.json` | Bulk import JSON or CSV (`import_format`, `dry_run`, `upsert`); duplicates skipped; returns `skipped` |
 | POST | `/admin/quiz/questions/bulk_disable_duplicates.json` | Disable duplicate questions, keeping the lowest ID in each group |
+| GET | `/admin/quiz/rewards.json` | Admin rewards list + recent claims |
+| POST | `/admin/quiz/rewards.json` | Create reward |
+| PUT | `/admin/quiz/rewards/:id.json` | Update reward |
+| DELETE | `/admin/quiz/rewards/:id.json` | Delete reward |
+| PUT | `/admin/quiz/reward_claims/:id.json` | Update claim status (`pending`, `fulfilled`, `cancelled`) |
 
 ## Gamification and scoring
 
@@ -257,7 +305,7 @@ Set `quiz_tier1_upto_count` to **N** (greater than 0) to enable tiers by **daily
 | `quiz_tier3_points` | Points per question after M |
 | `quiz_daily_max_points` | Hard daily cap; last award may be partial if only a few points remain |
 
-Example (daily cap 30, encourage more practice): `N=3, tier1=10`, `M=10, tier2=5`, `tier3=2`.
+Example (daily cap 50, encourage more practice): `N=10, tier1=2`, `M=20, tier2=1`, `tier3=1`.
 
 Legacy attempts without `points_awarded` still count toward today's total using `quiz_points_per_question`.
 
@@ -266,8 +314,12 @@ Legacy attempts without `points_awarded` still count toward today's total using 
 - `quiz_rules_help` — custom rules text for the panel info dialog (blank = built-in rules)
 - `quiz_submit_cooldown_seconds` — minimum seconds between submissions (0 = off)
 - `quiz_enable_guest_demo` / `quiz_guest_attempt_limit` — guest try limit
+- `quiz_rewards_enabled` — milestone rewards page and claims (default off)
+- `quiz_rewards_use_gamification_score` — use total gamification score for reward thresholds (off = quiz points only)
+- `quiz_rewards_intro` — optional intro on `/quiz/rewards`
 
 ## Next steps
 
 - Phase C: admin analytics and user attempt history
+- Rewards: admin notification on new claims (PM / email)
 - Later: v0.6 source topic audit (`source_topic_id`, scheduled validation)

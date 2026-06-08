@@ -16,6 +16,10 @@ export default {
           label: "discourse_quiz.admin.title",
           route: "adminPlugins.show.discourse-quiz",
         },
+        {
+          label: "discourse_quiz.admin.rewards_title",
+          route: "adminPlugins.show.discourse-quiz-rewards",
+        },
       ]);
     });
   },

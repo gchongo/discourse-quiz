@@ -3,5 +3,6 @@ export default {
   path: "/plugins",
   map() {
     this.route("discourse-quiz");
+    this.route("discourse-quiz-rewards");
   },
 };

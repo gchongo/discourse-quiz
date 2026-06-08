@@ -48,3 +48,13 @@ plugins:
     default: ""
     client: true
     textarea: true
+  quiz_rewards_enabled:
+    default: false
+    client: true
+  quiz_rewards_use_gamification_score:
+    default: true
+    client: true
+  quiz_rewards_intro:
+    default: ""
+    client: true
+    textarea: true

@@ -6,6 +6,9 @@ DiscourseQuiz::Engine.routes.draw do
   get "/status" => "quiz#status"
   get "/summary_stats" => "quiz#summary_stats"
   post "/submit" => "quiz#submit"
+  get "/rewards" => "quiz_rewards#index"
+  get "/rewards/claims" => "quiz_rewards#claims"
+  post "/rewards/:id/claim" => "quiz_rewards#claim"
 end
 
 Discourse::Application.routes.draw do
@@ -24,5 +27,11 @@ Discourse::Application.routes.draw do
     put "/admin/quiz/categories/rename" => "discourse_quiz/admin_quiz_questions#rename_category"
     put "/admin/quiz/questions/:id" => "discourse_quiz/admin_quiz_questions#update"
     delete "/admin/quiz/questions/:id" => "discourse_quiz/admin_quiz_questions#destroy"
+
+    get "/admin/quiz/rewards" => "discourse_quiz/admin_quiz_rewards#index"
+    post "/admin/quiz/rewards" => "discourse_quiz/admin_quiz_rewards#create"
+    put "/admin/quiz/rewards/:id" => "discourse_quiz/admin_quiz_rewards#update"
+    delete "/admin/quiz/rewards/:id" => "discourse_quiz/admin_quiz_rewards#destroy"
+    put "/admin/quiz/reward_claims/:id" => "discourse_quiz/admin_quiz_rewards#update_claim"
   end
 end

@@ -26,6 +26,15 @@ en:
       question_not_found: "Question not found."
       invalid_answer_index: "Answer index is out of range."
       paywall_reached: "You have reached the quiz limit. Log in to continue."
+    rewards:
+      errors:
+        login_required: "Please log in first."
+        insufficient_points: "Your cumulative score has not reached the threshold yet."
+        already_claimed: "You have already claimed this reward."
+        reward_out_of_stock: "This reward is out of stock."
+        reward_inactive: "This reward is no longer available."
+        rewards_unavailable: "Rewards are temporarily unavailable."
+        invalid_status: "Invalid status."
     true_false:
       true: "True"
       false: "False"
@@ -44,3 +53,6 @@ en:
     quiz_guest_paywall_message: "Message shown when a guest reaches the attempt limit."
     quiz_submit_cooldown_seconds: "Minimum seconds between answer submissions (0 to disable)."
     quiz_rules_help: "Custom quiz rules text shown in the panel info dialog. Leave blank to use the default rules (play modes and scoring from settings above)."
+    quiz_rewards_enabled: "Enable the milestone rewards page where logged-in users can claim prizes when their cumulative score reaches each threshold. Points are never deducted."
+    quiz_rewards_use_gamification_score: "Use total gamification score for reward thresholds. When disabled, only quiz points earned from correct answers count."
+    quiz_rewards_intro: "Optional intro text shown at the top of the rewards page (/quiz/rewards)."
