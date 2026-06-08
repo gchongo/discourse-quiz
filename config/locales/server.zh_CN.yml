@@ -38,3 +38,4 @@ zh_CN:
     quiz_guest_attempt_limit: "游客答题次数上限，超过后需登录。"
     quiz_guest_paywall_message: "游客达到答题上限时显示的提示文案。"
     quiz_submit_cooldown_seconds: "两次提交答案之间的最短间隔（秒），0 表示不限制。"
+    quiz_rules_help: "面板规则说明的自定义文案。留空则使用默认规则（根据上方积分设置自动生成玩法与得分说明）。"

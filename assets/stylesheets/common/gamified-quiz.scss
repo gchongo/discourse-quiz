@@ -1251,3 +1251,8 @@ label.quiz-option-radio {
   background: var(--primary-very-low);
   font-weight: 600;
 }
+
+.quiz-rules-modal__custom {
+  white-space: pre-wrap;
+  line-height: var(--line-height-large);
+}

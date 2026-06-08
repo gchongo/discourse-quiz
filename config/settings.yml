@@ -24,3 +24,7 @@ plugins:
     default: 5
     min: 0
     client: true
+  quiz_rules_help:
+    default: ""
+    client: true
+    textarea: true

@@ -11,6 +11,14 @@ export default class QuizRulesModal extends Component {
     return this.args.model?.quizStatus;
   }
 
+  get customRules() {
+    return this.siteSettings.quiz_rules_help?.trim() || "";
+  }
+
+  get useCustomRules() {
+    return this.customRules.length > 0;
+  }
+
   get showScoringRules() {
     return (
       this.siteSettings.quiz_points_per_question > 0 &&
@@ -20,10 +28,6 @@ export default class QuizRulesModal extends Component {
 
   get showCooldownRule() {
     return this.siteSettings.quiz_submit_cooldown_seconds > 0;
-  }
-
-  get showGuestRules() {
-    return !this.currentUser && this.siteSettings.quiz_enable_guest_demo;
   }
 
   get showLoggedInStatus() {
@@ -37,65 +41,54 @@ export default class QuizRulesModal extends Component {
       class="quiz-rules-modal"
     >
       <div class="quiz-rules-modal__body">
-        <p>{{i18n "discourse_quiz.rules_modal.intro"}}</p>
-
-        <h3>{{i18n "discourse_quiz.rules_modal.play_title"}}</h3>
-        <ul>
-          <li>{{i18n "discourse_quiz.rules_modal.play_types"}}</li>
-          <li>{{i18n "discourse_quiz.rules_modal.play_categories"}}</li>
-          <li>{{i18n "discourse_quiz.rules_modal.play_modes"}}</li>
-        </ul>
-
-        {{#if this.showScoringRules}}
-          <h3>{{i18n "discourse_quiz.rules_modal.scoring_title"}}</h3>
+        {{#if this.useCustomRules}}
+          <div class="quiz-rules-modal__custom">{{this.customRules}}</div>
+        {{else}}
+          <h3>{{i18n "discourse_quiz.rules_modal.play_title"}}</h3>
           <ul>
-            <li>
-              {{i18n
-                "discourse_quiz.rules_modal.scoring_per_question"
-                count=this.siteSettings.quiz_points_per_question
-              }}
-            </li>
-            <li>
-              {{i18n
-                "discourse_quiz.rules_modal.scoring_daily_cap"
-                count=this.siteSettings.quiz_daily_max_points
-              }}
-            </li>
-            <li>{{i18n "discourse_quiz.rules_modal.scoring_once_per_question"}}</li>
-            <li>{{i18n "discourse_quiz.rules_modal.scoring_learning_only"}}</li>
+            <li>{{i18n "discourse_quiz.rules_modal.play_types"}}</li>
+            <li>{{i18n "discourse_quiz.rules_modal.play_categories"}}</li>
+            <li>{{i18n "discourse_quiz.rules_modal.play_modes"}}</li>
           </ul>
-        {{/if}}
 
-        {{#if this.showLoggedInStatus}}
-          <p class="quiz-rules-modal__status">
-            {{i18n
-              "discourse_quiz.rules_modal.points_today"
-              earned=this.quizStatus.points_today
-              max=this.quizStatus.daily_max
-            }}
-          </p>
-        {{/if}}
+          {{#if this.showScoringRules}}
+            <h3>{{i18n "discourse_quiz.rules_modal.scoring_title"}}</h3>
+            <ul>
+              <li>
+                {{i18n
+                  "discourse_quiz.rules_modal.scoring_per_question"
+                  count=this.siteSettings.quiz_points_per_question
+                }}
+              </li>
+              <li>
+                {{i18n
+                  "discourse_quiz.rules_modal.scoring_daily_cap"
+                  count=this.siteSettings.quiz_daily_max_points
+                }}
+              </li>
+              <li>{{i18n "discourse_quiz.rules_modal.scoring_once_per_question"}}</li>
+              <li>{{i18n "discourse_quiz.rules_modal.scoring_learning_only"}}</li>
+            </ul>
+          {{/if}}
 
-        {{#if this.showGuestRules}}
-          <h3>{{i18n "discourse_quiz.rules_modal.guest_title"}}</h3>
-          <ul>
-            <li>
+          {{#if this.showLoggedInStatus}}
+            <p class="quiz-rules-modal__status">
               {{i18n
-                "discourse_quiz.rules_modal.guest_attempt_limit"
-                count=this.siteSettings.quiz_guest_attempt_limit
+                "discourse_quiz.rules_modal.points_today"
+                earned=this.quizStatus.points_today
+                max=this.quizStatus.daily_max
               }}
-            </li>
-            <li>{{i18n "discourse_quiz.rules_modal.guest_login_hint"}}</li>
-          </ul>
-        {{/if}}
+            </p>
+          {{/if}}
 
-        {{#if this.showCooldownRule}}
-          <p>
-            {{i18n
-              "discourse_quiz.rules_modal.cooldown"
-              seconds=this.siteSettings.quiz_submit_cooldown_seconds
-            }}
-          </p>
+          {{#if this.showCooldownRule}}
+            <p>
+              {{i18n
+                "discourse_quiz.rules_modal.cooldown"
+                seconds=this.siteSettings.quiz_submit_cooldown_seconds
+              }}
+            </p>
+          {{/if}}
         {{/if}}
       </div>
     </DModal>

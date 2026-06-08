@@ -38,3 +38,4 @@ en:
     quiz_guest_attempt_limit: "Number of questions a guest can answer before login is required."
     quiz_guest_paywall_message: "Message shown when a guest reaches the attempt limit."
     quiz_submit_cooldown_seconds: "Minimum seconds between answer submissions (0 to disable)."
+    quiz_rules_help: "Custom quiz rules text shown in the panel info dialog. Leave blank to use the default rules (play modes and scoring from settings above)."
