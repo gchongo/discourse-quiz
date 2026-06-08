@@ -172,6 +172,10 @@ export default class AdminQuizRewards extends Component {
     return i18n(`discourse_quiz.admin.rewards_status_${status}`);
   }
 
+  activeLabel(active) {
+    return active ? i18n("discourse_quiz.admin.yes") : i18n("discourse_quiz.admin.no");
+  }
+
   <template>
     <div class="admin-discourse-quiz-rewards">
       <div class="admin-discourse-quiz-rewards__toolbar">
@@ -244,7 +248,40 @@ export default class AdminQuizRewards extends Component {
       {{#if this.loading}}
         <p>{{i18n "discourse_quiz.loading"}}</p>
       {{else if this.rewards.length}}
-        <table class="admin-discourse-quiz-rewards__table">
+        <div class="admin-discourse-quiz-rewards__cards">
+          {{#each this.rewards as |reward|}}
+            <article class="admin-discourse-quiz-rewards__card">
+              <div class="admin-discourse-quiz-rewards__card-header">
+                <strong>{{reward.name}}</strong>
+                <span class="admin-discourse-quiz-rewards__card-category">{{reward.category}}</span>
+              </div>
+              <dl class="admin-discourse-quiz-rewards__card-stats">
+                <div>
+                  <dt>{{i18n "discourse_quiz.admin.rewards_table.threshold"}}</dt>
+                  <dd>{{reward.points_threshold}}</dd>
+                </div>
+                <div>
+                  <dt>{{i18n "discourse_quiz.admin.rewards_table.stock"}}</dt>
+                  <dd>{{this.stockLabel reward}}</dd>
+                </div>
+                <div>
+                  <dt>{{i18n "discourse_quiz.admin.rewards_table.claims"}}</dt>
+                  <dd>{{reward.claims_count}}</dd>
+                </div>
+                <div>
+                  <dt>{{i18n "discourse_quiz.admin.rewards_table.active"}}</dt>
+                  <dd>{{this.activeLabel reward.active}}</dd>
+                </div>
+              </dl>
+              <div class="admin-discourse-quiz-rewards__card-actions">
+                <DButton @action={{fn this.openEditForm reward}} @label="discourse_quiz.admin.edit" class="btn-default btn-small" />
+                <DButton @action={{fn this.deleteReward reward}} @label="discourse_quiz.admin.rewards_delete" class="btn-danger btn-small" />
+              </div>
+            </article>
+          {{/each}}
+        </div>
+
+        <table class="admin-discourse-quiz-rewards__table admin-discourse-quiz-rewards__table--desktop">
           <thead>
             <tr>
               <th>{{i18n "discourse_quiz.admin.rewards_table.name"}}</th>
@@ -264,7 +301,7 @@ export default class AdminQuizRewards extends Component {
                 <td>{{reward.points_threshold}}</td>
                 <td>{{this.stockLabel reward}}</td>
                 <td>{{reward.claims_count}}</td>
-                <td>{{if reward.active (i18n "discourse_quiz.admin.yes") (i18n "discourse_quiz.admin.no")}}</td>
+                <td>{{this.activeLabel reward.active}}</td>
                 <td>
                   <DButton @action={{fn this.openEditForm reward}} @label="discourse_quiz.admin.edit" class="btn-default btn-small" />
                   <DButton @action={{fn this.deleteReward reward}} @label="discourse_quiz.admin.rewards_delete" class="btn-danger btn-small" />
@@ -279,7 +316,42 @@ export default class AdminQuizRewards extends Component {
 
       <h3>{{i18n "discourse_quiz.admin.rewards_claims_title"}}</h3>
       {{#if this.claims.length}}
-        <table class="admin-discourse-quiz-rewards__table">
+        <div class="admin-discourse-quiz-rewards__cards admin-discourse-quiz-rewards__cards--claims">
+          {{#each this.claims as |claim|}}
+            <article class="admin-discourse-quiz-rewards__card">
+              <div class="admin-discourse-quiz-rewards__card-header">
+                <strong>{{claim.username}}</strong>
+                <span>{{claim.reward_name}}</span>
+              </div>
+              <dl class="admin-discourse-quiz-rewards__card-stats">
+                <div>
+                  <dt>{{i18n "discourse_quiz.admin.rewards_claims_table.status"}}</dt>
+                  <dd>{{this.claimStatusLabel claim.status}}</dd>
+                </div>
+                <div>
+                  <dt>{{i18n "discourse_quiz.admin.rewards_claims_table.date"}}</dt>
+                  <dd>{{claim.created_at}}</dd>
+                </div>
+              </dl>
+              {{#if (eq claim.status "pending")}}
+                <div class="admin-discourse-quiz-rewards__card-actions">
+                  <DButton
+                    @label="discourse_quiz.admin.rewards_mark_fulfilled"
+                    @action={{fn this.updateClaimStatus claim "fulfilled"}}
+                    class="btn-default btn-small"
+                  />
+                  <DButton
+                    @label="discourse_quiz.admin.rewards_mark_cancelled"
+                    @action={{fn this.updateClaimStatus claim "cancelled"}}
+                    class="btn-danger btn-small"
+                  />
+                </div>
+              {{/if}}
+            </article>
+          {{/each}}
+        </div>
+
+        <table class="admin-discourse-quiz-rewards__table admin-discourse-quiz-rewards__table--desktop">
           <thead>
             <tr>
               <th>{{i18n "discourse_quiz.admin.rewards_claims_table.user"}}</th>

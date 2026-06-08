@@ -1444,6 +1444,15 @@ label.quiz-option-radio {
   &__claim-btn {
     width: 100%;
     margin-top: 0.35em;
+    min-height: 2.25em;
+
+    &:disabled {
+      opacity: 1;
+      cursor: default;
+      background: var(--primary-low);
+      color: var(--primary);
+      border-color: var(--primary-low-mid);
+    }
   }
 
   &__claims {
@@ -1497,6 +1506,76 @@ label.quiz-option-radio {
     gap: 0.5em;
   }
 
+  &__cards {
+    display: none;
+    flex-direction: column;
+    gap: 0.75em;
+    margin-bottom: 1.5em;
+  }
+
+  &__card {
+    border: 1px solid var(--primary-low);
+    border-radius: var(--d-border-radius);
+    background: var(--secondary);
+    padding: 0.85em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65em;
+  }
+
+  &__card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+
+    strong {
+      font-size: var(--font-up-1);
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
+
+  &__card-category {
+    font-size: var(--font-down-1);
+    color: var(--primary-medium);
+    font-weight: 600;
+  }
+
+  &__card-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5em 0.75em;
+    margin: 0;
+
+    div {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1em;
+      min-width: 0;
+    }
+
+    dt {
+      margin: 0;
+      font-size: var(--font-down-2);
+      color: var(--primary-medium);
+      font-weight: 600;
+    }
+
+    dd {
+      margin: 0;
+      font-size: var(--font-down-1);
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
+
+  &__card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    justify-content: flex-end;
+  }
+
   &__table {
     width: 100%;
     margin-bottom: 1.5em;
@@ -1508,6 +1587,28 @@ label.quiz-option-radio {
       border-bottom: 1px solid var(--primary-low);
       text-align: left;
       vertical-align: top;
+      white-space: nowrap;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1),
+    th:nth-child(2),
+    td:nth-child(2) {
+      white-space: normal;
+      min-width: 6em;
+      max-width: 12em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
+
+  @media screen and (width <= 768px) {
+    &__cards {
+      display: flex;
+    }
+
+    &__table--desktop {
+      display: none;
     }
   }
 }

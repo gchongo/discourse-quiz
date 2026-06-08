@@ -6,8 +6,8 @@ import { LinkTo } from "@ember/routing";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { fn } from "@ember/helper";
+import { on } from "@ember/modifier";
 import { i18n } from "discourse-i18n";
-import DButton from "discourse/ui-kit/d-button";
 
 export default class QuizRewardsPage extends Component {
   @service currentUser;
@@ -37,6 +37,10 @@ export default class QuizRewardsPage extends Component {
     );
   }
 
+  get isLoggedIn() {
+    return Boolean(this.currentUser || this.model.logged_in);
+  }
+
   get pointsSourceLabel() {
     if (this.model.points_source === "quiz") {
       return i18n("discourse_quiz.rewards.points_source_quiz");
@@ -58,7 +62,7 @@ export default class QuizRewardsPage extends Component {
   }
 
   actionLabel(reward) {
-    if (!this.model.logged_in) {
+    if (!this.isLoggedIn) {
       return i18n("discourse_quiz.rewards.login_to_claim");
     }
 
@@ -83,11 +87,18 @@ export default class QuizRewardsPage extends Component {
   }
 
   canClaim(reward) {
+    const eligible =
+      reward.claimable ??
+      (this.isLoggedIn &&
+        !reward.claim_status &&
+        reward.in_stock !== false &&
+        (this.model.cumulative_points || 0) >= reward.points_threshold);
+
     return (
-      this.model.logged_in &&
-      reward.claimable &&
+      this.isLoggedIn &&
+      eligible &&
       !reward.claim_status &&
-      reward.in_stock &&
+      reward.in_stock !== false &&
       this.claimingId !== reward.id
     );
   }
@@ -164,12 +175,14 @@ export default class QuizRewardsPage extends Component {
                   <span>{{i18n "discourse_quiz.rewards.threshold" count=reward.points_threshold}}</span>
                   <span>{{this.stockLabel reward}}</span>
                 </div>
-                <DButton
-                  @translatedLabel={{this.actionLabel reward}}
-                  @action={{fn this.claimReward reward}}
-                  @disabled={{this.isClaimDisabled reward}}
-                  class="btn-primary quiz-rewards-page__claim-btn"
-                />
+                <button
+                  type="button"
+                  class="btn btn-primary quiz-rewards-page__claim-btn"
+                  disabled={{this.isClaimDisabled reward}}
+                  {{on "click" (fn this.claimReward reward)}}
+                >
+                  {{this.actionLabel reward}}
+                </button>
               </div>
             </article>
           {{/each}}
