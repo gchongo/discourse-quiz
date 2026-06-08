@@ -160,21 +160,21 @@ export default class AdminQuizRewards extends Component {
     }
   }
 
-  stockLabel(reward) {
+  stockLabel = (reward) => {
     if (reward.stock === null || reward.stock === undefined) {
       return i18n("discourse_quiz.rewards.unlimited_stock");
     }
 
     return reward.remaining_stock ?? reward.stock;
-  }
+  };
 
-  claimStatusLabel(status) {
+  claimStatusLabel = (status) => {
     return i18n(`discourse_quiz.admin.rewards_status_${status}`);
-  }
+  };
 
-  activeLabel(active) {
+  activeLabel = (active) => {
     return active ? i18n("discourse_quiz.admin.yes") : i18n("discourse_quiz.admin.no");
-  }
+  };
 
   <template>
     <div class="admin-discourse-quiz-rewards">

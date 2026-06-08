@@ -49,7 +49,7 @@ export default class QuizRewardsPage extends Component {
     return i18n("discourse_quiz.rewards.points_source_gamification");
   }
 
-  stockLabel(reward) {
+  stockLabel = (reward) => {
     if (!reward.in_stock) {
       return i18n("discourse_quiz.rewards.out_of_stock");
     }
@@ -59,9 +59,26 @@ export default class QuizRewardsPage extends Component {
     }
 
     return i18n("discourse_quiz.rewards.remaining_stock", { count: reward.remaining_stock });
-  }
+  };
 
-  actionLabel(reward) {
+  canClaim = (reward) => {
+    const eligible =
+      reward.claimable ??
+      (this.isLoggedIn &&
+        !reward.claim_status &&
+        reward.in_stock !== false &&
+        (this.model.cumulative_points || 0) >= reward.points_threshold);
+
+    return (
+      this.isLoggedIn &&
+      eligible &&
+      !reward.claim_status &&
+      reward.in_stock !== false &&
+      this.claimingId !== reward.id
+    );
+  };
+
+  actionLabel = (reward) => {
     if (!this.isLoggedIn) {
       return i18n("discourse_quiz.rewards.login_to_claim");
     }
@@ -78,40 +95,23 @@ export default class QuizRewardsPage extends Component {
       return i18n("discourse_quiz.rewards.out_of_stock");
     }
 
-    if (!reward.claimable) {
+    if (!this.canClaim(reward)) {
       const needed = Math.max(reward.points_threshold - (this.model.cumulative_points || 0), 0);
       return i18n("discourse_quiz.rewards.need_more_points", { count: needed });
     }
 
     return i18n("discourse_quiz.rewards.claim");
-  }
-
-  canClaim(reward) {
-    const eligible =
-      reward.claimable ??
-      (this.isLoggedIn &&
-        !reward.claim_status &&
-        reward.in_stock !== false &&
-        (this.model.cumulative_points || 0) >= reward.points_threshold);
-
-    return (
-      this.isLoggedIn &&
-      eligible &&
-      !reward.claim_status &&
-      reward.in_stock !== false &&
-      this.claimingId !== reward.id
-    );
-  }
+  };
 
   isClaimDisabled = (reward) => !this.canClaim(reward);
 
-  claimStatusLabel(status) {
+  claimStatusLabel = (status) => {
     if (status === "fulfilled") {
       return i18n("discourse_quiz.rewards.claimed_fulfilled");
     }
 
     return i18n("discourse_quiz.rewards.claimed_pending");
-  }
+  };
 
   @action
   async claimReward(reward) {
