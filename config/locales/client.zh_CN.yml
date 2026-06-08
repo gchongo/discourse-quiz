@@ -29,7 +29,8 @@ zh_CN:
       next_question: "下一题"
       select_option: "请先选择一个选项。"
       points_earned: "+%{count} 积分"
-      points_today: "今日已获积分：%{earned} / %{max}。"
+      points_today_label: "今日积分"
+      points_today_value: "%{earned} / %{max}"
       learning_only: "今日积分已达上限，仍可练习，但不再获得积分。"
       guest_attempts_left: "还可免费试答 %{count} 次"
       guest_home_notice_modes: "登录后可使用错题巩固和未做题模式。"
@@ -88,7 +89,6 @@ zh_CN:
         scoring_daily_cap: "每日最多可通过答题获得 %{count} 积分。"
         scoring_once_per_question: "同一道题只计分一次，之后答对不再重复加分。"
         scoring_learning_only: "达到每日上限后仍可继续练习，但当日不再获得积分。"
-        points_today: "今日已获积分：%{earned} / %{max}。"
         cooldown: "两次提交答案之间至少间隔 %{seconds} 秒。"
       admin:
         title: "社区竞答"

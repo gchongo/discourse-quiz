@@ -9,6 +9,7 @@ import DButton from "discourse/ui-kit/d-button";
 import DToggleSwitch from "discourse/ui-kit/d-toggle-switch";
 import QuizCategoryRow from "./quiz-category-row";
 import QuizGuestNotice from "./quiz-guest-notice";
+import QuizPointsToday from "./quiz-points-today";
 
 export default class QuizHome extends Component {
   @service quiz;
@@ -38,13 +39,10 @@ export default class QuizHome extends Component {
   <template>
     <div class="quiz-home">
       {{#if this.showPointsToday}}
-        <p class="quiz-home-points-today">
-          {{i18n
-            "discourse_quiz.points_today"
-            earned=this.quiz.quizStatus.points_today
-            max=this.quiz.quizStatus.daily_max
-          }}
-        </p>
+        <QuizPointsToday
+          @pointsToday={{this.quiz.quizStatus.points_today}}
+          @dailyMax={{this.quiz.quizStatus.daily_max}}
+        />
       {{/if}}
 
       <div class="quiz-home-modes">

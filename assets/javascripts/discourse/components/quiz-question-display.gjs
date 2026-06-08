@@ -8,6 +8,7 @@ import { fn } from "@ember/helper";
 import { not } from "discourse/truth-helpers";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
+import QuizQuestionMeta from "./quiz-question-meta";
 
 export default class QuizQuestionDisplay extends Component {
   @service quiz;
@@ -121,8 +122,10 @@ export default class QuizQuestionDisplay extends Component {
           }}
         </p>
       {{/if}}
-      <div class="quiz-question-type">{{this.questionTypeLabel}}</div>
-      <div class="quiz-question-category">{{this.question.category_name}}</div>
+      <QuizQuestionMeta
+        @typeLabel={{this.questionTypeLabel}}
+        @categoryName={{this.question.category_name}}
+      />
       <div class="quiz-question-text">{{this.question.question_text}}</div>
 
       {{#if this.isMultipleChoice}}

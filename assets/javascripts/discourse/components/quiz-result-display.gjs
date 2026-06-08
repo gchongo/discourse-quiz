@@ -3,6 +3,7 @@ import { action } from "@ember/object";
 import { service } from "@ember/service";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
+import QuizQuestionMeta from "./quiz-question-meta";
 
 export default class QuizResultDisplay extends Component {
   @service quiz;
@@ -109,8 +110,10 @@ export default class QuizResultDisplay extends Component {
           <p class="quiz-learning-notice">{{i18n "discourse_quiz.learning_only"}}</p>
         {{/if}}
 
-        <div class="quiz-question-type">{{this.questionTypeLabel}}</div>
-        <div class="quiz-question-category">{{this.question.category_name}}</div>
+        <QuizQuestionMeta
+          @typeLabel={{this.questionTypeLabel}}
+          @categoryName={{this.question.category_name}}
+        />
         <div class="quiz-question-text">{{this.question.question_text}}</div>
 
         {{#if this.question.options}}
