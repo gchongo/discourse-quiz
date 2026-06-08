@@ -1,14 +1,13 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
 import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
-import { eq, not } from "discourse/truth-helpers";
+import { eq } from "discourse/truth-helpers";
 
 const EMPTY_REWARD = {
   name: "",
@@ -22,8 +21,6 @@ const EMPTY_REWARD = {
 };
 
 export default class AdminQuizRewards extends Component {
-  @service modal;
-
   @tracked rewards = [];
   @tracked claims = [];
   @tracked loadError = null;
@@ -39,6 +36,10 @@ export default class AdminQuizRewards extends Component {
 
   get formReward() {
     return this.editingReward || EMPTY_REWARD;
+  }
+
+  get saveDisabled() {
+    return this.saving || !this.formReward.name?.trim();
   }
 
   @action
@@ -232,7 +233,7 @@ export default class AdminQuizRewards extends Component {
             <DButton
               @label="discourse_quiz.admin.save"
               @action={{this.saveReward}}
-              @disabled={{or this.saving (not this.formReward.name)}}
+              @disabled={{this.saveDisabled}}
               class="btn-primary"
             />
             <DButton @label="discourse_quiz.admin.no" @action={{this.closeForm}} class="btn-default" />

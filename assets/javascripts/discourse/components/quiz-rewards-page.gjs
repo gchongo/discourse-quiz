@@ -7,7 +7,6 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { fn } from "@ember/helper";
 import { i18n } from "discourse-i18n";
-import { not } from "discourse/truth-helpers";
 import DButton from "discourse/ui-kit/d-button";
 
 export default class QuizRewardsPage extends Component {
@@ -93,6 +92,10 @@ export default class QuizRewardsPage extends Component {
     );
   }
 
+  isClaimDisabled(reward) {
+    return !this.canClaim(reward);
+  }
+
   claimStatusLabel(status) {
     if (status === "fulfilled") {
       return i18n("discourse_quiz.rewards.claimed_fulfilled");
@@ -164,7 +167,7 @@ export default class QuizRewardsPage extends Component {
                 <DButton
                   @translatedLabel={{this.actionLabel reward}}
                   @action={{fn this.claimReward reward}}
-                  @disabled={{not (this.canClaim reward)}}
+                  @disabled={{this.isClaimDisabled reward}}
                   class="btn-primary quiz-rewards-page__claim-btn"
                 />
               </div>
