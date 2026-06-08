@@ -103,9 +103,7 @@ export default class QuizRewardsPage extends Component {
     );
   }
 
-  isClaimDisabled(reward) {
-    return !this.canClaim(reward);
-  }
+  isClaimDisabled = (reward) => !this.canClaim(reward);
 
   claimStatusLabel(status) {
     if (status === "fulfilled") {

@@ -1,7 +1,6 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
-import { LinkTo } from "@ember/routing";
 import { on } from "@ember/modifier";
 import { eq, not, or } from "discourse/truth-helpers";
 import { fn } from "@ember/helper";
@@ -45,14 +44,6 @@ export default class QuizHome extends Component {
           @pointsToday={{this.quiz.quizStatus.points_today}}
           @dailyMax={{this.quiz.quizStatus.daily_max}}
         />
-      {{/if}}
-
-      {{#if this.siteSettings.quiz_rewards_enabled}}
-        <div class="quiz-home-rewards-link-wrap">
-          <LinkTo @route="quizRewards" class="btn btn-default quiz-home-rewards-link">
-            {{i18n "discourse_quiz.rewards_link"}}
-          </LinkTo>
-        </div>
       {{/if}}
 
       <div class="quiz-home-modes">
