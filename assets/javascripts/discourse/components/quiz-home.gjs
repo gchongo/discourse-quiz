@@ -12,8 +12,18 @@ import QuizGuestNotice from "./quiz-guest-notice";
 
 export default class QuizHome extends Component {
   @service quiz;
+  @service currentUser;
 
   categorySkeletonRows = [1, 2, 3, 4, 5];
+
+  get showPointsToday() {
+    return (
+      this.currentUser &&
+      this.quiz.quizStatus &&
+      !this.quiz.quizStatus.is_guest &&
+      this.quiz.quizStatus.daily_max > 0
+    );
+  }
 
   @action
   startQuiz() {
@@ -27,6 +37,16 @@ export default class QuizHome extends Component {
 
   <template>
     <div class="quiz-home">
+      {{#if this.showPointsToday}}
+        <p class="quiz-home-points-today">
+          {{i18n
+            "discourse_quiz.points_today"
+            earned=this.quiz.quizStatus.points_today
+            max=this.quiz.quizStatus.daily_max
+          }}
+        </p>
+      {{/if}}
+
       <div class="quiz-home-modes">
         <span class="quiz-home-modes__label">{{i18n "discourse_quiz.home_question_type"}}</span>
         <div class="quiz-home-modes__buttons quiz-home-modes__buttons--triple" role="group">

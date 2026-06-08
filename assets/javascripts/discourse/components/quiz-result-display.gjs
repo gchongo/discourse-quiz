@@ -23,6 +23,11 @@ export default class QuizResultDisplay extends Component {
     return this.result.question_type === "true_false";
   }
 
+  get questionTypeLabel() {
+    const type = this.result.question_type || this.question.question_type;
+    return i18n(`discourse_quiz.admin.form.question_types.${type}`);
+  }
+
   get submittedIndex() {
     return this.quiz.submittedAnswerIndex;
   }
@@ -104,6 +109,7 @@ export default class QuizResultDisplay extends Component {
           <p class="quiz-learning-notice">{{i18n "discourse_quiz.learning_only"}}</p>
         {{/if}}
 
+        <div class="quiz-question-type">{{this.questionTypeLabel}}</div>
         <div class="quiz-question-category">{{this.question.category_name}}</div>
         <div class="quiz-question-text">{{this.question.question_text}}</div>
 

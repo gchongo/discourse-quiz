@@ -393,6 +393,17 @@ html.has-full-page-chat .quiz-panel-container.is-mobile.is-minimized {
   flex: 0 1 auto;
   flex-direction: column;
 
+  .quiz-home-points-today {
+    flex-shrink: 0;
+    margin: 0 0 0.75em;
+    padding: 0.65em 0.75em;
+    border-radius: var(--d-border-radius);
+    background: var(--primary-very-low);
+    font-weight: 600;
+    text-align: center;
+    font-size: var(--font-down-1);
+  }
+
   .quiz-home-modes {
     flex-shrink: 0;
     margin-bottom: 0.75em;
@@ -769,6 +780,14 @@ label.quiz-option-radio {
         margin-top: 0;
       }
     }
+  }
+
+  .quiz-question-type {
+    text-align: center;
+    font-size: var(--font-down-2);
+    color: var(--tertiary);
+    margin: 0 0 0.35em;
+    font-weight: 600;
   }
 
   .quiz-question-category {

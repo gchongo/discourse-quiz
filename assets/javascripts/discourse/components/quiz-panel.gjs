@@ -155,11 +155,7 @@ export default class QuizPanel extends Component {
 
   @action
   showRules() {
-    this.modal.show(QuizRulesModal, {
-      model: {
-        quizStatus: this.quiz.quizStatus,
-      },
-    });
+    this.modal.show(QuizRulesModal);
   }
 
   <template>

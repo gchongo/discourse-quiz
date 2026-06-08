@@ -5,11 +5,6 @@ import { i18n } from "discourse-i18n";
 
 export default class QuizRulesModal extends Component {
   @service siteSettings;
-  @service currentUser;
-
-  get quizStatus() {
-    return this.args.model?.quizStatus;
-  }
 
   get customRules() {
     return this.siteSettings.quiz_rules_help?.trim() || "";
@@ -36,10 +31,6 @@ export default class QuizRulesModal extends Component {
 
   get showCooldownRule() {
     return this.siteSettings.quiz_submit_cooldown_seconds > 0;
-  }
-
-  get showLoggedInStatus() {
-    return this.currentUser && this.quizStatus && !this.quizStatus.is_guest;
   }
 
   <template>
@@ -102,16 +93,6 @@ export default class QuizRulesModal extends Component {
               <li>{{i18n "discourse_quiz.rules_modal.scoring_once_per_question"}}</li>
               <li>{{i18n "discourse_quiz.rules_modal.scoring_learning_only"}}</li>
             </ul>
-          {{/if}}
-
-          {{#if this.showLoggedInStatus}}
-            <p class="quiz-rules-modal__status">
-              {{i18n
-                "discourse_quiz.rules_modal.points_today"
-                earned=this.quizStatus.points_today
-                max=this.quizStatus.daily_max
-              }}
-            </p>
           {{/if}}
 
           {{#if this.showCooldownRule}}

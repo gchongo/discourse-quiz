@@ -29,6 +29,7 @@ en:
       next_question: "Next question"
       select_option: "Select an option before submitting."
       points_earned: "+%{count} points"
+      points_today: "Today: %{earned} / %{max} points earned."
       learning_only: "Daily point limit reached. You can still practice, but won't earn more points today."
       guest_attempts_left: "%{count} free tries left"
       guest_home_notice_modes: "Log in to unlock wrong-answer and unseen modes."
