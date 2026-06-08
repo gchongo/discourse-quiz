@@ -34,14 +34,16 @@ describe DiscourseQuiz::QuizStatusService do
         correct_index: 0,
       )
 
-      DiscourseQuiz::QuizUserAttempt.create!(
+      attrs = {
         user_id: user.id,
         question_id: question.id,
         answer_index: 0,
         is_correct: true,
         score_awarded: true,
         created_at: Time.zone.now,
-      )
+      }
+      attrs[:points_awarded] = 10 if DiscourseQuiz::QuizUserAttempt.points_awarded_column?
+      DiscourseQuiz::QuizUserAttempt.create!(attrs)
 
       status = described_class.new(user, 0).get_status
       expect(status[:mode]).to eq("learning_only")

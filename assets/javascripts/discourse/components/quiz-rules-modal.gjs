@@ -19,10 +19,18 @@ export default class QuizRulesModal extends Component {
     return this.customRules.length > 0;
   }
 
+  get tiersEnabled() {
+    return this.siteSettings.quiz_tier1_upto_count > 0;
+  }
+
+  get showTier2Rule() {
+    return this.siteSettings.quiz_tier2_upto_count > this.siteSettings.quiz_tier1_upto_count;
+  }
+
   get showScoringRules() {
     return (
-      this.siteSettings.quiz_points_per_question > 0 &&
-      this.siteSettings.quiz_daily_max_points > 0
+      this.siteSettings.quiz_daily_max_points > 0 &&
+      (this.tiersEnabled || this.siteSettings.quiz_points_per_question > 0)
     );
   }
 
@@ -54,12 +62,37 @@ export default class QuizRulesModal extends Component {
           {{#if this.showScoringRules}}
             <h3>{{i18n "discourse_quiz.rules_modal.scoring_title"}}</h3>
             <ul>
-              <li>
-                {{i18n
-                  "discourse_quiz.rules_modal.scoring_per_question"
-                  count=this.siteSettings.quiz_points_per_question
-                }}
-              </li>
+              {{#if this.tiersEnabled}}
+                <li>
+                  {{i18n
+                    "discourse_quiz.rules_modal.scoring_tier1"
+                    count=this.siteSettings.quiz_tier1_upto_count
+                    points=this.siteSettings.quiz_tier1_points
+                  }}
+                </li>
+                {{#if this.showTier2Rule}}
+                  <li>
+                    {{i18n
+                      "discourse_quiz.rules_modal.scoring_tier2"
+                      count=this.siteSettings.quiz_tier2_upto_count
+                      points=this.siteSettings.quiz_tier2_points
+                    }}
+                  </li>
+                {{/if}}
+                <li>
+                  {{i18n
+                    "discourse_quiz.rules_modal.scoring_tier3"
+                    points=this.siteSettings.quiz_tier3_points
+                  }}
+                </li>
+              {{else}}
+                <li>
+                  {{i18n
+                    "discourse_quiz.rules_modal.scoring_per_question"
+                    count=this.siteSettings.quiz_points_per_question
+                  }}
+                </li>
+              {{/if}}
               <li>
                 {{i18n
                   "discourse_quiz.rules_modal.scoring_daily_cap"

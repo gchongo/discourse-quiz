@@ -89,5 +89,9 @@ module DiscourseQuiz
     def self.table_ready?
       ActiveRecord::Base.connection.table_exists?(:discourse_quiz_user_attempts)
     end
+
+    def self.points_awarded_column?
+      table_ready? && connection.column_exists?(table_name, :points_awarded)
+    end
   end
 end

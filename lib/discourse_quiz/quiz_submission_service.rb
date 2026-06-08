@@ -33,7 +33,9 @@ module DiscourseQuiz
 
         if is_correct
           QuizPointsService.award_points(@user, @question, attempt)
-          points_awarded = SiteSetting.quiz_points_per_question if attempt.reload.score_awarded
+          if attempt.reload.score_awarded
+            points_awarded = QuizPointsTierService.attempt_points_value(attempt)
+          end
         end
       end
 

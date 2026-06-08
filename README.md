@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.15.6)
+## Current features (v0.16.0)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Category selection and practice/question-type preferences persist in `localStorage`
@@ -12,6 +12,10 @@ Discourse quiz plugin with a dedicated question bank.
 - Home skeleton loading: only shown when no cached categories are available
 - Reset button resets category selection only (labeled「重置分类」)
 - Desktop and mobile quiz panel entry with show/hide controls
+- Header icon: when the panel is minimized, clicking the icon **expands** the panel (does not close or reset progress); when expanded, clicking closes the panel
+- Panel title **info** button opens quiz rules (play modes, scoring, daily cap); optional custom copy via `quiz_rules_help`
+- Mobile panel: minimize/expand uses `angles-down` / `angles-up`; minimize button centered in the header for thumb reach
+- Mobile close fully hides the panel (`is-visible`); minimized state on Chat full-page avoids overlapping the Chat footer (`.c-footer`)
 - Desktop docked panel sits in `#main-outlet-wrapper` grid (third column, like the sidebar); narrow viewports auto-switch to floating
 - Desktop minimize/expand for browsing topics while keeping the panel available
 - Panel mounted in a persistent outlet so quiz state survives topic navigation
@@ -24,14 +28,16 @@ Discourse quiz plugin with a dedicated question bank.
 - Correct-answer feedback shows points on the same line, right-aligned
 - Submit answers with correct/incorrect feedback and explanation
 - Guest demo with configurable attempt limit and login paywall
-- Logged-in answer history in `discourse_quiz_user_attempts`
+- Logged-in answer history in `discourse_quiz_user_attempts` (includes per-attempt `points_awarded` when tiered scoring is used)
 - Gamification points for correct answers (when `discourse-gamification` is enabled)
+- Flat or **tiered daily scoring** (optional): first N scored answers, then tier 2 up to M, then tier 3; daily cap still applies
 - Daily point cap with learning-only mode after the cap
 - Practice modes (logged-in): random, wrong-answer review, unseen questions
 - Session de-duplication: while practicing, avoids repeating questions until the selected range is exhausted
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
 - User summary stats (own profile only at `/u/:username/summary`): lifetime correct count, never-correct question count, and accuracy rate
 - Admin page with add/edit, search, pagination, category rename, export, dry-run import, and upsert import
+- Bulk import **auto-skips duplicate question text** (within the batch and vs. existing bank); reports `skipped` count
 - Admin duplicate-question detection with list summary, row highlighting, save/import warnings, and bulk disable (keep lowest ID per group)
 - Admin mobile question list uses card layout; desktop keeps the table with ID, question type, and compact active indicators; bulk-disable-duplicates control is a small button after Search
 - Optional site setting `quiz_categories` to limit panel questions by category name
@@ -109,10 +115,11 @@ id,category_name,question_text,question_type,options,correct_index,correct_indic
 - **Edit question**: pencil icon in the table (keeps the same question ID)
 - **Export**: export JSON/CSV for the current filter/search
 - **Dry run**: validate import without writing to the database
-- **Upsert**: update existing rows when `id` is present
+- **Upsert**: update existing rows when `id` is present (not skipped as duplicates)
 - **Rename category**: rename a category across all questions in the bank
 - **Search / pagination**: find questions by text, category, or question type in large banks
 - **Duplicate detection**: normalized question-text duplicates are highlighted in the list; save/import responses include warnings
+- **Bulk import skip**: duplicate rows in the file or matching existing question text are skipped automatically; import result shows `skipped` count
 - **Bulk disable duplicates**: disable all but the lowest-ID question in each duplicate group
 
 ## Testing
@@ -220,21 +227,45 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | GET | `/quiz/next.json` | Random active question; optional `category_names[]`, `question_types[]` (`single_choice`, `true_false`, `multiple_choice`), `practice_mode` (`normal`, `wrong_only`, `unseen`), `exclude_question_ids[]` (session de-duplication) |
 | GET | `/quiz/status.json` | Current guest/login quiz status |
 | GET | `/quiz/summary_stats.json` | Logged-in user's lifetime correct, never-correct question count, and accuracy rate |
-| POST | `/quiz/submit.json` | Submit `question_id` + `answer_index` (single/true-false) or `answer_indices[]` (multiple choice) |
+| POST | `/quiz/submit.json` | Submit `question_id` + `answer_index` (single/true-false) or `answer_indices[]` (multiple choice); returns actual `points_awarded` |
 | GET | `/admin/quiz/questions.json` | Admin question list (`page`, `per_page`, `q`, `category_name`, `question_type`) + duplicate summary |
 | GET | `/admin/quiz/questions/export.json` | Export JSON or CSV (`export_format`) |
 | POST | `/admin/quiz/questions.json` | Create one question (may include `duplicate_warning`) |
 | PUT | `/admin/quiz/questions/:id.json` | Update one question (may include `duplicate_warning`) |
 | PUT | `/admin/quiz/categories/rename.json` | Rename a category across the bank |
-| POST | `/admin/quiz/questions/bulk_import.json` | Bulk import JSON or CSV (`import_format`, `dry_run`, `upsert`) |
+| POST | `/admin/quiz/questions/bulk_import.json` | Bulk import JSON or CSV (`import_format`, `dry_run`, `upsert`); duplicates skipped; returns `skipped` |
 | POST | `/admin/quiz/questions/bulk_disable_duplicates.json` | Disable duplicate questions, keeping the lowest ID in each group |
 
-## Gamification
+## Gamification and scoring
 
-Install and enable the official `discourse-gamification` plugin, then set:
+Install and enable the official `discourse-gamification` plugin.
 
-- `quiz_points_per_question` — points per correct answer
-- `quiz_daily_max_points` — daily earning cap
+### Flat scoring (default)
+
+Set `quiz_tier1_upto_count` to **0**. Each first-time correct answer awards `quiz_points_per_question` until `quiz_daily_max_points` is reached.
+
+### Tiered scoring (optional)
+
+Set `quiz_tier1_upto_count` to **N** (greater than 0) to enable tiers by **daily scored-answer index** (same question only scores once):
+
+| Setting | Meaning |
+|---------|---------|
+| `quiz_tier1_upto_count` | Tier 1: first **N** scored answers today |
+| `quiz_tier1_points` | Points per question in tier 1 |
+| `quiz_tier2_upto_count` | Tier 2 cumulative upper bound **M** (must be > N) |
+| `quiz_tier2_points` | Points per question for scored answers N+1 … M |
+| `quiz_tier3_points` | Points per question after M |
+| `quiz_daily_max_points` | Hard daily cap; last award may be partial if only a few points remain |
+
+Example (daily cap 30, encourage more practice): `N=3, tier1=10`, `M=10, tier2=5`, `tier3=2`.
+
+Legacy attempts without `points_awarded` still count toward today's total using `quiz_points_per_question`.
+
+### Other settings
+
+- `quiz_rules_help` — custom rules text for the panel info dialog (blank = built-in rules)
+- `quiz_submit_cooldown_seconds` — minimum seconds between submissions (0 = off)
+- `quiz_enable_guest_demo` / `quiz_guest_attempt_limit` — guest try limit
 
 ## Next steps
 

@@ -66,7 +66,7 @@ module DiscourseQuiz
     def points_today_for(user_id)
       return 0 unless attempts_table_ready?
 
-      QuizUserAttempt.awarded_today(user_id).count * SiteSetting.quiz_points_per_question
+      QuizPointsTierService.points_earned_today(user_id)
     end
 
     def attempts_table_ready?

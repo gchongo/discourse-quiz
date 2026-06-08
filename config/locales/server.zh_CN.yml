@@ -32,7 +32,12 @@ zh_CN:
   site_settings:
     quiz_plugin_enabled: "启用答题面板与题库。"
     quiz_categories: "答题面板可选分类过滤（留空表示全部）。"
-    quiz_points_per_question: "每道答对题目奖励的积分（需启用 discourse-gamification）。"
+    quiz_points_per_question: "未启用阶梯时，每道首次答对题目的固定积分（quiz_tier1_upto_count 为 0 时生效）。"
+    quiz_tier1_upto_count: "阶梯积分：第一档每日计分题数上限 N。设为 0 则使用上方固定每题积分。"
+    quiz_tier1_points: "第一档每题积分（当日第 1～N 次计分）。"
+    quiz_tier2_upto_count: "第二档累计上界 M（须大于 N）。第 N+1～M 次计分使用第二档积分。"
+    quiz_tier2_points: "第二档每题积分。"
+    quiz_tier3_points: "第三档每题积分（M 次计分之后）。"
     quiz_daily_max_points: "用户每日可通过答题获得的最大积分。"
     quiz_enable_guest_demo: "允许游客试答有限数量的题目。"
     quiz_guest_attempt_limit: "游客答题次数上限，超过后需登录。"

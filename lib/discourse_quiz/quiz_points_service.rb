@@ -12,9 +12,15 @@ module DiscourseQuiz
         return if already_awarded?(user, question)
         return if daily_limit_reached?(user)
 
-        points = SiteSetting.quiz_points_per_question
+        points = QuizPointsTierService.awardable_points_for(user.id)
+        return if points <= 0
+
         if award_via_gamification(user, points, question)
-          attempt.update!(score_awarded: true)
+          attrs = { score_awarded: true }
+          if QuizUserAttempt.points_awarded_column?
+            attrs[:points_awarded] = points
+          end
+          attempt.update!(attrs)
           enqueue_score_refresh
         end
       end
@@ -34,9 +40,7 @@ module DiscourseQuiz
     end
 
     def self.daily_limit_reached?(user)
-      points_today =
-        QuizUserAttempt.awarded_today(user.id).count * SiteSetting.quiz_points_per_question
-      points_today >= SiteSetting.quiz_daily_max_points
+      QuizPointsTierService.points_earned_today(user.id) >= QuizPointsTierService.daily_max_points
     end
 
     def self.award_via_gamification(user, points, question)

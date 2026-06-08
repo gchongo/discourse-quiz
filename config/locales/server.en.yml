@@ -32,7 +32,12 @@ en:
   site_settings:
     quiz_plugin_enabled: "Enable the quiz panel and question bank."
     quiz_categories: "Optional category name filter for the quiz panel (leave blank for all)."
-    quiz_points_per_question: "Points awarded for each correct answer (requires discourse-gamification)."
+    quiz_points_per_question: "Points per correct answer when tier scoring is off (quiz_tier1_upto_count = 0)."
+    quiz_tier1_upto_count: "Tiered scoring: number of daily scored answers in tier 1. Set to 0 to use flat quiz_points_per_question."
+    quiz_tier1_points: "Points per question for tier 1 (first N scored answers today)."
+    quiz_tier2_upto_count: "Cumulative upper bound for tier 2 (must be greater than tier 1). Answers from N+1 up to this count use tier 2 points."
+    quiz_tier2_points: "Points per question for tier 2."
+    quiz_tier3_points: "Points per question for tier 3 (after tier 2 bound)."
     quiz_daily_max_points: "Maximum quiz points a user can earn per day."
     quiz_enable_guest_demo: "Allow guests to try a limited number of quiz questions."
     quiz_guest_attempt_limit: "Number of questions a guest can answer before login is required."

@@ -8,6 +8,26 @@ plugins:
   quiz_points_per_question:
     default: 10
     client: true
+  quiz_tier1_upto_count:
+    default: 0
+    min: 0
+    client: true
+  quiz_tier1_points:
+    default: 10
+    min: 0
+    client: true
+  quiz_tier2_upto_count:
+    default: 0
+    min: 0
+    client: true
+  quiz_tier2_points:
+    default: 5
+    min: 0
+    client: true
+  quiz_tier3_points:
+    default: 1
+    min: 0
+    client: true
   quiz_daily_max_points:
     default: 100
     client: true
