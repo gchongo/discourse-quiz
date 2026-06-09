@@ -1340,30 +1340,58 @@ label.quiz-option-radio {
   }
 
   &__score-card {
-    margin-bottom: 1.25em;
-    padding: 0.85em 1em;
-    border: 1px solid var(--primary-low);
-    border-radius: var(--d-border-radius);
-    background: var(--secondary);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1.5em;
+    padding: 1.35em 1.25em 1.15em;
+    border: 1px solid var(--tertiary-low);
+    border-radius: calc(var(--d-border-radius) * 1.5);
+    background: linear-gradient(
+      160deg,
+      var(--secondary) 0%,
+      var(--tertiary-very-low) 55%,
+      var(--secondary) 100%
+    );
+    text-align: center;
+    box-shadow: 0 8px 28px var(--tertiary-low);
+    animation: quiz-rewards-score-glow 3s ease-in-out infinite;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% -20%, var(--tertiary-low) 0%, transparent 65%);
+      opacity: 0.65;
+      pointer-events: none;
+    }
+
+    > * {
+      position: relative;
+      z-index: 1;
+    }
   }
 
   &__score-label {
-    font-size: var(--font-down-1);
+    font-size: var(--font-0);
     color: var(--primary-medium);
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.02em;
   }
 
   &__score-value {
-    font-size: var(--font-up-3);
-    font-weight: 700;
+    font-size: var(--font-up-5);
+    font-weight: 800;
     color: var(--tertiary);
-    line-height: 1.2;
-    margin: 0.15em 0;
+    line-height: 1.1;
+    margin: 0.2em 0 0.25em;
+    text-shadow: 0 2px 12px var(--tertiary-low);
+    animation: quiz-rewards-score-pulse 2.8s ease-in-out infinite;
   }
 
   &__score-hint {
     font-size: var(--font-down-1);
     color: var(--primary-medium);
+    font-weight: 600;
   }
 
   &__notice {
@@ -1451,13 +1479,77 @@ label.quiz-option-radio {
     padding-top: 1em;
 
     h3 {
-      margin: 0 0 0.5em;
+      margin: 0 0 0.65em;
     }
+  }
 
-    ul {
-      margin: 0;
-      padding-left: 1.25em;
+  &__claims-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  &__claim-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35em 0.5em;
+    padding: 0.65em 0.75em;
+    border: 1px solid var(--primary-low);
+    border-radius: var(--d-border-radius);
+    background: var(--secondary);
+    line-height: 1.4;
+  }
+
+  &__claim-name {
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  &__claim-status {
+    color: var(--primary-medium);
+
+    &::before {
+      content: "—";
+      margin-right: 0.35em;
+      color: var(--primary-low-mid);
     }
+  }
+
+  &__claim-date {
+    font-size: var(--font-down-1);
+    color: var(--primary-medium);
+
+    &::before {
+      content: "·";
+      margin-right: 0.35em;
+      color: var(--primary-low-mid);
+    }
+  }
+}
+
+@keyframes quiz-rewards-score-glow {
+  0%,
+  100% {
+    box-shadow: 0 8px 28px var(--tertiary-low);
+  }
+
+  50% {
+    box-shadow: 0 10px 36px var(--tertiary-medium);
+  }
+}
+
+@keyframes quiz-rewards-score-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.04);
   }
 }
 
@@ -1514,10 +1606,34 @@ label.quiz-option-radio {
     gap: 0.65em;
   }
 
+  .quiz-admin-active-indicator {
+    display: inline-block;
+    width: 0.65em;
+    height: 0.65em;
+    border-radius: 50%;
+    vertical-align: middle;
+
+    &.is-active {
+      background: var(--success);
+    }
+
+    &.is-inactive {
+      background: var(--primary-low-mid);
+    }
+  }
+
   &__card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75em;
+  }
+
+  &__card-title {
     display: flex;
     flex-direction: column;
     gap: 0.2em;
+    min-width: 0;
 
     strong {
       font-size: var(--font-up-1);
@@ -1526,15 +1642,25 @@ label.quiz-option-radio {
     }
   }
 
+  &__card-status {
+    flex-shrink: 0;
+    padding-top: 0.15em;
+  }
+
   &__card-category {
     font-size: var(--font-down-1);
     color: var(--primary-medium);
     font-weight: 600;
   }
 
+  &__col-active {
+    text-align: center;
+    width: 2.75em;
+  }
+
   &__card-stats {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.5em 0.75em;
     margin: 0;
 

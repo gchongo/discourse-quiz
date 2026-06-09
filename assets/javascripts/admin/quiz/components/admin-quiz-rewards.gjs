@@ -172,10 +172,6 @@ export default class AdminQuizRewards extends Component {
     return i18n(`discourse_quiz.admin.rewards_status_${status}`);
   };
 
-  activeLabel = (active) => {
-    return active ? i18n("discourse_quiz.admin.yes") : i18n("discourse_quiz.admin.no");
-  };
-
   <template>
     <div class="admin-discourse-quiz-rewards">
       <div class="admin-discourse-quiz-rewards__toolbar">
@@ -252,8 +248,27 @@ export default class AdminQuizRewards extends Component {
           {{#each this.rewards as |reward|}}
             <article class="admin-discourse-quiz-rewards__card">
               <div class="admin-discourse-quiz-rewards__card-header">
-                <strong>{{reward.name}}</strong>
-                <span class="admin-discourse-quiz-rewards__card-category">{{reward.category}}</span>
+                <div class="admin-discourse-quiz-rewards__card-title">
+                  <strong>{{reward.name}}</strong>
+                  {{#if reward.category}}
+                    <span class="admin-discourse-quiz-rewards__card-category">{{reward.category}}</span>
+                  {{/if}}
+                </div>
+                <span class="admin-discourse-quiz-rewards__card-status">
+                  {{#if reward.active}}
+                    <span
+                      class="quiz-admin-active-indicator is-active"
+                      title={{i18n "discourse_quiz.admin.yes"}}
+                      aria-label={{i18n "discourse_quiz.admin.yes"}}
+                    ></span>
+                  {{else}}
+                    <span
+                      class="quiz-admin-active-indicator is-inactive"
+                      title={{i18n "discourse_quiz.admin.no"}}
+                      aria-label={{i18n "discourse_quiz.admin.no"}}
+                    ></span>
+                  {{/if}}
+                </span>
               </div>
               <dl class="admin-discourse-quiz-rewards__card-stats">
                 <div>
@@ -267,10 +282,6 @@ export default class AdminQuizRewards extends Component {
                 <div>
                   <dt>{{i18n "discourse_quiz.admin.rewards_table.claims"}}</dt>
                   <dd>{{reward.claims_count}}</dd>
-                </div>
-                <div>
-                  <dt>{{i18n "discourse_quiz.admin.rewards_table.active"}}</dt>
-                  <dd>{{this.activeLabel reward.active}}</dd>
                 </div>
               </dl>
               <div class="admin-discourse-quiz-rewards__card-actions">
@@ -301,7 +312,21 @@ export default class AdminQuizRewards extends Component {
                 <td>{{reward.points_threshold}}</td>
                 <td>{{this.stockLabel reward}}</td>
                 <td>{{reward.claims_count}}</td>
-                <td>{{this.activeLabel reward.active}}</td>
+                <td class="admin-discourse-quiz-rewards__col-active">
+                  {{#if reward.active}}
+                    <span
+                      class="quiz-admin-active-indicator is-active"
+                      title={{i18n "discourse_quiz.admin.yes"}}
+                      aria-label={{i18n "discourse_quiz.admin.yes"}}
+                    ></span>
+                  {{else}}
+                    <span
+                      class="quiz-admin-active-indicator is-inactive"
+                      title={{i18n "discourse_quiz.admin.no"}}
+                      aria-label={{i18n "discourse_quiz.admin.no"}}
+                    ></span>
+                  {{/if}}
+                </td>
                 <td>
                   <DButton @action={{fn this.openEditForm reward}} @label="discourse_quiz.admin.edit" class="btn-default btn-small" />
                   <DButton @action={{fn this.deleteReward reward}} @label="discourse_quiz.admin.rewards_delete" class="btn-danger btn-small" />

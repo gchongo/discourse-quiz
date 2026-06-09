@@ -7,6 +7,7 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
+import dFormatDate from "discourse/ui-kit/helpers/d-format-date";
 import { i18n } from "discourse-i18n";
 
 export default class QuizRewardsPage extends Component {
@@ -193,11 +194,16 @@ export default class QuizRewardsPage extends Component {
         <div class="quiz-rewards-page__claims">
           <h3>{{i18n "discourse_quiz.rewards.my_claims"}}</h3>
           {{#if this.claims.length}}
-            <ul>
+            <ul class="quiz-rewards-page__claims-list">
               {{#each this.claims as |claim|}}
-                <li>
-                  <strong>{{claim.reward_name}}</strong>
-                  — {{this.claimStatusLabel claim.status}}
+                <li class="quiz-rewards-page__claim-item">
+                  <span class="quiz-rewards-page__claim-name">{{claim.reward_name}}</span>
+                  <span class="quiz-rewards-page__claim-status">{{this.claimStatusLabel claim.status}}</span>
+                  {{#if claim.created_at}}
+                    <time class="quiz-rewards-page__claim-date" datetime={{claim.created_at}}>
+                      {{dFormatDate claim.created_at}}
+                    </time>
+                  {{/if}}
                 </li>
               {{/each}}
             </ul>
