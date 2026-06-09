@@ -8,6 +8,7 @@ import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { eq, not } from "discourse/truth-helpers";
 import dAvatar from "discourse/ui-kit/helpers/d-avatar";
+import dIcon from "discourse/ui-kit/helpers/d-icon";
 import { i18n } from "discourse-i18n";
 
 export default class QuizLeaderboardPage extends Component {
@@ -60,6 +61,38 @@ export default class QuizLeaderboardPage extends Component {
   get profileCategories() {
     return this.profileData?.categories || [];
   }
+
+  get winners() {
+    if (!this.users.length) {
+      return [];
+    }
+
+    return this.users.slice(0, Math.min(3, this.users.length));
+  }
+
+  get listUsers() {
+    if (this.users.length <= 3) {
+      return [];
+    }
+
+    return this.users.slice(3);
+  }
+
+  get showPodium() {
+    return this.winners.length > 0;
+  }
+
+  get metricColumnLabel() {
+    if (this.metric === "accuracy") {
+      return i18n("discourse_quiz.leaderboard.metric_accuracy");
+    }
+
+    return i18n("discourse_quiz.leaderboard.metric_volume");
+  }
+
+  winnerPositionClass = (entry) => {
+    return `-position${entry.position}`;
+  };
 
   valueLabel = (entry) => {
     if (this.metric === "accuracy") {
@@ -209,7 +242,9 @@ export default class QuizLeaderboardPage extends Component {
 
   <template>
     <section class="quiz-leaderboard-page">
-      <h1>{{i18n "discourse_quiz.leaderboard.title"}}</h1>
+      <div class="quiz-leaderboard-page__header">
+        <h1 class="quiz-leaderboard-page__title">{{i18n "discourse_quiz.leaderboard.title"}}</h1>
+      </div>
       <p class="quiz-leaderboard-page__intro">{{i18n "discourse_quiz.leaderboard.intro"}}</p>
 
       {{#unless this.isEnabled}}
@@ -237,17 +272,17 @@ export default class QuizLeaderboardPage extends Component {
       </nav>
 
       {{#if (eq this.activeTab "rankings")}}
-        <div class="quiz-leaderboard-page__subtabs">
+        <div class="quiz-leaderboard-page__metric-switch" role="tablist">
           <button
             type="button"
-            class="btn btn-default btn-small {{if (eq this.metric 'volume') 'active'}}"
+            class="quiz-leaderboard-page__metric-btn {{if (eq this.metric 'volume') 'is-active'}}"
             {{on "click" (fn this.setMetric "volume")}}
           >
             {{i18n "discourse_quiz.leaderboard.metric_volume"}}
           </button>
           <button
             type="button"
-            class="btn btn-default btn-small {{if (eq this.metric 'accuracy') 'active'}}"
+            class="quiz-leaderboard-page__metric-btn {{if (eq this.metric 'accuracy') 'is-active'}}"
             {{on "click" (fn this.setMetric "accuracy")}}
           >
             {{i18n "discourse_quiz.leaderboard.metric_accuracy"}}
@@ -275,62 +310,92 @@ export default class QuizLeaderboardPage extends Component {
           {{/unless}}
         {{/if}}
 
-        {{#if this.users.length}}
-          <div class="quiz-leaderboard-page__list">
-            {{#each this.users as |entry|}}
-              <article class="quiz-leaderboard-page__row">
-                <span class="quiz-leaderboard-page__rank">{{entry.position}}</span>
-                <button
-                  type="button"
-                  class="quiz-leaderboard-page__user"
-                  {{on "click" (fn this.openProfile entry.username)}}
-                >
-                  {{dAvatar entry imageSize="large"}}
-                  <span class="quiz-leaderboard-page__name">{{this.displayName entry}}</span>
-                </button>
-                <span class="quiz-leaderboard-page__value">{{this.valueLabel entry}}</span>
-              </article>
-            {{/each}}
-          </div>
-
-          {{#if this.canLoadMore}}
-            <div class="quiz-leaderboard-page__more">
-              <button
-                type="button"
-                class="btn btn-default"
-                disabled={{this.loadingRankings}}
-                {{on "click" this.loadMore}}
-              >
-                {{i18n "discourse_quiz.leaderboard.load_more"}}
-              </button>
+        {{#if this.showPodium}}
+          <div class="quiz-leaderboard-page__podium-wrapper">
+            <div class="quiz-leaderboard-page__podium">
+              {{#each this.winners as |entry|}}
+                <div class="quiz-leaderboard-page__winner {{this.winnerPositionClass entry}}">
+                  <div class="quiz-leaderboard-page__winner-crown">{{dIcon "crown"}}</div>
+                  <button
+                    type="button"
+                    class="quiz-leaderboard-page__winner-avatar"
+                    {{on "click" (fn this.openProfile entry.username)}}
+                  >
+                    {{dAvatar entry imageSize="huge"}}
+                    <span class="quiz-leaderboard-page__winner-rank">{{entry.position}}</span>
+                  </button>
+                  <div class="quiz-leaderboard-page__winner-name">{{this.displayName entry}}</div>
+                  <div class="quiz-leaderboard-page__winner-value">{{this.valueLabel entry}}</div>
+                </div>
+              {{/each}}
             </div>
-          {{/if}}
-        {{else if (not this.loadingRankings)}}
-          <p>{{i18n "discourse_quiz.leaderboard.empty"}}</p>
+          </div>
         {{/if}}
 
-        {{#if this.personal}}
-          <div class="quiz-leaderboard-page__personal">
-            <h3>{{i18n "discourse_quiz.leaderboard.personal_title"}}</h3>
-            {{#if this.personal.ineligible}}
-              <p>
-                {{i18n
-                  "discourse_quiz.leaderboard.personal_ineligible"
-                  count=this.personal.min_attempts
-                  attempted=this.personal.questions_attempted
-                }}
-              </p>
-            {{else}}
-              <article class="quiz-leaderboard-page__row is-highlight">
-                <span class="quiz-leaderboard-page__rank">{{this.personal.position}}</span>
-                <span class="quiz-leaderboard-page__user is-static">
-                  {{dAvatar this.personal imageSize="large"}}
-                  <span class="quiz-leaderboard-page__name">{{this.displayName this.personal}}</span>
-                </span>
-                <span class="quiz-leaderboard-page__value">{{this.valueLabel this.personal}}</span>
-              </article>
+        {{#if this.users.length}}
+          <div class="quiz-leaderboard-page__ranking">
+            <div class="quiz-leaderboard-page__ranking-head">
+              <span>{{i18n "discourse_quiz.leaderboard.rank_column"}}</span>
+              <span>
+                {{dIcon "award"}}
+                {{this.metricColumnLabel}}
+              </span>
+            </div>
+
+            {{#if this.personal}}
+              {{#if this.personal.ineligible}}
+                <p class="quiz-leaderboard-page__personal-note">
+                  {{i18n
+                    "discourse_quiz.leaderboard.personal_ineligible"
+                    count=this.personal.min_attempts
+                    attempted=this.personal.questions_attempted
+                  }}
+                </p>
+              {{else}}
+                <article class="quiz-leaderboard-page__self-row">
+                  <span class="quiz-leaderboard-page__self-rank">{{this.personal.position}}</span>
+                  <span class="quiz-leaderboard-page__self-label">
+                    {{i18n "discourse_quiz.leaderboard.personal_you"}}
+                  </span>
+                  <span class="quiz-leaderboard-page__self-value">{{this.valueLabel this.personal}}</span>
+                </article>
+              {{/if}}
+            {{/if}}
+
+            {{#if this.listUsers.length}}
+              <div class="quiz-leaderboard-page__list">
+                {{#each this.listUsers as |entry|}}
+                  <article class="quiz-leaderboard-page__row">
+                    <span class="quiz-leaderboard-page__rank">{{entry.position}}</span>
+                    <button
+                      type="button"
+                      class="quiz-leaderboard-page__user"
+                      {{on "click" (fn this.openProfile entry.username)}}
+                    >
+                      {{dAvatar entry imageSize="large"}}
+                      <span class="quiz-leaderboard-page__name">{{this.displayName entry}}</span>
+                    </button>
+                    <span class="quiz-leaderboard-page__value">{{this.valueLabel entry}}</span>
+                  </article>
+                {{/each}}
+              </div>
+            {{/if}}
+
+            {{#if this.canLoadMore}}
+              <div class="quiz-leaderboard-page__more">
+                <button
+                  type="button"
+                  class="btn btn-default"
+                  disabled={{this.loadingRankings}}
+                  {{on "click" this.loadMore}}
+                >
+                  {{i18n "discourse_quiz.leaderboard.load_more"}}
+                </button>
+              </div>
             {{/if}}
           </div>
+        {{else if (not this.loadingRankings)}}
+          <p class="quiz-leaderboard-page__empty">{{i18n "discourse_quiz.leaderboard.empty"}}</p>
         {{/if}}
       {{/if}}
 

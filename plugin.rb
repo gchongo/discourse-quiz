@@ -2,13 +2,16 @@
 
 # name: discourse-quiz
 # about: Quiz panel with question bank for Discourse.
-# version: 0.18.3
+# version: 0.18.4
 # authors: howhy.day
 # url: https://github.com/howhy-day/discourse-quiz
 
 enabled_site_setting :quiz_plugin_enabled
 
 register_asset "stylesheets/common/gamified-quiz.scss"
+
+register_svg_icon "crown"
+register_svg_icon "award"
 
 module ::DiscourseQuiz
   PLUGIN_NAME = "discourse-quiz"
