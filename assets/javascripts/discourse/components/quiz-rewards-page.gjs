@@ -198,12 +198,14 @@ export default class QuizRewardsPage extends Component {
               {{#each this.claims as |claim|}}
                 <li class="quiz-rewards-page__claim-item">
                   <span class="quiz-rewards-page__claim-name">{{claim.reward_name}}</span>
-                  <span class="quiz-rewards-page__claim-status">{{this.claimStatusLabel claim.status}}</span>
-                  {{#if claim.created_at}}
-                    <time class="quiz-rewards-page__claim-date" datetime={{claim.created_at}}>
-                      {{dFormatDate claim.created_at}}
-                    </time>
-                  {{/if}}
+                  <span class="quiz-rewards-page__claim-meta">
+                    <span class="quiz-rewards-page__claim-status">{{this.claimStatusLabel claim.status}}</span>
+                    {{#if claim.created_at}}
+                      <time class="quiz-rewards-page__claim-date" datetime={{claim.created_at}}>
+                        {{dFormatDate claim.created_at}}
+                      </time>
+                    {{/if}}
+                  </span>
                 </li>
               {{/each}}
             </ul>

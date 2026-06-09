@@ -188,55 +188,69 @@ export default class AdminQuizRewards extends Component {
 
       {{#if this.showForm}}
         <div class="admin-discourse-quiz-rewards__form">
-          <h3>
-            {{#if this.editingReward.id}}
-              {{i18n "discourse_quiz.admin.rewards_edit"}}
-            {{else}}
-              {{i18n "discourse_quiz.admin.rewards_create"}}
-            {{/if}}
-          </h3>
+          <div class="admin-discourse-quiz-rewards__form-header">
+            <h3>
+              {{#if this.editingReward.id}}
+                {{i18n "discourse_quiz.admin.rewards_edit"}}
+              {{else}}
+                {{i18n "discourse_quiz.admin.rewards_create"}}
+              {{/if}}
+            </h3>
+            <DButton
+              @icon="xmark"
+              @action={{this.closeForm}}
+              @title="cancel"
+              class="btn-flat btn-small admin-discourse-quiz-rewards__form-close"
+            />
+          </div>
 
-          <label>
-            {{i18n "discourse_quiz.admin.rewards_form.name"}}
-            <input type="text" value={{this.formReward.name}} {{on "input" (fn this.updateField "name")}} />
-          </label>
-          <label>
-            {{i18n "discourse_quiz.admin.rewards_form.description"}}
-            <textarea rows="3" {{on "input" (fn this.updateField "description")}}>{{this.formReward.description}}</textarea>
-          </label>
-          <label>
-            {{i18n "discourse_quiz.admin.rewards_form.category"}}
-            <input type="text" value={{this.formReward.category}} {{on "input" (fn this.updateField "category")}} />
-          </label>
-          <label>
-            {{i18n "discourse_quiz.admin.rewards_form.image_url"}}
-            <input type="text" value={{this.formReward.image_url}} {{on "input" (fn this.updateField "image_url")}} />
-          </label>
-          <label>
-            {{i18n "discourse_quiz.admin.rewards_form.points_threshold"}}
-            <input type="number" min="1" value={{this.formReward.points_threshold}} {{on "input" (fn this.updateField "points_threshold")}} />
-          </label>
-          <label>
-            {{i18n "discourse_quiz.admin.rewards_form.stock"}}
-            <input type="number" min="0" value={{this.formReward.stock}} {{on "input" (fn this.updateField "stock")}} />
-          </label>
-          <label>
-            {{i18n "discourse_quiz.admin.rewards_form.position"}}
-            <input type="number" min="0" value={{this.formReward.position}} {{on "input" (fn this.updateField "position")}} />
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" checked={{this.formReward.active}} {{on "change" (fn this.updateField "active")}} />
-            {{i18n "discourse_quiz.admin.rewards_form.active"}}
-          </label>
+          <div class="quiz-admin-form">
+            <label class="quiz-admin-form__field">
+              <span>{{i18n "discourse_quiz.admin.rewards_form.name"}}</span>
+              <input type="text" value={{this.formReward.name}} {{on "input" (fn this.updateField "name")}} />
+            </label>
+            <label class="quiz-admin-form__field">
+              <span>{{i18n "discourse_quiz.admin.rewards_form.description"}}</span>
+              <textarea rows="3" {{on "input" (fn this.updateField "description")}}>{{this.formReward.description}}</textarea>
+            </label>
+            <label class="quiz-admin-form__field">
+              <span>{{i18n "discourse_quiz.admin.rewards_form.category"}}</span>
+              <input type="text" value={{this.formReward.category}} {{on "input" (fn this.updateField "category")}} />
+            </label>
+            <label class="quiz-admin-form__field">
+              <span>{{i18n "discourse_quiz.admin.rewards_form.image_url"}}</span>
+              <input type="text" value={{this.formReward.image_url}} {{on "input" (fn this.updateField "image_url")}} />
+            </label>
+            <div class="admin-discourse-quiz-rewards__form-row">
+              <label class="quiz-admin-form__field">
+                <span>{{i18n "discourse_quiz.admin.rewards_form.points_threshold"}}</span>
+                <input type="number" min="1" value={{this.formReward.points_threshold}} {{on "input" (fn this.updateField "points_threshold")}} />
+              </label>
+              <label class="quiz-admin-form__field">
+                <span>{{i18n "discourse_quiz.admin.rewards_form.stock"}}</span>
+                <input type="number" min="0" value={{this.formReward.stock}} {{on "input" (fn this.updateField "stock")}} />
+              </label>
+            </div>
+            <div class="admin-discourse-quiz-rewards__form-row">
+              <label class="quiz-admin-form__field">
+                <span>{{i18n "discourse_quiz.admin.rewards_form.position"}}</span>
+                <input type="number" min="0" value={{this.formReward.position}} {{on "input" (fn this.updateField "position")}} />
+              </label>
+              <label class="quiz-admin-form__checkbox">
+                <input type="checkbox" checked={{this.formReward.active}} {{on "change" (fn this.updateField "active")}} />
+                <span>{{i18n "discourse_quiz.admin.rewards_form.active"}}</span>
+              </label>
+            </div>
+          </div>
 
           <div class="admin-discourse-quiz-rewards__form-actions">
+            <DButton @label="cancel" @action={{this.closeForm}} class="btn-default" />
             <DButton
-              @label="discourse_quiz.admin.save"
+              @label={{if this.saving "discourse_quiz.admin.saving" "discourse_quiz.admin.save"}}
               @action={{this.saveReward}}
               @disabled={{this.saveDisabled}}
               class="btn-primary"
             />
-            <DButton @label="discourse_quiz.admin.no" @action={{this.closeForm}} class="btn-default" />
           </div>
         </div>
       {{/if}}
