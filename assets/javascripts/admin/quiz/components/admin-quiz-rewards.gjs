@@ -3,6 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
+import moment from "moment";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
 import { fn } from "@ember/helper";
@@ -170,6 +171,14 @@ export default class AdminQuizRewards extends Component {
 
   claimStatusLabel = (status) => {
     return i18n(`discourse_quiz.admin.rewards_status_${status}`);
+  };
+
+  claimDateTime = (value) => {
+    if (!value) {
+      return "";
+    }
+
+    return moment(value).format("YYYY-MM-DD HH:mm:ss");
   };
 
   <template>
@@ -369,7 +378,7 @@ export default class AdminQuizRewards extends Component {
                 </div>
                 <div>
                   <dt>{{i18n "discourse_quiz.admin.rewards_claims_table.date"}}</dt>
-                  <dd>{{claim.created_at}}</dd>
+                  <dd>{{this.claimDateTime claim.created_at}}</dd>
                 </div>
               </dl>
               {{#if (eq claim.status "pending")}}
@@ -406,7 +415,7 @@ export default class AdminQuizRewards extends Component {
                 <td>{{claim.username}}</td>
                 <td>{{claim.reward_name}}</td>
                 <td>{{this.claimStatusLabel claim.status}}</td>
-                <td>{{claim.created_at}}</td>
+                <td>{{this.claimDateTime claim.created_at}}</td>
                 <td>
                   {{#if (eq claim.status "pending")}}
                     <DButton

@@ -31,9 +31,9 @@ en:
       points_earned: "+%{count} points"
       points_today_label: "Today's points"
       points_today_value: "%{earned} / %{max}"
-      rewards_link: "Milestone rewards"
+      rewards_link: "Points redemption"
       rewards:
-        title: "Milestone rewards"
+        title: "Points redemption"
         intro_default: "Claim prizes when your cumulative score reaches each threshold. Points are never deducted."
         cumulative_label: "Cumulative score"
         points_source_gamification: "Thresholds use your total gamification score"
@@ -121,7 +121,7 @@ en:
         cooldown: "Wait at least %{seconds} seconds between answer submissions."
       admin:
         title: "Community quiz"
-        rewards_title: "Milestone rewards"
+        rewards_title: "Points redemption"
         rewards_create: "Add reward"
         rewards_edit: "Edit reward"
         rewards_empty: "No rewards yet. Click Add reward to get started."

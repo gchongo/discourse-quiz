@@ -31,9 +31,9 @@ zh_CN:
       points_earned: "+%{count} 积分"
       points_today_label: "今日积分"
       points_today_value: "%{earned} / %{max}"
-      rewards_link: "里程碑奖品"
+      rewards_link: "积分兑换"
       rewards:
-        title: "里程碑奖品"
+        title: "积分兑换"
         intro_default: "累计积分达到门槛即可领取奖品，积分不会被扣除。"
         cumulative_label: "累计积分"
         points_source_gamification: "按社区总积分计算门槛"
@@ -121,7 +121,7 @@ zh_CN:
         cooldown: "两次提交答案之间至少间隔 %{seconds} 秒。"
       admin:
         title: "社区竞答"
-        rewards_title: "里程碑奖品"
+        rewards_title: "积分兑换"
         rewards_create: "新增奖品"
         rewards_edit: "编辑奖品"
         rewards_empty: "还没有奖品，点击「新增奖品」开始配置。"

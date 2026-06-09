@@ -6,7 +6,7 @@ Discourse quiz plugin with a dedicated question bank.
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Home **today's points** progress bar (earned / daily max); rules info dialog no longer shows this line
-- Home link to **milestone rewards** when `quiz_rewards_enabled` (optional, separate from quiz play)
+- Home link to **points redemption** when `quiz_rewards_enabled` (optional, separate from quiz play)
 - Category selection and practice/question-type preferences persist in `localStorage`
 - Category list cache: cached categories show immediately on home open while refreshing in the background
 - Home layout: start button below practice mode; category list below start button (optional)
@@ -39,7 +39,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Session de-duplication: while practicing, avoids repeating questions until the selected range is exhausted
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
 - User summary stats (own profile only at `/u/:username/summary`): lifetime correct count, never-correct question count, and accuracy rate
-- **Milestone rewards** (optional): cumulative score thresholds, claim prizes without deducting points; admin CRUD + fulfillment queue
+- **Points redemption** (optional): cumulative score thresholds, claim prizes without deducting points; admin CRUD + fulfillment queue
 - Admin question bank: add/edit, search, pagination, category rename, export, dry-run import, and upsert import
 - Bulk import **auto-skips duplicate question text** (within the batch and vs. existing bank); reports `skipped` count
 - Admin duplicate-question detection with list summary, row highlighting, save/import warnings, and bulk disable (keep lowest ID per group)
@@ -64,7 +64,7 @@ hooks:
 
 Enable `quiz_plugin_enabled` in admin settings.
 
-## Milestone rewards (optional)
+## Points redemption (optional)
 
 Independent module — does **not** change quiz submit, scoring, or daily caps. Disabled by default (`quiz_rewards_enabled`).
 
@@ -82,12 +82,12 @@ Independent module — does **not** change quiz submit, scoring, or daily caps. 
 3. Choose score source:
    - `quiz_rewards_use_gamification_score` **true** (default): total `discourse-gamification` score.
    - **false**: sum of quiz `points_awarded` from scored correct answers only.
-4. Admin → Plugins → **Community quiz** → **Milestone rewards**: add prizes (name, category, image URL, threshold, stock, sort order).
+4. Admin → Plugins → **Community quiz** → **Points redemption**: add prizes (name, category, image URL, threshold, stock, sort order).
 
 ### User paths
 
 - Public page: `/quiz/rewards`
-- Panel home: **Milestone rewards** link (when enabled)
+- Panel home: **Points redemption** link (when enabled)
 
 ### Admin fulfillment
 
@@ -255,7 +255,7 @@ Recent plugin migrations:
 | Version | Purpose |
 |---------|---------|
 | `20260606120000` | `points_awarded` on `discourse_quiz_user_attempts` (tiered scoring) |
-| `20260608130000` | `discourse_quiz_rewards` + `discourse_quiz_reward_claims` (milestone rewards) |
+| `20260608130000` | `discourse_quiz_rewards` + `discourse_quiz_reward_claims` (points redemption) |
 
 Then run `rake db:migrate` again after pulling the fixed plugin code.
 
@@ -314,7 +314,7 @@ Legacy attempts without `points_awarded` still count toward today's total using 
 - `quiz_rules_help` — custom rules text for the panel info dialog (blank = built-in rules)
 - `quiz_submit_cooldown_seconds` — minimum seconds between submissions (0 = off)
 - `quiz_enable_guest_demo` / `quiz_guest_attempt_limit` — guest try limit
-- `quiz_rewards_enabled` — milestone rewards page and claims (default off)
+- `quiz_rewards_enabled` — points redemption page and claims (default off)
 - `quiz_rewards_use_gamification_score` — use total gamification score for reward thresholds (off = quiz points only)
 - `quiz_rewards_intro` — optional intro on `/quiz/rewards`
 

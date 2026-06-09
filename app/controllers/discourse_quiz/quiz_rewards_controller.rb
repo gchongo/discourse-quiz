@@ -110,6 +110,7 @@ module DiscourseQuiz
         id: claim.id,
         reward_id: claim.reward_id,
         reward_name: claim.reward&.name,
+        reward_description: claim.reward&.description,
         status: claim.status,
         created_at: claim.created_at,
       }

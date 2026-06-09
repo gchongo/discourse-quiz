@@ -7,7 +7,7 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
-import dFormatDate from "discourse/ui-kit/helpers/d-format-date";
+import moment from "moment";
 import { i18n } from "discourse-i18n";
 
 export default class QuizRewardsPage extends Component {
@@ -114,6 +114,14 @@ export default class QuizRewardsPage extends Component {
     return i18n("discourse_quiz.rewards.claimed_pending");
   };
 
+  claimDateTime = (value) => {
+    if (!value) {
+      return "";
+    }
+
+    return moment(value).format("YYYY-MM-DD HH:mm:ss");
+  };
+
   @action
   async claimReward(reward) {
     if (!this.canClaim(reward)) {
@@ -197,12 +205,17 @@ export default class QuizRewardsPage extends Component {
             <ul class="quiz-rewards-page__claims-list">
               {{#each this.claims as |claim|}}
                 <li class="quiz-rewards-page__claim-item">
-                  <span class="quiz-rewards-page__claim-name">{{claim.reward_name}}</span>
+                  <div class="quiz-rewards-page__claim-main">
+                    <span class="quiz-rewards-page__claim-name">{{claim.reward_name}}</span>
+                    {{#if claim.reward_description}}
+                      <span class="quiz-rewards-page__claim-description">{{claim.reward_description}}</span>
+                    {{/if}}
+                  </div>
                   <span class="quiz-rewards-page__claim-meta">
                     <span class="quiz-rewards-page__claim-status">{{this.claimStatusLabel claim.status}}</span>
                     {{#if claim.created_at}}
                       <time class="quiz-rewards-page__claim-date" datetime={{claim.created_at}}>
-                        {{dFormatDate claim.created_at}}
+                        {{this.claimDateTime claim.created_at}}
                       </time>
                     {{/if}}
                   </span>
