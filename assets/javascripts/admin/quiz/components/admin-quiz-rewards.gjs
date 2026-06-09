@@ -416,7 +416,7 @@ export default class AdminQuizRewards extends Component {
                 <td>{{claim.reward_name}}</td>
                 <td>{{this.claimStatusLabel claim.status}}</td>
                 <td>{{this.claimDateTime claim.created_at}}</td>
-                <td>
+                <td class="admin-discourse-quiz-rewards__claim-actions">
                   {{#if (eq claim.status "pending")}}
                     <DButton
                       @label="discourse_quiz.admin.rewards_mark_fulfilled"
@@ -428,6 +428,8 @@ export default class AdminQuizRewards extends Component {
                       @action={{fn this.updateClaimStatus claim "cancelled"}}
                       class="btn-danger btn-small"
                     />
+                  {{else}}
+                    <span class="admin-discourse-quiz-rewards__claim-actions-done">{{i18n "discourse_quiz.admin.rewards_claims_no_actions"}}</span>
                   {{/if}}
                 </td>
               </tr>

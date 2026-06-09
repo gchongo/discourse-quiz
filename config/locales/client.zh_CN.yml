@@ -127,6 +127,7 @@ zh_CN:
         rewards_empty: "还没有奖品，点击「新增奖品」开始配置。"
         rewards_claims_title: "领取记录"
         rewards_claims_empty: "暂无领取记录。"
+        rewards_claims_no_actions: "—"
         rewards_form:
           name: "名称"
           description: "描述"

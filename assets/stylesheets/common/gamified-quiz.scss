@@ -1753,6 +1753,14 @@ body.quiz-rewards {
     width: 2.75em;
   }
 
+  &__claim-actions {
+    white-space: nowrap;
+  }
+
+  &__claim-actions-done {
+    color: var(--primary-medium);
+  }
+
   &__card-stats {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

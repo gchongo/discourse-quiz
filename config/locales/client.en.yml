@@ -127,6 +127,7 @@ en:
         rewards_empty: "No rewards yet. Click Add reward to get started."
         rewards_claims_title: "Claims"
         rewards_claims_empty: "No claims yet."
+        rewards_claims_no_actions: "—"
         rewards_form:
           name: "Name"
           description: "Description"
