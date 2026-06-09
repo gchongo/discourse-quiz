@@ -2,7 +2,7 @@
 
 # name: discourse-quiz
 # about: Quiz panel with question bank for Discourse.
-# version: 0.18.0
+# version: 0.18.1
 # authors: howhy.day
 # url: https://github.com/howhy-day/discourse-quiz
 
@@ -32,10 +32,9 @@ require_relative "lib/discourse_quiz/quiz_leaderboard_refresh_service"
 require_relative "lib/discourse_quiz/quiz_leaderboard_ranking_service"
 require_relative "lib/discourse_quiz/user_summary_extension"
 
-require_relative "jobs/regular/refresh_quiz_leaderboard_user"
-require_relative "jobs/scheduled/refresh_quiz_leaderboard_stats"
-
 after_initialize do
+  require_relative "jobs/regular/refresh_quiz_leaderboard_user"
+  require_relative "jobs/scheduled/refresh_quiz_leaderboard_stats"
 
   ::UserSummary.prepend(DiscourseQuiz::UserSummaryExtension)
 

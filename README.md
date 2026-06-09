@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.18.0)
+## Current features (v0.18.1)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Home **today's points** progress bar (earned / daily max); rules info dialog no longer shows this line
@@ -357,6 +357,11 @@ Disabled by default (`quiz_leaderboard_enabled`). Link `/quiz/leaderboard` from 
 Stats are stored in `discourse_quiz_leaderboard_stats` and refreshed hourly (`Jobs::RefreshQuizLeaderboardStats`) and after each logged-in submit when enabled.
 
 ## Changelog
+
+### v0.18.1
+
+- Fix: idempotent leaderboard/rewards migrations (`if_not_exists` indexes; safe table creation)
+- Fix: load leaderboard refresh jobs inside `after_initialize` (matches discourse-gamification)
 
 ### v0.18.0
 
