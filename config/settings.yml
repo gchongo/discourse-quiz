@@ -58,3 +58,15 @@ plugins:
     default: ""
     client: true
     textarea: true
+  quiz_leaderboard_enabled:
+    default: false
+    client: true
+  quiz_leaderboard_min_attempts:
+    default: 20
+    min: 1
+    client: true
+  quiz_leaderboard_user_limit:
+    default: 50
+    min: 10
+    max: 100
+    client: true

@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.17.1)
+## Current features (v0.18.0)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Home **today's points** progress bar (earned / daily max); rules info dialog no longer shows this line
@@ -40,6 +40,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
 - User summary stats (own profile only at `/u/:username/summary`): lifetime correct count, never-correct question count, and accuracy rate
 - **Points redemption** (optional): cumulative score thresholds, claim prizes without deducting points; admin CRUD + fulfillment queue; centered page layout; claim history with name, description, status, and `YYYY-MM-DD HH:mm:ss` timestamp
+- **Quiz leaderboard** (optional): `/quiz/leaderboard` with volume and accuracy rankings plus per-user category stats table; distinct-question counts (not attempt counts); accuracy = distinct correct ÷ distinct attempted; cached stats table with hourly refresh and per-user refresh after submit
 - Admin question bank: add/edit, search, pagination, category rename, export, dry-run import, and upsert import
 - Bulk import **auto-skips duplicate question text** (within the batch and vs. existing bank); reports `skipped` count
 - Admin duplicate-question detection with list summary, row highlighting, save/import warnings, and bulk disable (keep lowest ID per group)
@@ -329,8 +330,40 @@ Legacy attempts without `points_awarded` still count toward today's total using 
 - `quiz_rewards_enabled` — points redemption page and claims (default off)
 - `quiz_rewards_use_gamification_score` — use total gamification score for reward thresholds (off = quiz points only)
 - `quiz_rewards_intro` — optional intro on `/quiz/rewards`
+- `quiz_leaderboard_enabled` — quiz leaderboard page (default off)
+- `quiz_leaderboard_min_attempts` — minimum distinct questions for accuracy ranking (default 20)
+- `quiz_leaderboard_user_limit` — users per page on leaderboard (default 50, max 100)
+
+## Quiz leaderboard (optional)
+
+Disabled by default (`quiz_leaderboard_enabled`). Link `/quiz/leaderboard` from your site nav (not shown in the quiz panel).
+
+### Metrics
+
+- **Questions attempted** — `COUNT(DISTINCT question_id)` per user (any attempt counts once per question).
+- **Questions correct** — distinct questions with at least one correct attempt.
+- **Accuracy** — `questions_correct / questions_attempted × 100%` (one decimal place).
+
+### Tabs
+
+1. **Rankings** — volume (total distinct questions) or accuracy (requires `quiz_leaderboard_min_attempts`); shows your rank when logged in.
+2. **By category** — search a username and view a table of per-category stats (scheme C).
+
+### API
+
+- `GET /quiz/leaderboard.json?metric=volume|accuracy&page=1`
+- `GET /quiz/leaderboard/user_categories.json?username=`
+
+Stats are stored in `discourse_quiz_leaderboard_stats` and refreshed hourly (`Jobs::RefreshQuizLeaderboardStats`) and after each logged-in submit when enabled.
 
 ## Changelog
+
+### v0.18.0
+
+- Quiz leaderboard: volume and accuracy rankings, per-user category stats table
+- Distinct-question metrics (not raw attempt counts); accuracy uses distinct correct ÷ distinct attempted
+- Cached stats with per-user refresh on submit and hourly full refresh
+- Settings: `quiz_leaderboard_enabled`, `quiz_leaderboard_min_attempts`, `quiz_leaderboard_user_limit`
 
 ### v0.17.1
 

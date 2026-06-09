@@ -1,0 +1,112 @@
+# frozen_string_literal: true
+
+module DiscourseQuiz
+  class QuizLeaderboardRefreshService
+    ACTIVE_USER_SQL = <<~SQL.squish
+      u.active = TRUE
+      AND (u.suspended_till IS NULL OR u.suspended_till < :now)
+      AND u.staged = FALSE
+    SQL
+
+    def self.refresh_all!
+      return unless tables_ready?
+
+      now = Time.zone.now
+      QuizLeaderboardStat.delete_all
+      insert_global_rows!(now)
+      insert_category_rows!(now)
+      true
+    end
+
+    def self.refresh_user!(user_id)
+      return unless tables_ready?
+
+      user_id = user_id.to_i
+      return if user_id <= 0
+
+      now = Time.zone.now
+      QuizLeaderboardStat.where(user_id: user_id).delete_all
+
+      insert_global_rows!(now, user_id: user_id)
+      insert_category_rows!(now, user_id: user_id)
+      true
+    end
+
+    def self.tables_ready?
+      QuizUserAttempt.table_ready? && QuizLeaderboardStat.table_ready?
+    end
+
+    def self.insert_global_rows!(now, user_id: nil)
+      user_filter = user_id ? "AND a.user_id = :user_id" : ""
+
+      DB.exec(
+        <<~SQL,
+          INSERT INTO discourse_quiz_leaderboard_stats
+            (user_id, category_name, questions_attempted, questions_correct, accuracy_rate, updated_at)
+          SELECT
+            stats.user_id,
+            '',
+            stats.questions_attempted,
+            stats.questions_correct,
+            CASE
+              WHEN stats.questions_attempted > 0
+              THEN ROUND(100.0 * stats.questions_correct / stats.questions_attempted, 1)
+              ELSE NULL
+            END,
+            :now
+          FROM (
+            SELECT
+              a.user_id,
+              COUNT(DISTINCT a.question_id) AS questions_attempted,
+              COUNT(DISTINCT CASE WHEN a.is_correct THEN a.question_id END) AS questions_correct
+            FROM discourse_quiz_user_attempts a
+            INNER JOIN users u ON u.id = a.user_id
+            INNER JOIN discourse_quiz_questions q ON q.id = a.question_id AND q.active = TRUE
+            WHERE #{ACTIVE_USER_SQL}
+              #{user_filter}
+            GROUP BY a.user_id
+          ) stats
+        SQL
+        now: now,
+        user_id: user_id,
+      )
+    end
+
+    def self.insert_category_rows!(now, user_id: nil)
+      user_filter = user_id ? "AND a.user_id = :user_id" : ""
+
+      DB.exec(
+        <<~SQL,
+          INSERT INTO discourse_quiz_leaderboard_stats
+            (user_id, category_name, questions_attempted, questions_correct, accuracy_rate, updated_at)
+          SELECT
+            stats.user_id,
+            stats.category_name,
+            stats.questions_attempted,
+            stats.questions_correct,
+            CASE
+              WHEN stats.questions_attempted > 0
+              THEN ROUND(100.0 * stats.questions_correct / stats.questions_attempted, 1)
+              ELSE NULL
+            END,
+            :now
+          FROM (
+            SELECT
+              a.user_id,
+              q.category_name,
+              COUNT(DISTINCT a.question_id) AS questions_attempted,
+              COUNT(DISTINCT CASE WHEN a.is_correct THEN a.question_id END) AS questions_correct
+            FROM discourse_quiz_user_attempts a
+            INNER JOIN users u ON u.id = a.user_id
+            INNER JOIN discourse_quiz_questions q ON q.id = a.question_id AND q.active = TRUE
+            WHERE #{ACTIVE_USER_SQL}
+              #{user_filter}
+            GROUP BY a.user_id, q.category_name
+          ) stats
+        SQL
+        now: now,
+        user_id: user_id,
+      )
+    end
+  end
+end

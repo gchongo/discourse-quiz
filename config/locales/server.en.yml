@@ -56,3 +56,6 @@ en:
     quiz_rewards_enabled: "Enable the points redemption page where logged-in users can claim prizes when their cumulative score reaches each threshold. Points are never deducted."
     quiz_rewards_use_gamification_score: "Use total gamification score for reward thresholds. When disabled, only quiz points earned from correct answers count."
     quiz_rewards_intro: "Optional intro text shown at the top of the rewards page (/quiz/rewards)."
+    quiz_leaderboard_enabled: "Enable the quiz leaderboard page (/quiz/leaderboard)."
+    quiz_leaderboard_min_attempts: "Minimum distinct questions attempted to appear on the accuracy leaderboard (default 20)."
+    quiz_leaderboard_user_limit: "Users shown per leaderboard page (10–100)."

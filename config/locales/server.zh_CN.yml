@@ -56,3 +56,6 @@ zh_CN:
     quiz_rewards_enabled: "启用积分兑换页：用户累计积分达到门槛后可领取，积分不会被扣除。"
     quiz_rewards_use_gamification_score: "兑换门槛使用 gamification 总积分。关闭后仅统计答题获得的积分。"
     quiz_rewards_intro: "积分兑换页（/quiz/rewards）顶部可选说明文案。"
+    quiz_leaderboard_enabled: "启用答题排行页（/quiz/leaderboard）。"
+    quiz_leaderboard_min_attempts: "正确率榜最低答题总数（不同题目数），默认 20。"
+    quiz_leaderboard_user_limit: "排行榜每页显示人数（10–100）。"

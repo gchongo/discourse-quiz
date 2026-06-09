@@ -37,6 +37,8 @@ module DiscourseQuiz
             points_awarded = QuizPointsTierService.attempt_points_value(attempt)
           end
         end
+
+        enqueue_leaderboard_refresh(@user.id)
       end
 
       build_result(is_correct, points_awarded)
@@ -119,6 +121,13 @@ module DiscourseQuiz
 
     def attempts_answer_indices_column?
       ActiveRecord::Base.connection.column_exists?(:discourse_quiz_user_attempts, :answer_indices)
+    end
+
+    def enqueue_leaderboard_refresh(user_id)
+      return unless SiteSetting.quiz_leaderboard_enabled
+      return unless defined?(Jobs::RefreshQuizLeaderboardUser)
+
+      Jobs.enqueue(Jobs::RefreshQuizLeaderboardUser, user_id: user_id)
     end
   end
 end

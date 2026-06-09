@@ -9,6 +9,8 @@ DiscourseQuiz::Engine.routes.draw do
   get "/rewards" => "quiz_rewards#index"
   get "/rewards/claims" => "quiz_rewards#claims"
   post "/rewards/:id/claim" => "quiz_rewards#claim"
+  get "/leaderboard" => "quiz_leaderboard#index"
+  get "/leaderboard/user_categories" => "quiz_leaderboard#user_categories"
 end
 
 Discourse::Application.routes.draw do
