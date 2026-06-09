@@ -2,11 +2,11 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.17.0)
+## Current features (v0.17.1)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Home **today's points** progress bar (earned / daily max); rules info dialog no longer shows this line
-- Home link to **points redemption** when `quiz_rewards_enabled` (optional, separate from quiz play)
+- **Points redemption** is a standalone page (`/quiz/rewards`); link it from your site nav/menus (not shown in the quiz panel)
 - Category selection and practice/question-type preferences persist in `localStorage`
 - Category list cache: cached categories show immediately on home open while refreshing in the background
 - Home layout: start button below practice mode; category list below start button (optional)
@@ -39,7 +39,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Session de-duplication: while practicing, avoids repeating questions until the selected range is exhausted
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
 - User summary stats (own profile only at `/u/:username/summary`): lifetime correct count, never-correct question count, and accuracy rate
-- **Points redemption** (optional): cumulative score thresholds, claim prizes without deducting points; admin CRUD + fulfillment queue
+- **Points redemption** (optional): cumulative score thresholds, claim prizes without deducting points; admin CRUD + fulfillment queue; centered page layout; claim history with name, description, status, and `YYYY-MM-DD HH:mm:ss` timestamp
 - Admin question bank: add/edit, search, pagination, category rename, export, dry-run import, and upsert import
 - Bulk import **auto-skips duplicate question text** (within the batch and vs. existing bank); reports `skipped` count
 - Admin duplicate-question detection with list summary, row highlighting, save/import warnings, and bulk disable (keep lowest ID per group)
@@ -86,12 +86,24 @@ Independent module — does **not** change quiz submit, scoring, or daily caps. 
 
 ### User paths
 
-- Public page: `/quiz/rewards`
-- Panel home: **Points redemption** link (when enabled)
+- Public page: `/quiz/rewards` (add your own nav link, e.g. sidebar or header menu)
+- Logged-in users see cumulative score, available rewards, and **My claims** (name + description on one line; status and time on the right)
 
 ### Admin fulfillment
 
-- Same admin area → **Claims** table: mark **fulfilled** or **cancelled**.
+- Admin → Plugins → **Community quiz** → **Points redemption** tab
+- **Claims** table: **Mark fulfilled** / **Cancel** when status is **pending**; fulfilled/cancelled rows show **—** in Actions
+- Mobile admin uses card layout; desktop uses tables; enabled status uses green/grey dots (same as question bank)
+
+### Question picking (logged-in)
+
+| Mode | Already-answered questions |
+|------|---------------------------|
+| **Random** (`normal`) | Can reappear after the current session exhausts the range; recently correct (30 min) are deprioritized; points only once per question |
+| **Wrong only** | Only questions whose **latest** attempt was wrong |
+| **Unseen** | Only questions never attempted before |
+
+Session de-duplication: while a quiz round is running, already-shown questions are excluded until the selected range is exhausted, then the pool resets.
 
 ## Admin bulk import format
 
@@ -318,8 +330,23 @@ Legacy attempts without `points_awarded` still count toward today's total using 
 - `quiz_rewards_use_gamification_score` — use total gamification score for reward thresholds (off = quiz points only)
 - `quiz_rewards_intro` — optional intro on `/quiz/rewards`
 
+## Changelog
+
+### v0.17.1
+
+- Points redemption UI: centered `/quiz/rewards` layout; claim list no longer shifted by global `.body-page ul` margin
+- Claim records: name + description on one line; fixed datetime format; admin claims datetime formatting
+- Admin rewards: mobile cards, form UX, cancel button fix, claim actions column clarity
+- Renamed user-facing copy from「里程碑奖品」to「积分兑换」
+- Removed points redemption link from quiz panel home (use site nav instead)
+
+### v0.17.0
+
+- Milestone / points redemption module, tiered scoring, quiz panel UX improvements
+
 ## Next steps
 
+- Configurable day boundary (e.g. Beijing midnight) for quiz daily cap vs. gamification
+- Clarify or customize gamification daily leaderboard vs. quiz「today」points
+- Admin notification on new claims (PM / email)
 - Phase C: admin analytics and user attempt history
-- Rewards: admin notification on new claims (PM / email)
-- Later: v0.6 source topic audit (`source_topic_id`, scheduled validation)

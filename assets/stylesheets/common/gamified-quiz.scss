@@ -1319,6 +1319,13 @@ body.quiz-rewards {
   .container .body-page {
     max-width: 960px;
     margin-inline: auto;
+
+    // Override global .body-page ul { margin-left: 40px } (faqs.scss)
+    ul.quiz-rewards-page__claims-list {
+      margin-left: 0;
+      margin-right: 0;
+      padding-left: 0;
+    }
   }
 }
 
@@ -1484,23 +1491,34 @@ body.quiz-rewards {
 
   &__claims {
     width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
     border-top: 1px solid var(--primary-low);
     padding-top: 1em;
+    box-sizing: border-box;
 
     h3 {
       margin: 0 0 0.65em;
       text-align: center;
     }
+
+    > p {
+      text-align: center;
+      color: var(--primary-medium);
+    }
   }
 
   &__claims-list {
     width: 100%;
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 0;
     padding: 0;
     list-style: none;
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: 0.5em;
+    box-sizing: border-box;
   }
 
   &__claim-item {
