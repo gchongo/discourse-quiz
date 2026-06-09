@@ -73,6 +73,7 @@ en:
         load_more: "Load more"
         empty: "No leaderboard data yet."
         load_error: "Failed to load leaderboard. Please try again."
+        disabled: "The quiz leaderboard is disabled. Enable quiz_leaderboard_enabled in admin settings."
         personal_title: "Your rank"
         personal_ineligible: "Accuracy ranking requires at least %{count} distinct questions; you have %{attempted}."
         profile_hint: "View a user's stats per category (distinct questions attempted)."

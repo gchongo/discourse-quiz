@@ -73,6 +73,7 @@ zh_CN:
         load_more: "加载更多"
         empty: "暂无排行数据。"
         load_error: "排行榜加载失败，请稍后重试。"
+        disabled: "答题排行功能未开启，请在管理后台启用「quiz_leaderboard_enabled」。"
         personal_title: "我的排名"
         personal_ineligible: "正确率榜需至少完成 %{count} 道不同题目，你当前为 %{attempted} 道。"
         profile_hint: "查看某用户在各分类下的答题统计（做过的不同题目数）。"

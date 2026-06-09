@@ -6,7 +6,7 @@ export default class QuizLeaderboardRoute extends Route {
   @service router;
 
   beforeModel() {
-    if (!this.siteSettings.quiz_plugin_enabled || !this.siteSettings.quiz_leaderboard_enabled) {
+    if (!this.siteSettings.quiz_plugin_enabled) {
       this.router.replaceWith("discovery.latest");
     }
   }

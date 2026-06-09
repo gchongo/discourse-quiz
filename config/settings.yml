@@ -59,7 +59,7 @@ plugins:
     client: true
     textarea: true
   quiz_leaderboard_enabled:
-    default: false
+    default: true
     client: true
   quiz_leaderboard_min_attempts:
     default: 20

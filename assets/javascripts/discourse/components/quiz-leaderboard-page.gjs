@@ -26,10 +26,19 @@ export default class QuizLeaderboardPage extends Component {
   @tracked profileData = null;
   @tracked profileError = null;
 
+  get isEnabled() {
+    return this.siteSettings.quiz_leaderboard_enabled;
+  }
+
   constructor() {
     super(...arguments);
     this.profileUsername = this.currentUser?.username || "";
-    this.loadRankings();
+
+    if (this.isEnabled) {
+      this.loadRankings();
+    } else {
+      this.loadingRankings = false;
+    }
   }
 
   get users() {
@@ -84,6 +93,10 @@ export default class QuizLeaderboardPage extends Component {
 
   @action
   setTab(tab) {
+    if (!this.isEnabled) {
+      return;
+    }
+
     this.activeTab = tab;
 
     if (tab === "profile" && !this.profileData && this.profileUsername) {
@@ -199,6 +212,13 @@ export default class QuizLeaderboardPage extends Component {
       <h1>{{i18n "discourse_quiz.leaderboard.title"}}</h1>
       <p class="quiz-leaderboard-page__intro">{{i18n "discourse_quiz.leaderboard.intro"}}</p>
 
+      {{#unless this.isEnabled}}
+        <p class="quiz-leaderboard-page__notice is-error">
+          {{i18n "discourse_quiz.leaderboard.disabled"}}
+        </p>
+      {{/unless}}
+
+      {{#if this.isEnabled}}
       <nav class="quiz-leaderboard-page__tabs" role="tablist">
         <button
           type="button"
@@ -382,6 +402,7 @@ export default class QuizLeaderboardPage extends Component {
             <p>{{i18n "discourse_quiz.leaderboard.profile_empty"}}</p>
           {{/if}}
         {{/if}}
+      {{/if}}
       {{/if}}
     </section>
   </template>
