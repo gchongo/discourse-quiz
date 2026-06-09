@@ -243,7 +243,9 @@ export default class QuizLeaderboardPage extends Component {
   <template>
     <section class="quiz-leaderboard-page">
       <div class="quiz-leaderboard-page__header">
-        <h1 class="quiz-leaderboard-page__title">{{i18n "discourse_quiz.leaderboard.title"}}</h1>
+        <h1 class="quiz-leaderboard-page__title page__title">
+          {{i18n "discourse_quiz.leaderboard.title"}}
+        </h1>
       </div>
       <p class="quiz-leaderboard-page__intro">{{i18n "discourse_quiz.leaderboard.intro"}}</p>
 
@@ -254,41 +256,54 @@ export default class QuizLeaderboardPage extends Component {
       {{/unless}}
 
       {{#if this.isEnabled}}
-      <nav class="quiz-leaderboard-page__tabs" role="tablist">
+      <div class="quiz-leaderboard-page__toolbar">
+        {{#if (eq this.activeTab "profile")}}
+          <button
+            type="button"
+            class="quiz-leaderboard-page__back-btn"
+            title={{i18n "discourse_quiz.leaderboard.back"}}
+            {{on "click" (fn this.setTab "rankings")}}
+          >
+            {{dIcon "arrow-left"}}
+          </button>
+        {{else}}
+          <span class="quiz-leaderboard-page__toolbar-spacer" aria-hidden="true"></span>
+        {{/if}}
+
+        {{#if (eq this.activeTab "rankings")}}
+          <div class="quiz-leaderboard-page__metric-switch" role="tablist">
+            <button
+              type="button"
+              class="quiz-leaderboard-page__metric-btn {{if (eq this.metric 'volume') 'is-active'}}"
+              {{on "click" (fn this.setMetric "volume")}}
+            >
+              {{i18n "discourse_quiz.leaderboard.metric_volume"}}
+            </button>
+            <button
+              type="button"
+              class="quiz-leaderboard-page__metric-btn {{if (eq this.metric 'accuracy') 'is-active'}}"
+              {{on "click" (fn this.setMetric "accuracy")}}
+            >
+              {{i18n "discourse_quiz.leaderboard.metric_accuracy"}}
+            </button>
+          </div>
+        {{else}}
+          <span class="quiz-leaderboard-page__toolbar-profile-title">
+            {{i18n "discourse_quiz.leaderboard.tab_profile"}}
+          </span>
+        {{/if}}
+
         <button
           type="button"
-          class="btn btn-default {{if (eq this.activeTab 'rankings') 'active'}}"
-          {{on "click" (fn this.setTab "rankings")}}
-        >
-          {{i18n "discourse_quiz.leaderboard.tab_rankings"}}
-        </button>
-        <button
-          type="button"
-          class="btn btn-default {{if (eq this.activeTab 'profile') 'active'}}"
+          class="quiz-leaderboard-page__profile-btn {{if (eq this.activeTab 'profile') 'is-active'}}"
           {{on "click" (fn this.setTab "profile")}}
         >
+          {{dIcon "chart-pie"}}
           {{i18n "discourse_quiz.leaderboard.tab_profile"}}
         </button>
-      </nav>
+      </div>
 
       {{#if (eq this.activeTab "rankings")}}
-        <div class="quiz-leaderboard-page__metric-switch" role="tablist">
-          <button
-            type="button"
-            class="quiz-leaderboard-page__metric-btn {{if (eq this.metric 'volume') 'is-active'}}"
-            {{on "click" (fn this.setMetric "volume")}}
-          >
-            {{i18n "discourse_quiz.leaderboard.metric_volume"}}
-          </button>
-          <button
-            type="button"
-            class="quiz-leaderboard-page__metric-btn {{if (eq this.metric 'accuracy') 'is-active'}}"
-            {{on "click" (fn this.setMetric "accuracy")}}
-          >
-            {{i18n "discourse_quiz.leaderboard.metric_accuracy"}}
-          </button>
-        </div>
-
         <p class="quiz-leaderboard-page__hint">
           {{#if (eq this.metric "accuracy")}}
             {{i18n
@@ -400,73 +415,81 @@ export default class QuizLeaderboardPage extends Component {
       {{/if}}
 
       {{#if (eq this.activeTab "profile")}}
-        <p class="quiz-leaderboard-page__hint">{{i18n "discourse_quiz.leaderboard.profile_hint"}}</p>
+        <div class="quiz-leaderboard-page__profile-panel">
+          <p class="quiz-leaderboard-page__profile-intro">
+            {{i18n "discourse_quiz.leaderboard.profile_hint"}}
+          </p>
 
-        <form class="quiz-leaderboard-page__profile-search" {{on "submit" this.submitProfileSearch}}>
-          <label>
-            <span>{{i18n "discourse_quiz.leaderboard.profile_username"}}</span>
+          <form class="quiz-leaderboard-page__search-bar" {{on "submit" this.submitProfileSearch}}>
+            <span class="quiz-leaderboard-page__search-icon">{{dIcon "magnifying-glass"}}</span>
             <input
               type="text"
+              class="quiz-leaderboard-page__search-input"
               value={{this.profileUsername}}
+              placeholder={{i18n "discourse_quiz.leaderboard.profile_username_placeholder"}}
               {{on "input" this.updateProfileUsername}}
             />
-          </label>
-          <button type="submit" class="btn btn-primary" disabled={{this.loadingProfile}}>
-            {{i18n "discourse_quiz.leaderboard.profile_search"}}
-          </button>
-        </form>
+            <button
+              type="submit"
+              class="quiz-leaderboard-page__search-submit"
+              disabled={{this.loadingProfile}}
+            >
+              {{i18n "discourse_quiz.leaderboard.profile_search"}}
+            </button>
+          </form>
 
-        {{#if this.profileError}}
-          <p class="quiz-leaderboard-page__notice is-error">{{this.profileError}}</p>
-        {{/if}}
-
-        {{#if this.loadingProfile}}
-          <p>{{i18n "discourse_quiz.loading"}}</p>
-        {{/if}}
-
-        {{#if this.profileData}}
-          <div class="quiz-leaderboard-page__profile-summary">
-            {{dAvatar this.profileData.user imageSize="large"}}
-            <div>
-              <strong>{{this.profileData.user.username}}</strong>
-              <span class="quiz-leaderboard-page__profile-summary-text">
-                {{i18n
-                  "discourse_quiz.leaderboard.profile_summary"
-                  attempted=this.profileData.user.questions_attempted
-                  correct=this.profileData.user.questions_correct
-                }}
-                {{this.accuracyLabel this.profileData.user.accuracy_rate}}
-              </span>
-            </div>
-          </div>
-
-          {{#if this.profileCategories.length}}
-            <div class="quiz-leaderboard-page__profile-table-wrapper">
-            <table class="quiz-leaderboard-page__profile-table">
-              <thead>
-                <tr>
-                  <th>{{i18n "discourse_quiz.leaderboard.category_column"}}</th>
-                  <th>{{i18n "discourse_quiz.leaderboard.questions_column"}}</th>
-                  <th>{{i18n "discourse_quiz.leaderboard.correct_column"}}</th>
-                  <th>{{i18n "discourse_quiz.leaderboard.accuracy_column"}}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{#each this.profileCategories as |row|}}
-                  <tr>
-                    <td>{{row.category_name}}</td>
-                    <td>{{row.questions_attempted}}</td>
-                    <td>{{row.questions_correct}}</td>
-                    <td>{{this.accuracyLabel row.accuracy_rate}}</td>
-                  </tr>
-                {{/each}}
-              </tbody>
-            </table>
-            </div>
-          {{else}}
-            <p>{{i18n "discourse_quiz.leaderboard.profile_empty"}}</p>
+          {{#if this.profileError}}
+            <p class="quiz-leaderboard-page__notice is-error">{{this.profileError}}</p>
           {{/if}}
-        {{/if}}
+
+          {{#if this.loadingProfile}}
+            <p class="quiz-leaderboard-page__profile-loading">{{i18n "discourse_quiz.loading"}}</p>
+          {{/if}}
+
+          {{#if this.profileData}}
+            <div class="quiz-leaderboard-page__profile-summary">
+              {{dAvatar this.profileData.user imageSize="large"}}
+              <div class="quiz-leaderboard-page__profile-summary-body">
+                <strong class="quiz-leaderboard-page__profile-username">
+                  {{this.profileData.user.username}}
+                </strong>
+                <span class="quiz-leaderboard-page__profile-summary-text">
+                  {{i18n
+                    "discourse_quiz.leaderboard.profile_summary"
+                    attempted=this.profileData.user.questions_attempted
+                    correct=this.profileData.user.questions_correct
+                  }}
+                  {{this.accuracyLabel this.profileData.user.accuracy_rate}}
+                </span>
+              </div>
+            </div>
+
+            {{#if this.profileCategories.length}}
+              <div class="quiz-leaderboard-page__category-board">
+                <div class="quiz-leaderboard-page__category-head">
+                  <span>{{i18n "discourse_quiz.leaderboard.category_column"}}</span>
+                  <span>{{i18n "discourse_quiz.leaderboard.questions_column"}}</span>
+                  <span>{{i18n "discourse_quiz.leaderboard.correct_column"}}</span>
+                  <span>{{i18n "discourse_quiz.leaderboard.accuracy_column"}}</span>
+                </div>
+                <div class="quiz-leaderboard-page__category-list">
+                  {{#each this.profileCategories as |row|}}
+                    <article class="quiz-leaderboard-page__category-row">
+                      <span class="quiz-leaderboard-page__category-name">{{row.category_name}}</span>
+                      <span class="quiz-leaderboard-page__category-stat">{{row.questions_attempted}}</span>
+                      <span class="quiz-leaderboard-page__category-stat">{{row.questions_correct}}</span>
+                      <span class="quiz-leaderboard-page__category-stat is-accent">
+                        {{this.accuracyLabel row.accuracy_rate}}
+                      </span>
+                    </article>
+                  {{/each}}
+                </div>
+              </div>
+            {{else}}
+              <p class="quiz-leaderboard-page__empty">{{i18n "discourse_quiz.leaderboard.profile_empty"}}</p>
+            {{/if}}
+          {{/if}}
+        </div>
       {{/if}}
       {{/if}}
     </section>

@@ -145,7 +145,7 @@ export default class QuizRewardsPage extends Component {
   <template>
     <section class="quiz-rewards-page">
       <div class="quiz-rewards-page__header">
-        <h1>{{i18n "discourse_quiz.rewards.title"}}</h1>
+        <h1 class="quiz-rewards-page__title page__title">{{i18n "discourse_quiz.rewards.title"}}</h1>
         <LinkTo @route="quiz" class="btn btn-default btn-small">
           {{i18n "gamified_quiz.button_title"}}
         </LinkTo>
