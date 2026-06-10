@@ -1883,10 +1883,29 @@ body.quiz-leaderboard {
       align-items: center;
       justify-content: space-between;
       gap: 0.75em;
-    }
 
-    .btn.-ghost {
-      flex-shrink: 0;
+      svg {
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .-ghost,
+  .-ghost .d-icon {
+    padding: 0;
+    color: var(--tertiary);
+    border: 0;
+    background-color: transparent;
+    box-shadow: none;
+
+    &:hover {
+      color: var(--tertiary);
+      background-color: transparent;
+
+      .d-icon {
+        color: var(--tertiary);
+        background-color: transparent;
+      }
     }
   }
 
@@ -1911,8 +1930,12 @@ body.quiz-leaderboard {
   &__toolbar-profile-title {
     grid-column: 2;
     justify-self: center;
-    font-weight: 700;
-    color: var(--primary);
+    border: 0;
+    border-radius: 999px;
+    padding: 0.45em 1em;
+    background: var(--tertiary);
+    color: var(--secondary);
+    font-weight: 600;
   }
 
   &__metric-switch {
@@ -2288,11 +2311,11 @@ body.quiz-leaderboard {
     gap: 0.5em;
     max-width: 520px;
     margin: 0 auto 1.5em;
-    padding: 0.35em 0.35em 0.35em 1em;
-    border: 1px solid var(--primary-low);
-    border-radius: 999px;
-    background: var(--secondary);
-    box-shadow: 0 4px 18px rgb(var(--shadow-rgb), 0.08);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   &__search-icon {
@@ -2433,7 +2456,7 @@ body.quiz-leaderboard {
   }
 
   @media screen and (width <= 768px) {
-    &__header .btn.-ghost {
+    .page__header button.-ghost {
       font-size: var(--font-up-2);
       padding: 0.5rem 0 0.5rem 0.5rem;
     }
@@ -2513,9 +2536,9 @@ body.quiz-leaderboard {
   @media screen and (width <= 768px) {
     .d-modal__body {
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       gap: 1.25rem;
-      text-align: center;
+      text-align: left;
     }
 
     .d-icon-award {

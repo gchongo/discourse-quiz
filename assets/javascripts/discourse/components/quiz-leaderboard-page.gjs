@@ -141,7 +141,12 @@ export default class QuizLeaderboardPage extends Component {
 
     this.activeTab = tab;
 
-    if (tab === "profile" && !this.profileData && this.profileUsername) {
+    if (
+      tab === "profile" &&
+      this.profileUsername &&
+      (!this.profileData ||
+        this.profileData.user?.username !== this.profileUsername)
+    ) {
       this.loadProfile();
     }
   }
@@ -207,6 +212,7 @@ export default class QuizLeaderboardPage extends Component {
     }
 
     this.profileUsername = username;
+    this.profileData = null;
     this.activeTab = "profile";
     this.loadProfile();
   }
@@ -260,6 +266,7 @@ export default class QuizLeaderboardPage extends Component {
           class="-ghost"
           @icon="circle-info"
           @label={{unless this.site.mobileView "discourse_quiz.leaderboard.info"}}
+          @title={{if this.site.mobileView "discourse_quiz.leaderboard.info"}}
         />
       </div>
 
