@@ -434,17 +434,19 @@ export default class QuizLeaderboardPage extends Component {
       {{#if (eq this.activeTab "profile")}}
         <div class="quiz-leaderboard-page__profile-panel">
           <form class="quiz-leaderboard-page__search-bar" {{on "submit" this.submitProfileSearch}}>
-            <span class="quiz-leaderboard-page__search-icon">{{dIcon "magnifying-glass"}}</span>
-            <input
-              type="text"
-              class="quiz-leaderboard-page__search-input"
-              value={{this.profileUsername}}
-              placeholder={{i18n "discourse_quiz.leaderboard.profile_username_placeholder"}}
-              {{on "input" this.updateProfileUsername}}
-            />
+            <label class="quiz-leaderboard-page__search-field">
+              <span class="quiz-leaderboard-page__search-icon">{{dIcon "magnifying-glass"}}</span>
+              <input
+                type="text"
+                class="quiz-leaderboard-page__search-input"
+                value={{this.profileUsername}}
+                placeholder={{i18n "discourse_quiz.leaderboard.profile_username_placeholder"}}
+                {{on "input" this.updateProfileUsername}}
+              />
+            </label>
             <button
               type="submit"
-              class="quiz-leaderboard-page__search-submit"
+              class="btn btn-primary quiz-leaderboard-page__search-submit"
               disabled={{this.loadingProfile}}
             >
               {{i18n "discourse_quiz.leaderboard.profile_search"}}
@@ -460,22 +462,24 @@ export default class QuizLeaderboardPage extends Component {
           {{/if}}
 
           {{#if this.profileData}}
-            <div class="quiz-leaderboard-page__profile-summary">
+            <article class="quiz-leaderboard-page__profile-summary">
               {{dAvatar this.profileData.user imageSize="large"}}
               <div class="quiz-leaderboard-page__profile-summary-body">
-                <strong class="quiz-leaderboard-page__profile-username">
+                <span class="quiz-leaderboard-page__profile-username">
                   {{this.profileData.user.username}}
-                </strong>
+                </span>
                 <span class="quiz-leaderboard-page__profile-summary-text">
                   {{i18n
                     "discourse_quiz.leaderboard.profile_summary"
                     attempted=this.profileData.user.questions_attempted
                     correct=this.profileData.user.questions_correct
                   }}
-                  {{this.accuracyLabel this.profileData.user.accuracy_rate}}
+                  <span class="quiz-leaderboard-page__profile-accuracy">
+                    {{this.accuracyLabel this.profileData.user.accuracy_rate}}
+                  </span>
                 </span>
               </div>
-            </div>
+            </article>
 
             {{#if this.profileCategories.length}}
               <div class="quiz-leaderboard-page__category-board">
