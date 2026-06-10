@@ -2313,32 +2313,21 @@ body.quiz-leaderboard {
     margin: 0 auto 1.5em;
   }
 
-  &__search-field {
-    display: flex;
-    align-items: center;
+  &__search-input-group {
+    position: relative;
     flex: 1;
-    gap: 0.5em;
     min-width: 0;
-    height: var(--d-button-height, 2.25em);
-    padding: 0 0.9em;
-    border: 1px solid var(--primary-low);
-    border-radius: var(--d-border-radius);
-    background: var(--secondary);
-    color: var(--primary);
-    transition:
-      border-color 0.15s ease,
-      box-shadow 0.15s ease;
-
-    &:focus-within {
-      border-color: var(--tertiary-medium);
-      box-shadow: 0 0 0 2px rgb(var(--tertiary-rgb), 0.15);
-    }
   }
 
   &__search-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.75em;
+    z-index: 1;
     display: flex;
-    flex-shrink: 0;
     color: var(--primary-medium);
+    pointer-events: none;
+    transform: translateY(-50%);
 
     .d-icon {
       font-size: var(--font-down-1);
@@ -2346,19 +2335,24 @@ body.quiz-leaderboard {
   }
 
   &__search-input {
-    flex: 1;
-    min-width: 0;
-    height: 100%;
+    box-sizing: border-box;
+    width: 100%;
+    height: var(--d-button-height, 2.25em);
     margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
+    padding: 0 0.9em 0 2.25em;
+    border: 1px solid var(--primary-low);
+    border-radius: var(--d-border-radius);
+    background: var(--secondary);
     color: var(--primary);
     font-size: var(--font-0);
     line-height: normal;
+    box-shadow: none;
+    appearance: none;
 
     &:focus {
       outline: none;
+      border-color: var(--tertiary-medium);
+      box-shadow: 0 0 0 2px rgb(var(--tertiary-rgb), 0.15);
     }
 
     &::placeholder {
@@ -2409,11 +2403,6 @@ body.quiz-leaderboard {
     color: var(--primary-medium);
     font-size: var(--font-down-1);
     line-height: 1.45;
-  }
-
-  &__profile-accuracy {
-    color: var(--tertiary);
-    font-weight: 600;
   }
 
   &__category-board {
@@ -2517,7 +2506,7 @@ body.quiz-leaderboard {
       flex-wrap: wrap;
     }
 
-    &__search-field {
+    &__search-input-group {
       flex: 1 1 12em;
     }
 

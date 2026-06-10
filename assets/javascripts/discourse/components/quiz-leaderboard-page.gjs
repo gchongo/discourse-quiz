@@ -434,7 +434,7 @@ export default class QuizLeaderboardPage extends Component {
       {{#if (eq this.activeTab "profile")}}
         <div class="quiz-leaderboard-page__profile-panel">
           <form class="quiz-leaderboard-page__search-bar" {{on "submit" this.submitProfileSearch}}>
-            <label class="quiz-leaderboard-page__search-field">
+            <div class="quiz-leaderboard-page__search-input-group">
               <span class="quiz-leaderboard-page__search-icon">{{dIcon "magnifying-glass"}}</span>
               <input
                 type="text"
@@ -443,7 +443,7 @@ export default class QuizLeaderboardPage extends Component {
                 placeholder={{i18n "discourse_quiz.leaderboard.profile_username_placeholder"}}
                 {{on "input" this.updateProfileUsername}}
               />
-            </label>
+            </div>
             <button
               type="submit"
               class="btn btn-primary quiz-leaderboard-page__search-submit"
@@ -474,9 +474,7 @@ export default class QuizLeaderboardPage extends Component {
                     attempted=this.profileData.user.questions_attempted
                     correct=this.profileData.user.questions_correct
                   }}
-                  <span class="quiz-leaderboard-page__profile-accuracy">
-                    {{this.accuracyLabel this.profileData.user.accuracy_rate}}
-                  </span>
+                  {{this.accuracyLabel this.profileData.user.accuracy_rate}}
                 </span>
               </div>
             </article>
