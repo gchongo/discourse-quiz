@@ -9,10 +9,14 @@ import { on } from "@ember/modifier";
 import { eq, not } from "discourse/truth-helpers";
 import dAvatar from "discourse/ui-kit/helpers/d-avatar";
 import dIcon from "discourse/ui-kit/helpers/d-icon";
+import DButton from "discourse/ui-kit/d-button";
 import { i18n } from "discourse-i18n";
+import QuizLeaderboardInfo from "./modal/quiz-leaderboard-info";
 
 export default class QuizLeaderboardPage extends Component {
   @service currentUser;
+  @service site;
+  @service modal;
   @service siteSettings;
 
   @tracked activeTab = "rankings";
@@ -123,6 +127,11 @@ export default class QuizLeaderboardPage extends Component {
 
     return entry.name || entry.username;
   };
+
+  @action
+  showLeaderboardInfo() {
+    this.modal.show(QuizLeaderboardInfo);
+  }
 
   @action
   setTab(tab) {
@@ -242,12 +251,17 @@ export default class QuizLeaderboardPage extends Component {
 
   <template>
     <section class="quiz-leaderboard-page">
-      <div class="quiz-leaderboard-page__header">
+      <div class="quiz-leaderboard-page__header page__header">
         <h1 class="quiz-leaderboard-page__title page__title">
           {{i18n "discourse_quiz.leaderboard.title"}}
         </h1>
+        <DButton
+          @action={{this.showLeaderboardInfo}}
+          class="-ghost"
+          @icon="circle-info"
+          @label={{unless this.site.mobileView "discourse_quiz.leaderboard.info"}}
+        />
       </div>
-      <p class="quiz-leaderboard-page__intro">{{i18n "discourse_quiz.leaderboard.intro"}}</p>
 
       {{#unless this.isEnabled}}
         <p class="quiz-leaderboard-page__notice is-error">
@@ -293,28 +307,24 @@ export default class QuizLeaderboardPage extends Component {
           </span>
         {{/if}}
 
-        <button
-          type="button"
-          class="quiz-leaderboard-page__profile-btn {{if (eq this.activeTab 'profile') 'is-active'}}"
-          {{on "click" (fn this.setTab "profile")}}
-        >
-          {{dIcon "chart-pie"}}
-          {{i18n "discourse_quiz.leaderboard.tab_profile"}}
-        </button>
+        {{#unless (eq this.activeTab "profile")}}
+          <button
+            type="button"
+            class="quiz-leaderboard-page__profile-btn"
+            title={{i18n "discourse_quiz.leaderboard.tab_profile"}}
+            {{on "click" (fn this.setTab "profile")}}
+          >
+            {{dIcon "chart-pie"}}
+            {{#unless this.site.mobileView}}
+              <span class="quiz-leaderboard-page__profile-btn-label">
+                {{i18n "discourse_quiz.leaderboard.tab_profile"}}
+              </span>
+            {{/unless}}
+          </button>
+        {{/unless}}
       </div>
 
       {{#if (eq this.activeTab "rankings")}}
-        <p class="quiz-leaderboard-page__hint">
-          {{#if (eq this.metric "accuracy")}}
-            {{i18n
-              "discourse_quiz.leaderboard.accuracy_hint"
-              count=this.siteSettings.quiz_leaderboard_min_attempts
-            }}
-          {{else}}
-            {{i18n "discourse_quiz.leaderboard.volume_hint"}}
-          {{/if}}
-        </p>
-
         {{#if this.rankingError}}
           <p class="quiz-leaderboard-page__notice is-error">{{this.rankingError}}</p>
         {{/if}}
@@ -416,10 +426,6 @@ export default class QuizLeaderboardPage extends Component {
 
       {{#if (eq this.activeTab "profile")}}
         <div class="quiz-leaderboard-page__profile-panel">
-          <p class="quiz-leaderboard-page__profile-intro">
-            {{i18n "discourse_quiz.leaderboard.profile_hint"}}
-          </p>
-
           <form class="quiz-leaderboard-page__search-bar" {{on "submit" this.submitProfileSearch}}>
             <span class="quiz-leaderboard-page__search-icon">{{dIcon "magnifying-glass"}}</span>
             <input

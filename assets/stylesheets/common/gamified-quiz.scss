@@ -1874,24 +1874,24 @@ body.quiz-leaderboard {
   margin: 0 auto;
 
   &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     margin-top: 2rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--header_primary);
+
+    &.page__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75em;
+    }
+
+    .btn.-ghost {
+      flex-shrink: 0;
+    }
   }
 
   &__title {
     margin: 0;
-  }
-
-  &__intro,
-  &__hint {
-    color: var(--primary-medium);
-    font-size: var(--font-down-1);
-    margin: 0.85em 0 1em;
-    line-height: 1.5;
   }
 
   &__toolbar {
@@ -2282,14 +2282,6 @@ body.quiz-leaderboard {
     margin: 0 auto;
   }
 
-  &__profile-intro {
-    margin: 0 0 1.25em;
-    text-align: center;
-    color: var(--primary-medium);
-    font-size: var(--font-down-1);
-    line-height: 1.5;
-  }
-
   &__search-bar {
     display: flex;
     align-items: center;
@@ -2441,6 +2433,17 @@ body.quiz-leaderboard {
   }
 
   @media screen and (width <= 768px) {
+    &__header .btn.-ghost {
+      font-size: var(--font-up-2);
+      padding: 0.5rem 0 0.5rem 0.5rem;
+    }
+
+    &__profile-btn {
+      padding: 0.45em;
+      min-width: 2.5em;
+      justify-content: center;
+    }
+
     &__podium {
       width: 100%;
       padding: 1.5rem 0.5rem 4rem;
@@ -2476,6 +2479,47 @@ body.quiz-leaderboard {
       padding: 0.55em 0.85em;
       gap: 0.35em;
       font-size: var(--font-down-1);
+    }
+  }
+}
+
+.quiz-leaderboard-info-modal {
+  .d-modal__body {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .d-icon-award {
+    flex-shrink: 0;
+    font-size: 4rem;
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+    color: var(--primary-medium);
+    line-height: 1.55;
+
+    p {
+      margin: 0 0 0.85em;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  @media screen and (width <= 768px) {
+    .d-modal__body {
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      text-align: center;
+    }
+
+    .d-icon-award {
+      font-size: 3rem;
     }
   }
 }
