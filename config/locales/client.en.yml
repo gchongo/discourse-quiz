@@ -191,6 +191,7 @@ en:
         question_submissions_rejected: "Rejected"
         question_submissions_note: "Review note (optional)"
         question_submissions_submitter: "Proposer: %{username}"
+        question_submissions_submitter_label: "Proposer"
         question_submissions_approve: "Approve"
         question_submissions_reject: "Reject"
         question_submissions_empty: "No question submissions."

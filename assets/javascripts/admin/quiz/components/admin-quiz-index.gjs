@@ -824,6 +824,64 @@ export default class AdminQuizIndex extends Component {
         {{#if this.submissionsLoading}}
           <p class="quiz-admin-hint">{{i18n "discourse_quiz.loading"}}</p>
         {{else if this.submissions.length}}
+          <div class="quiz-submissions-table-wrap">
+            <table class="quiz-questions-table table quiz-submissions-table">
+              <thead>
+                <tr>
+                  <th>{{i18n "discourse_quiz.admin.table.category"}}</th>
+                  <th>{{i18n "discourse_quiz.admin.table.question"}}</th>
+                  <th>{{i18n "discourse_quiz.admin.question_submissions_submitter_label"}}</th>
+                  <th>{{i18n "discourse_quiz.admin.question_submissions_status"}}</th>
+                  <th>{{i18n "discourse_quiz.admin.question_submissions_note"}}</th>
+                  <th>{{i18n "discourse_quiz.admin.table.actions"}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each this.submissions as |submission|}}
+                  <tr>
+                    <td>{{submission.category_name}}</td>
+                    <td>{{this.imageLabelPreview submission.question_text}}</td>
+                    <td>{{submission.submitter_username}}</td>
+                    <td>{{submission.status}}</td>
+                    <td>
+                      {{#if (eq submission.status "pending")}}
+                        <input
+                          class="quiz-admin-field__control quiz-submissions-table__note-input"
+                          type="text"
+                          value={{submission.review_note_draft}}
+                          placeholder={{i18n "discourse_quiz.admin.question_submissions_note"}}
+                          {{on "input" (fn this.onSubmissionReviewNoteInput submission)}}
+                        />
+                      {{else}}
+                        <span class="quiz-submissions-table__note-text">{{submission.review_note}}</span>
+                      {{/if}}
+                    </td>
+                    <td>
+                      {{#if (eq submission.status "pending")}}
+                        <div class="quiz-admin-actions">
+                          <DButton
+                            @label="discourse_quiz.admin.question_submissions_approve"
+                            @action={{fn this.reviewSubmission submission "approve"}}
+                            @disabled={{eq this.reviewBusyId submission.id}}
+                            class="btn-primary btn-small"
+                          />
+                          <DButton
+                            @label="discourse_quiz.admin.question_submissions_reject"
+                            @action={{fn this.reviewSubmission submission "reject"}}
+                            @disabled={{eq this.reviewBusyId submission.id}}
+                            class="btn-danger btn-small"
+                          />
+                        </div>
+                      {{else}}
+                        <span>—</span>
+                      {{/if}}
+                    </td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
+
           <div class="quiz-questions-cards quiz-submissions-cards">
             {{#each this.submissions as |submission|}}
               <article class="quiz-question-card">

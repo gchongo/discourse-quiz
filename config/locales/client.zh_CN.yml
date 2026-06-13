@@ -191,6 +191,7 @@ zh_CN:
         question_submissions_rejected: "已拒绝"
         question_submissions_note: "审核备注（可选）"
         question_submissions_submitter: "出题人：%{username}"
+        question_submissions_submitter_label: "出题人"
         question_submissions_approve: "通过"
         question_submissions_reject: "拒绝"
         question_submissions_empty: "暂无待审核题目。"
