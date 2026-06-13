@@ -38,6 +38,7 @@ module DiscourseQuiz
         {
           id: question.id,
           author_username: resolve_author_username(question),
+          author_hidden: author_hidden?(question),
           category_name: question.category_name,
           question_text: question.question_text,
           question_type: question.resolved_question_type,
@@ -291,6 +292,10 @@ module DiscourseQuiz
       return nil if question.respond_to?(:show_author_name) && !question.show_author_name
 
       question.author_username
+    end
+
+    def author_hidden?(question)
+      question.respond_to?(:show_author_name) && !question.show_author_name
     end
   end
 end

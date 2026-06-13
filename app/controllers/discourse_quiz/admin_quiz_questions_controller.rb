@@ -375,7 +375,7 @@ module DiscourseQuiz
       return unless current_user
 
       question.author_user_id = current_user.id
-      question.author_username = current_user.username
+      question.author_username = "管理员"
     end
   end
 end

@@ -75,7 +75,7 @@ export default class AdminQuizIndex extends Component {
   @tracked duplicateDisableResult = null;
   @tracked submissions = [];
   @tracked submissionsLoading = false;
-  @tracked submissionStatusFilter = "pending";
+  @tracked submissionStatusFilter = "";
   @tracked reviewBusyId = null;
 
   constructor() {
@@ -102,6 +102,13 @@ export default class AdminQuizIndex extends Component {
 
   duplicateIdsLabel(ids) {
     return (ids || []).join(", ");
+  }
+
+  imageLabelPreview(rawText) {
+    return (rawText || "").replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_match, altText) => {
+      const label = (altText || "").trim();
+      return label || i18n("discourse_quiz.admin.image_placeholder");
+    });
   }
 
   @action
@@ -672,7 +679,7 @@ export default class AdminQuizIndex extends Component {
                 </span>
               </div>
 
-              <div class="quiz-question-card__text">{{question.question_text}}</div>
+              <div class="quiz-question-card__text">{{this.imageLabelPreview question.question_text}}</div>
 
               {{#if question.duplicate_ids}}
                 <span class="quiz-admin-duplicate-badge">
@@ -733,7 +740,7 @@ export default class AdminQuizIndex extends Component {
                     {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
                   {{/if}}
                 </td>
-                <td>{{question.question_text}}</td>
+                <td>{{this.imageLabelPreview question.question_text}}</td>
                 <td class="quiz-admin-col-active">
                   {{#if question.active}}
                     <span
@@ -780,6 +787,9 @@ export default class AdminQuizIndex extends Component {
               class="quiz-admin-field__control"
               {{on "change" this.onSubmissionStatusFilterChange}}
             >
+              <option value="" selected={{eq this.submissionStatusFilter ""}}>
+                {{i18n "discourse_quiz.admin.question_submissions_all"}}
+              </option>
               <option value="pending" selected={{eq this.submissionStatusFilter "pending"}}>
                 {{i18n "discourse_quiz.admin.question_submissions_pending"}}
               </option>
@@ -812,7 +822,7 @@ export default class AdminQuizIndex extends Component {
                     {{submission.status}}
                   </span>
                 </div>
-                <div class="quiz-question-card__text">{{submission.question_text}}</div>
+                <div class="quiz-question-card__text">{{this.imageLabelPreview submission.question_text}}</div>
                 <div class="quiz-admin-hint">
                   {{i18n "discourse_quiz.admin.question_submissions_submitter" username=submission.submitter_username}}
                 </div>

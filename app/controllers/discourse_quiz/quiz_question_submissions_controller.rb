@@ -8,13 +8,13 @@ module DiscourseQuiz
     before_action :ensure_logged_in
 
     def create
-      submission =
-        QuizQuestionSubmission.new(
-          question_submission_params.merge(
-            submitter_id: current_user.id,
-            submitter_username: current_user.username,
-          ),
-        )
+      attrs = question_submission_params.to_h.symbolize_keys
+      attrs[:status] = "pending"
+      attrs[:show_author_name] = true if attrs[:show_author_name].nil?
+      attrs[:submitter_id] = current_user.id
+      attrs[:submitter_username] = current_user.username
+
+      submission = QuizQuestionSubmission.new(attrs)
 
       if submission.save
         render_json_dump(

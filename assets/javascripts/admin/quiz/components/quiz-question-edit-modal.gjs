@@ -168,7 +168,12 @@ export default class QuizQuestionEditModal extends Component {
 
   @action
   updateQuestionType(event) {
-    this.questionType = event.target.value;
+    this.setQuestionType(event.target.value);
+  }
+
+  @action
+  setQuestionType(type) {
+    this.questionType = type;
 
     if (this.isTrueFalse) {
       this.correctIndex = 0;
@@ -329,17 +334,29 @@ export default class QuizQuestionEditModal extends Component {
 
           <label class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.question_type"}}</span>
-            <select {{on "change" this.updateQuestionType}}>
-              <option value="single_choice" selected={{eq this.questionType "single_choice"}}>
+            <div class="quiz-home-modes__buttons quiz-home-modes__buttons--triple" role="group">
+              <button
+                type="button"
+                class="btn btn-default quiz-home-mode-btn {{if (eq this.questionType 'single_choice') 'active'}}"
+                {{on "click" (fn this.setQuestionType "single_choice")}}
+              >
                 {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
-              </option>
-              <option value="true_false" selected={{eq this.questionType "true_false"}}>
+              </button>
+              <button
+                type="button"
+                class="btn btn-default quiz-home-mode-btn {{if (eq this.questionType 'true_false') 'active'}}"
+                {{on "click" (fn this.setQuestionType "true_false")}}
+              >
                 {{i18n "discourse_quiz.admin.form.question_types.true_false"}}
-              </option>
-              <option value="multiple_choice" selected={{eq this.questionType "multiple_choice"}}>
+              </button>
+              <button
+                type="button"
+                class="btn btn-default quiz-home-mode-btn {{if (eq this.questionType 'multiple_choice') 'active'}}"
+                {{on "click" (fn this.setQuestionType "multiple_choice")}}
+              >
                 {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
-              </option>
-            </select>
+              </button>
+            </div>
           </label>
 
           <label class="quiz-admin-form__field">

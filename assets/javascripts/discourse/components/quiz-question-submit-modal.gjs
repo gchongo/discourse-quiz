@@ -2,6 +2,7 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { ajax } from "discourse/lib/ajax";
+import { service } from "@ember/service";
 import DButton from "discourse/ui-kit/d-button";
 import DModal from "discourse/ui-kit/d-modal";
 import { on } from "@ember/modifier";
@@ -11,6 +12,8 @@ import { i18n } from "discourse-i18n";
 import DCookText from "discourse/ui-kit/d-cook-text";
 
 export default class QuizQuestionSubmitModal extends Component {
+  @service dialog;
+
   @tracked categoryName;
   @tracked newCategoryName = "";
   @tracked useNewCategory = false;
@@ -145,7 +148,12 @@ export default class QuizQuestionSubmitModal extends Component {
 
   @action
   updateQuestionType(event) {
-    this.questionType = event.target.value;
+    this.setQuestionType(event.target.value);
+  }
+
+  @action
+  setQuestionType(type) {
+    this.questionType = type;
 
     if (this.isTrueFalse) {
       this.correctIndex = 0;
@@ -226,6 +234,9 @@ export default class QuizQuestionSubmitModal extends Component {
       });
 
       await this.args.model.onSaved?.();
+      this.dialog.alert({
+        message: i18n("discourse_quiz.question_submission.success"),
+      });
       this.args.closeModal();
     } catch (e) {
       this.saveError =
@@ -241,17 +252,8 @@ export default class QuizQuestionSubmitModal extends Component {
     <DModal @title={{this.modalTitle}} @closeModal={{@closeModal}}>
       <:body>
         <div class="quiz-admin-form">
-          <div class="quiz-question-guidelines">
-            <strong>{{i18n "discourse_quiz.question_submission.guidelines_title"}}</strong>
-            <ul>
-              <li>{{i18n "discourse_quiz.question_submission.guidelines_item_1"}}</li>
-              <li>{{i18n "discourse_quiz.question_submission.guidelines_item_2"}}</li>
-              <li>{{i18n "discourse_quiz.question_submission.guidelines_item_3"}}</li>
-            </ul>
-          </div>
-
           <div class="quiz-admin-form__field">
-            <span>{{i18n "discourse_quiz.admin.form.category"}}</span>
+            <span>{{i18n "discourse_quiz.question_submission.form_category"}}</span>
             {{#if this.useNewCategory}}
               <div class="quiz-admin-form__category-row">
                 <input
@@ -290,28 +292,40 @@ export default class QuizQuestionSubmitModal extends Component {
           </div>
 
           <label class="quiz-admin-form__field">
-            <span>{{i18n "discourse_quiz.admin.form.question_type"}}</span>
-            <select {{on "change" this.updateQuestionType}}>
-              <option value="single_choice" selected={{eq this.questionType "single_choice"}}>
+            <span>{{i18n "discourse_quiz.question_submission.form_question_type"}}</span>
+            <div class="quiz-home-modes__buttons quiz-home-modes__buttons--triple" role="group">
+              <button
+                type="button"
+                class="btn btn-default quiz-home-mode-btn {{if (eq this.questionType 'single_choice') 'active'}}"
+                {{on "click" (fn this.setQuestionType "single_choice")}}
+              >
                 {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
-              </option>
-              <option value="true_false" selected={{eq this.questionType "true_false"}}>
+              </button>
+              <button
+                type="button"
+                class="btn btn-default quiz-home-mode-btn {{if (eq this.questionType 'true_false') 'active'}}"
+                {{on "click" (fn this.setQuestionType "true_false")}}
+              >
                 {{i18n "discourse_quiz.admin.form.question_types.true_false"}}
-              </option>
-              <option value="multiple_choice" selected={{eq this.questionType "multiple_choice"}}>
+              </button>
+              <button
+                type="button"
+                class="btn btn-default quiz-home-mode-btn {{if (eq this.questionType 'multiple_choice') 'active'}}"
+                {{on "click" (fn this.setQuestionType "multiple_choice")}}
+              >
                 {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
-              </option>
-            </select>
+              </button>
+            </div>
           </label>
 
           <label class="quiz-admin-form__field">
-            <span>{{i18n "discourse_quiz.admin.form.question"}}</span>
+            <span>{{i18n "discourse_quiz.question_submission.form_question"}}</span>
             <textarea rows="5" value={{this.questionText}} {{on "input" this.updateQuestionText}}></textarea>
           </label>
 
           {{#if this.showOptionsEditor}}
             <label class="quiz-admin-form__field">
-              <span>{{i18n "discourse_quiz.admin.form.options"}}</span>
+              <span>{{i18n "discourse_quiz.question_submission.form_options"}}</span>
               <textarea rows="6" value={{this.optionsText}} {{on "input" this.updateOptionsText}}></textarea>
             </label>
           {{/if}}
@@ -379,7 +393,7 @@ export default class QuizQuestionSubmitModal extends Component {
           {{/if}}
 
           <label class="quiz-admin-form__field">
-            <span>{{i18n "discourse_quiz.admin.form.explanation"}}</span>
+            <span>{{i18n "discourse_quiz.question_submission.form_explanation"}}</span>
             <textarea rows="4" value={{this.explanation}} {{on "input" this.updateExplanation}}></textarea>
           </label>
 

@@ -77,7 +77,9 @@ export default class QuizResultDisplay extends Component {
   }
 
   get authorLabel() {
-    const username = this.question.author_username || i18n("discourse_quiz.question_author_unknown");
+    const username = this.question.author_hidden
+      ? i18n("discourse_quiz.question_author_unknown")
+      : this.question.author_username || i18n("discourse_quiz.question_author_admin_default");
     return i18n("discourse_quiz.question_author", { username });
   }
 
