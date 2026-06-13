@@ -7,7 +7,7 @@ import { popupAjaxError } from "discourse/lib/ajax-error";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
 import { on } from "@ember/modifier";
-import { fn } from "@ember/helper";
+import { fn, get } from "@ember/helper";
 import { eq, not, or } from "discourse/truth-helpers";
 import QuizQuestionEditModal from "./quiz-question-edit-modal";
 
@@ -76,7 +76,6 @@ export default class AdminQuizIndex extends Component {
   @tracked submissions = [];
   @tracked submissionsLoading = false;
   @tracked submissionStatusFilter = "pending";
-  @tracked submissionReviewNotes = {};
   @tracked reviewBusyId = null;
 
   constructor() {
@@ -142,7 +141,10 @@ export default class AdminQuizIndex extends Component {
 
     try {
       const data = await ajax(this.buildSubmissionsUrl());
-      this.submissions = data.submissions || [];
+      this.submissions = (data.submissions || []).map((submission) => ({
+        ...submission,
+        review_note_draft: submission.review_note || "",
+      }));
     } catch (e) {
       popupAjaxError(e);
     } finally {
@@ -157,11 +159,16 @@ export default class AdminQuizIndex extends Component {
   }
 
   @action
-  onSubmissionReviewNoteInput(submissionId, event) {
-    this.submissionReviewNotes = {
-      ...this.submissionReviewNotes,
-      [submissionId]: event.target.value,
-    };
+  onSubmissionReviewNoteInput(submission, event) {
+    const value = event.target.value;
+    this.submissions = this.submissions.map((item) =>
+      item.id === submission.id
+        ? {
+            ...item,
+            review_note_draft: value,
+          }
+        : item
+    );
   }
 
   @action
@@ -173,13 +180,9 @@ export default class AdminQuizIndex extends Component {
         type: "PUT",
         data: {
           review_action: reviewAction,
-          review_note: this.submissionReviewNotes[submission.id],
+          review_note: submission.review_note_draft,
         },
       });
-      this.submissionReviewNotes = {
-        ...this.submissionReviewNotes,
-        [submission.id]: "",
-      };
       this.loadSubmissions();
       this.loadQuestions();
     } catch (e) {
@@ -551,8 +554,8 @@ export default class AdminQuizIndex extends Component {
                     <input
                       class="quiz-admin-field__control"
                       type="text"
-                      value={{get this.submissionReviewNotes submission.id}}
-                      {{on "input" (fn this.onSubmissionReviewNoteInput submission.id)}}
+                      value={{submission.review_note_draft}}
+                      {{on "input" (fn this.onSubmissionReviewNoteInput submission)}}
                     />
                   </div>
                 {{/if}}
