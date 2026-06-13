@@ -5,19 +5,26 @@ module DiscourseQuiz
     requires_plugin DiscourseQuiz::PLUGIN_NAME
 
     def index
-      submissions = QuizQuestionSubmission.recent_first
-      status_filter = normalize_status_filter(params[:status])
-      if status_filter == "pending"
-        submissions =
-          submissions.where(
-            "COALESCE(NULLIF(TRIM(status), ''), 'pending') NOT IN ('approved', 'rejected')",
-          )
-      elsif status_filter.present?
-        submissions = submissions.where("LOWER(TRIM(status)) = ?", status_filter)
+      submissions = []
+
+      DB.use_primary do
+        scope = QuizQuestionSubmission.recent_first
+        status_filter = normalize_status_filter(params[:status])
+
+        if status_filter == "pending"
+          scope =
+            scope.where(
+              "LOWER(COALESCE(NULLIF(TRIM(status), ''), 'pending')) = 'pending'",
+            )
+        elsif status_filter.present?
+          scope = scope.where("LOWER(TRIM(status)) = ?", status_filter)
+        end
+
+        submissions = scope.limit(200).to_a
       end
 
       render_json_dump(
-        submissions: submissions.limit(200).map { |submission| submission_json(submission) },
+        submissions: submissions.map { |submission| submission_json(submission) },
       )
     end
 
