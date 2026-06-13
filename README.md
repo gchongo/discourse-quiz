@@ -351,6 +351,15 @@ Enabled by default (`quiz_leaderboard_enabled`). Link `/quiz/leaderboard` from y
 - **Questions correct** — distinct questions with at least one correct attempt.
 - **Accuracy** — `questions_correct / questions_attempted × 100%` (one decimal place).
 
+### Period windows
+
+- `all` — all-time
+- `yearly` — last 365 days (rolling window)
+- `quarterly` — last 90 days (rolling window)
+- `monthly` — last 30 days (rolling window)
+- `weekly` — last 7 days (rolling window)
+- `daily` — today
+
 ### Tabs
 
 1. **Rankings** — volume (total distinct questions) or accuracy (requires `quiz_leaderboard_min_attempts`); shows your rank when logged in.

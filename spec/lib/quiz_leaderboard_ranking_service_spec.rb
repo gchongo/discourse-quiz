@@ -96,7 +96,7 @@ RSpec.describe DiscourseQuiz::QuizLeaderboardRankingService do
       result = described_class.ranking(metric: "volume", period: "weekly", page: 1, per_page: 10)
 
       expect(result[:period]).to eq("weekly")
-      expect(result[:period_start]).to eq(Time.zone.today.beginning_of_week)
+      expect(result[:period_start]).to eq((Time.zone.now.beginning_of_day - 6.days).to_date)
     end
   end
 

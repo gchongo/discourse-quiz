@@ -26,15 +26,15 @@ module DiscourseQuiz
     def self.period_start_for(period, now: Time.zone.now)
       case normalize_period(period)
       when "daily"
-        now.to_date
+        now.beginning_of_day.to_date
       when "weekly"
-        now.to_date.beginning_of_week
+        (now.beginning_of_day - 6.days).to_date
       when "monthly"
-        now.to_date.beginning_of_month
+        (now.beginning_of_day - 29.days).to_date
       when "quarterly"
-        now.to_date.beginning_of_quarter
+        (now.beginning_of_day - 89.days).to_date
       when "yearly"
-        now.to_date.beginning_of_year
+        (now.beginning_of_day - 364.days).to_date
       else
         ALL_PERIOD_START
       end

@@ -2,14 +2,7 @@
 
 module DiscourseQuiz
   class QuizLeaderboardRefreshService
-    PERIODS = {
-      "all" => nil,
-      "yearly" => "DATE_TRUNC('year', a.created_at AT TIME ZONE :timezone)::date",
-      "quarterly" => "DATE_TRUNC('quarter', a.created_at AT TIME ZONE :timezone)::date",
-      "monthly" => "DATE_TRUNC('month', a.created_at AT TIME ZONE :timezone)::date",
-      "weekly" => "DATE_TRUNC('week', a.created_at AT TIME ZONE :timezone)::date",
-      "daily" => "DATE_TRUNC('day', a.created_at AT TIME ZONE :timezone)::date",
-    }.freeze
+    PERIODS = %w[all yearly quarterly monthly weekly daily].freeze
 
     ACTIVE_USER_SQL = <<~SQL.squish
       u.active = TRUE
@@ -59,9 +52,24 @@ module DiscourseQuiz
     end
 
     def self.insert_period_rows!(now, user_id: nil)
-      PERIODS.each do |period_type, period_expression|
-        insert_global_rows_for_period!(now, period_type, period_expression, user_id: user_id)
-        insert_category_rows_for_period!(now, period_type, period_expression, user_id: user_id)
+      PERIODS.each do |period_type|
+        period_start = QuizLeaderboardStat.period_start_for(period_type, now: now)
+        window_start = period_type == "all" ? nil : period_start.beginning_of_day
+
+        insert_global_rows_for_period!(
+          now,
+          period_type,
+          period_start,
+          window_start: window_start,
+          user_id: user_id,
+        )
+        insert_category_rows_for_period!(
+          now,
+          period_type,
+          period_start,
+          window_start: window_start,
+          user_id: user_id,
+        )
       end
     end
 
@@ -101,18 +109,9 @@ module DiscourseQuiz
       )
     end
 
-    def self.insert_global_rows_for_period!(now, period_type, period_expression, user_id: nil)
+    def self.insert_global_rows_for_period!(now, period_type, period_start, window_start:, user_id: nil)
       user_filter = user_id ? "AND a.user_id = :user_id" : ""
-      timezone = Time.zone.tzinfo.name
-
-      period_select =
-        if period_expression
-          "#{period_expression} AS period_start,"
-        else
-          "DATE '1970-01-01' AS period_start,"
-        end
-
-      period_group = period_expression ? ", #{period_expression}" : ""
+      window_filter = window_start ? "AND a.created_at >= :window_start" : ""
 
       DB.exec(
         <<~SQL,
@@ -131,7 +130,7 @@ module DiscourseQuiz
             stats.user_id,
             '',
             :period_type,
-            stats.period_start,
+            :period_start,
             stats.questions_attempted,
             stats.questions_correct,
             CASE
@@ -143,21 +142,22 @@ module DiscourseQuiz
           FROM (
             SELECT
               a.user_id,
-              #{period_select}
               COUNT(DISTINCT a.question_id) AS questions_attempted,
               COUNT(DISTINCT CASE WHEN a.is_correct THEN a.question_id END) AS questions_correct
             FROM discourse_quiz_user_attempts a
             INNER JOIN users u ON u.id = a.user_id
             INNER JOIN discourse_quiz_questions q ON q.id = a.question_id AND q.active = TRUE
             WHERE #{ACTIVE_USER_SQL}
+              #{window_filter}
               #{user_filter}
-            GROUP BY a.user_id#{period_group}
+            GROUP BY a.user_id
           ) stats
         SQL
         now: now,
         user_id: user_id,
         period_type: period_type,
-        timezone: timezone,
+        period_start: period_start,
+        window_start: window_start,
       )
     end
 
@@ -198,18 +198,9 @@ module DiscourseQuiz
       )
     end
 
-    def self.insert_category_rows_for_period!(now, period_type, period_expression, user_id: nil)
+    def self.insert_category_rows_for_period!(now, period_type, period_start, window_start:, user_id: nil)
       user_filter = user_id ? "AND a.user_id = :user_id" : ""
-      timezone = Time.zone.tzinfo.name
-
-      period_select =
-        if period_expression
-          "#{period_expression} AS period_start,"
-        else
-          "DATE '1970-01-01' AS period_start,"
-        end
-
-      period_group = period_expression ? ", #{period_expression}" : ""
+      window_filter = window_start ? "AND a.created_at >= :window_start" : ""
 
       DB.exec(
         <<~SQL,
@@ -228,7 +219,7 @@ module DiscourseQuiz
             stats.user_id,
             stats.category_name,
             :period_type,
-            stats.period_start,
+            :period_start,
             stats.questions_attempted,
             stats.questions_correct,
             CASE
@@ -241,21 +232,22 @@ module DiscourseQuiz
             SELECT
               a.user_id,
               q.category_name,
-              #{period_select}
               COUNT(DISTINCT a.question_id) AS questions_attempted,
               COUNT(DISTINCT CASE WHEN a.is_correct THEN a.question_id END) AS questions_correct
             FROM discourse_quiz_user_attempts a
             INNER JOIN users u ON u.id = a.user_id
             INNER JOIN discourse_quiz_questions q ON q.id = a.question_id AND q.active = TRUE
             WHERE #{ACTIVE_USER_SQL}
+              #{window_filter}
               #{user_filter}
-            GROUP BY a.user_id, q.category_name#{period_group}
+            GROUP BY a.user_id, q.category_name
           ) stats
         SQL
         now: now,
         user_id: user_id,
         period_type: period_type,
-        timezone: timezone,
+        period_start: period_start,
+        window_start: window_start,
       )
     end
   end
