@@ -1,7 +1,6 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
-import { tracked } from "@glimmer/tracking";
 import { on } from "@ember/modifier";
 import { eq, not, or } from "discourse/truth-helpers";
 import { fn } from "@ember/helper";
@@ -20,7 +19,6 @@ export default class QuizHome extends Component {
   @service modal;
 
   categorySkeletonRows = [1, 2, 3, 4, 5];
-  @tracked submissionNotice = null;
 
   get showPointsToday() {
     return (
@@ -50,9 +48,7 @@ export default class QuizHome extends Component {
     this.modal.show(QuizQuestionSubmitModal, {
       model: {
         categories: this.quiz.availableCategories || [],
-        onSaved: () => {
-          this.submissionNotice = i18n("discourse_quiz.question_submission.success");
-        },
+        onSaved: () => {},
       },
     });
   }
@@ -179,9 +175,6 @@ export default class QuizHome extends Component {
       </div>
 
       {{#if this.canSubmitQuestion}}
-        {{#if this.submissionNotice}}
-          <p class="quiz-status-hint">{{this.submissionNotice}}</p>
-        {{/if}}
         <DButton
           @label="discourse_quiz.question_submission.open_button"
           @action={{this.openQuestionSubmitModal}}

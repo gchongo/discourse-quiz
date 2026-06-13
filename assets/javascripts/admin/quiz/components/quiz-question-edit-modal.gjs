@@ -21,6 +21,7 @@ export default class QuizQuestionEditModal extends Component {
   @tracked correctIndices = [];
   @tracked explanation;
   @tracked active;
+  @tracked showAuthorName = true;
   @tracked saveError = null;
   @tracked saving = false;
 
@@ -38,6 +39,7 @@ export default class QuizQuestionEditModal extends Component {
       : [];
     this.explanation = question.explanation || "";
     this.active = question.active !== false;
+    this.showAuthorName = question.show_author_name !== false;
     const categories = this.args.model.categories || [];
     const isNew = !question.id;
 
@@ -222,6 +224,11 @@ export default class QuizQuestionEditModal extends Component {
     this.active = event.target.checked;
   }
 
+  @action
+  toggleShowAuthorName(event) {
+    this.showAuthorName = event.target.checked;
+  }
+
   questionPayload() {
     return {
       category_name: this.effectiveCategoryName,
@@ -232,6 +239,7 @@ export default class QuizQuestionEditModal extends Component {
       correct_indices: this.isMultipleChoice ? this.normalizedCorrectIndices : [],
       explanation: this.explanation,
       active: this.active,
+      show_author_name: this.showAuthorName,
     };
   }
 
@@ -271,6 +279,15 @@ export default class QuizQuestionEditModal extends Component {
     <DModal @title={{this.modalTitle}} @closeModal={{@closeModal}}>
       <:body>
         <div class="quiz-admin-form">
+          <div class="quiz-question-guidelines">
+            <strong>{{i18n "discourse_quiz.admin.form.guidelines_title"}}</strong>
+            <ul>
+              <li>{{i18n "discourse_quiz.admin.form.guidelines_item_1"}}</li>
+              <li>{{i18n "discourse_quiz.admin.form.guidelines_item_2"}}</li>
+              <li>{{i18n "discourse_quiz.admin.form.guidelines_item_3"}}</li>
+            </ul>
+          </div>
+
           <div class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.category"}}</span>
             {{#if this.useNewCategory}}
@@ -327,13 +344,13 @@ export default class QuizQuestionEditModal extends Component {
 
           <label class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.question"}}</span>
-            <textarea rows="3" value={{this.questionText}} {{on "input" this.updateQuestionText}}></textarea>
+            <textarea rows="5" value={{this.questionText}} {{on "input" this.updateQuestionText}}></textarea>
           </label>
 
           {{#if this.showOptionsEditor}}
             <label class="quiz-admin-form__field">
               <span>{{i18n "discourse_quiz.admin.form.options"}}</span>
-              <textarea rows="5" value={{this.optionsText}} {{on "input" this.updateOptionsText}}></textarea>
+              <textarea rows="6" value={{this.optionsText}} {{on "input" this.updateOptionsText}}></textarea>
             </label>
           {{/if}}
 
@@ -401,12 +418,17 @@ export default class QuizQuestionEditModal extends Component {
 
           <label class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.explanation"}}</span>
-            <textarea rows="3" value={{this.explanation}} {{on "input" this.updateExplanation}}></textarea>
+            <textarea rows="4" value={{this.explanation}} {{on "input" this.updateExplanation}}></textarea>
           </label>
 
           <label class="quiz-admin-form__checkbox">
             <input type="checkbox" checked={{this.active}} {{on "change" this.toggleActive}} />
             <span>{{i18n "discourse_quiz.admin.form.active"}}</span>
+          </label>
+
+          <label class="quiz-admin-form__checkbox">
+            <input type="checkbox" checked={{this.showAuthorName}} {{on "change" this.toggleShowAuthorName}} />
+            <span>{{i18n "discourse_quiz.admin.form.show_author_name"}}</span>
           </label>
 
           {{#if this.saveError}}

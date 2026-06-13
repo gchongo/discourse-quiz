@@ -37,7 +37,7 @@ module DiscourseQuiz
       render_json_dump(
         {
           id: question.id,
-          author_username: question.respond_to?(:author_username) ? question.author_username : nil,
+          author_username: resolve_author_username(question),
           category_name: question.category_name,
           question_text: question.question_text,
           question_type: question.resolved_question_type,
@@ -284,6 +284,13 @@ module DiscourseQuiz
         end
 
       I18n.t(key)
+    end
+
+    def resolve_author_username(question)
+      return nil unless question.respond_to?(:author_username)
+      return nil if question.respond_to?(:show_author_name) && !question.show_author_name
+
+      question.author_username
     end
   end
 end

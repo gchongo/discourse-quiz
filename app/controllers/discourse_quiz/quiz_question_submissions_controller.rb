@@ -39,7 +39,8 @@ module DiscourseQuiz
     end
 
     def question_submission_params
-      params
+      permitted =
+        params
         .require(:question_submission)
         .permit(
           :category_name,
@@ -47,9 +48,13 @@ module DiscourseQuiz
           :question_type,
           :correct_index,
           :explanation,
+          :show_author_name,
           options: [],
           correct_indices: [],
         )
+
+      permitted.delete(:show_author_name) unless QuizQuestionSubmission.column_names.include?("show_author_name")
+      permitted
     end
   end
 end

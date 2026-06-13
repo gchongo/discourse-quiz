@@ -459,7 +459,6 @@ export default class QuizLeaderboardPage extends Component {
         <div class="quiz-leaderboard-page__profile-panel">
           <form class="quiz-leaderboard-page__search-bar" {{on "submit" this.submitProfileSearch}}>
             <div class="quiz-leaderboard-page__search-input-group">
-              <span class="quiz-leaderboard-page__search-icon">{{dIcon "magnifying-glass"}}</span>
               <input
                 type="text"
                 class="quiz-leaderboard-page__search-input"

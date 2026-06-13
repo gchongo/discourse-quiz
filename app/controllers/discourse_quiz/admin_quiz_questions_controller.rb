@@ -52,6 +52,7 @@ module DiscourseQuiz
 
     def create
       question = QuizQuestion.new(import_attributes(params.require(:question)))
+      assign_admin_author!(question)
 
       if question.save
         render_json_dump(question: question_json(question), duplicate_warning: duplicate_warning_for(question))
@@ -115,6 +116,7 @@ module DiscourseQuiz
       end
 
       question.assign_attributes(import_attributes(params.require(:question)))
+      assign_admin_author!(question) if question.respond_to?(:author_user_id) && question.author_user_id.blank?
 
       if question.save
         render_json_dump(question: question_json(question), duplicate_warning: duplicate_warning_for(question))
@@ -156,6 +158,7 @@ module DiscourseQuiz
         explanation: question.explanation,
         author_user_id: question.respond_to?(:author_user_id) ? question.author_user_id : nil,
         author_username: question.respond_to?(:author_username) ? question.author_username : nil,
+        show_author_name: question.respond_to?(:show_author_name) ? question.show_author_name : true,
         active: question.active,
         created_at: question.created_at,
       }
@@ -313,9 +316,12 @@ module DiscourseQuiz
         return nil unless question
 
         question.assign_attributes(attrs)
+        assign_admin_author!(question) if question.respond_to?(:author_user_id) && question.author_user_id.blank?
         question
       else
-        QuizQuestion.new(attrs)
+        question = QuizQuestion.new(attrs)
+        assign_admin_author!(question)
+        question
       end
     end
 
@@ -344,6 +350,7 @@ module DiscourseQuiz
           :correct_index,
           :explanation,
           :active,
+          :show_author_name,
           :position,
           options: [],
           correct_indices: [],
@@ -354,8 +361,21 @@ module DiscourseQuiz
       end
 
       permitted[:active] = true if permitted[:active].nil?
+      if QuizQuestion.column_names.include?("show_author_name")
+        permitted[:show_author_name] = true if permitted[:show_author_name].nil?
+      else
+        permitted.delete(:show_author_name)
+      end
       permitted[:position] = permitted[:position].to_i if QuizQuestion.position_column?
       permitted
+    end
+
+    def assign_admin_author!(question)
+      return unless question.respond_to?(:author_user_id)
+      return unless current_user
+
+      question.author_user_id = current_user.id
+      question.author_username = current_user.username
     end
   end
 end

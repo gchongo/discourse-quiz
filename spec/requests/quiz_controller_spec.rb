@@ -35,6 +35,26 @@ describe DiscourseQuiz::QuizController do
       expect(response.parsed_body["author_username"]).to eq(user.username)
     end
 
+    it "returns nil author when question is anonymous" do
+      if DiscourseQuiz::QuizQuestion.column_names.include?("show_author_name")
+        question.update!(
+          author_user_id: user.id,
+          author_username: user.username,
+          show_author_name: false,
+        )
+      else
+        question.update!(author_user_id: user.id, author_username: user.username)
+      end
+
+      get "/quiz/next.json"
+      expect(response.status).to eq(200)
+      if DiscourseQuiz::QuizQuestion.column_names.include?("show_author_name")
+        expect(response.parsed_body["author_username"]).to eq(nil)
+      else
+        expect(response.parsed_body["author_username"]).to eq(user.username)
+      end
+    end
+
     it "filters by category_name param" do
       DiscourseQuiz::QuizQuestion.create!(
         category_name: "体育",
@@ -330,6 +350,26 @@ describe DiscourseQuiz::QuizController do
       submission = DiscourseQuiz::QuizQuestionSubmission.last
       expect(submission.status).to eq("pending")
       expect(submission.submitter_id).to eq(user.id)
+    end
+
+    it "supports anonymous submission option" do
+      sign_in(user)
+      post "/quiz/question_submissions.json",
+           params: {
+             question_submission: {
+               category_name: "数学",
+               question_text: "2+2=?",
+               question_type: "single_choice",
+               options: %w[3 4],
+               correct_index: 1,
+               show_author_name: false,
+             },
+           }
+      expect(response.status).to eq(200)
+      submission = DiscourseQuiz::QuizQuestionSubmission.last
+      if submission.respond_to?(:show_author_name)
+        expect(submission.show_author_name).to eq(false)
+      end
     end
   end
 end

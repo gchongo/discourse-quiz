@@ -12,6 +12,7 @@ module DiscourseQuiz
     validates :question_text, presence: true
     validates :question_type, inclusion: { in: QuestionTypes::ALL }
     validates :status, inclusion: { in: STATUSES }
+    validates :show_author_name, inclusion: { in: [true, false] }, if: :show_author_name_column?
     validate :options_must_be_array
     validate :correct_index_in_range
     validate :question_type_fields_valid
@@ -35,6 +36,7 @@ module DiscourseQuiz
             active: true,
             author_user_id: submitter_id,
             author_username: submitter_username,
+            show_author_name: show_author_name_column? ? show_author_name : true,
           )
         question.save!
 
@@ -66,6 +68,10 @@ module DiscourseQuiz
     end
 
     private
+
+    def show_author_name_column?
+      self.class.column_names.include?("show_author_name")
+    end
 
     def normalize_question_type_fields
       self.question_type = question_type.presence || QuestionTypes::SINGLE_CHOICE

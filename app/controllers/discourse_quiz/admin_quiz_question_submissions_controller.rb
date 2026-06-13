@@ -60,6 +60,7 @@ module DiscourseQuiz
         correct_index: submission.correct_index,
         correct_indices: submission.correct_indices,
         explanation: submission.explanation,
+        show_author_name: submission.respond_to?(:show_author_name) ? submission.show_author_name : true,
         status: submission.status,
         review_note: submission.review_note,
         reviewer_id: submission.reviewer_id,

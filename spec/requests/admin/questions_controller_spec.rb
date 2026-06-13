@@ -27,6 +27,9 @@ describe DiscourseQuiz::AdminQuizQuestionsController do
       expect(response.status).to eq(200)
       expect(DiscourseQuiz::QuizQuestion.count).to eq(1)
       expect(response.parsed_body["question"]["question_text"]).to eq("新题目")
+      if DiscourseQuiz::QuizQuestion.column_names.include?("author_username")
+        expect(response.parsed_body["question"]["author_username"]).to eq(admin.username)
+      end
     end
 
     it "returns a duplicate warning when question text already exists" do
@@ -478,6 +481,7 @@ describe DiscourseQuiz::AdminQuizQuestionSubmissionsController do
         question_type: "single_choice",
         options: %w[3 4],
         correct_index: 1,
+        show_author_name: false,
       )
     end
 
@@ -492,6 +496,9 @@ describe DiscourseQuiz::AdminQuizQuestionSubmissionsController do
       expect(submission.approved_question_id).to be_present
       question = DiscourseQuiz::QuizQuestion.find(submission.approved_question_id)
       expect(question.author_username).to eq(user.username)
+      if question.respond_to?(:show_author_name)
+        expect(question.show_author_name).to eq(false)
+      end
     end
 
     it "rejects a submission" do

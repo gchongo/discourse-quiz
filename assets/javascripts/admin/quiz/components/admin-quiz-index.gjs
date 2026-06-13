@@ -7,7 +7,7 @@ import { popupAjaxError } from "discourse/lib/ajax-error";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/ui-kit/d-button";
 import { on } from "@ember/modifier";
-import { fn, get } from "@ember/helper";
+import { fn } from "@ember/helper";
 import { eq, not, or } from "discourse/truth-helpers";
 import QuizQuestionEditModal from "./quiz-question-edit-modal";
 
@@ -499,251 +499,6 @@ export default class AdminQuizIndex extends Component {
   <template>
     <div class="admin-discourse-quiz">
       <section class="quiz-admin-list">
-        <h2>{{i18n "discourse_quiz.admin.question_submissions_title"}}</h2>
-        <div class="quiz-admin-filters">
-          <div class="quiz-admin-field">
-            <label class="quiz-admin-field__label" for="quiz-submission-status-filter">
-              {{i18n "discourse_quiz.admin.question_submissions_status"}}
-            </label>
-            <select
-              id="quiz-submission-status-filter"
-              class="quiz-admin-field__control"
-              {{on "change" this.onSubmissionStatusFilterChange}}
-            >
-              <option value="pending" selected={{eq this.submissionStatusFilter "pending"}}>
-                {{i18n "discourse_quiz.admin.question_submissions_pending"}}
-              </option>
-              <option value="approved" selected={{eq this.submissionStatusFilter "approved"}}>
-                {{i18n "discourse_quiz.admin.question_submissions_approved"}}
-              </option>
-              <option value="rejected" selected={{eq this.submissionStatusFilter "rejected"}}>
-                {{i18n "discourse_quiz.admin.question_submissions_rejected"}}
-              </option>
-            </select>
-          </div>
-          <div class="quiz-admin-field__actions">
-            <DButton
-              @label="discourse_quiz.admin.reload"
-              @action={{this.loadSubmissions}}
-              class="btn-default"
-            />
-          </div>
-        </div>
-
-        {{#if this.submissionsLoading}}
-          <p class="quiz-admin-hint">{{i18n "discourse_quiz.loading"}}</p>
-        {{else if this.submissions.length}}
-          <div class="quiz-questions-cards">
-            {{#each this.submissions as |submission|}}
-              <article class="quiz-question-card">
-                <div class="quiz-question-card__meta">
-                  <span class="quiz-question-card__category">{{submission.category_name}}</span>
-                  <span class="quiz-question-card__status">
-                    {{submission.status}}
-                  </span>
-                </div>
-                <div class="quiz-question-card__text">{{submission.question_text}}</div>
-                <div class="quiz-admin-hint">
-                  {{i18n "discourse_quiz.admin.question_submissions_submitter" username=submission.submitter_username}}
-                </div>
-                {{#if (eq submission.status "pending")}}
-                  <div class="quiz-admin-field">
-                    <label class="quiz-admin-field__label">
-                      {{i18n "discourse_quiz.admin.question_submissions_note"}}
-                    </label>
-                    <input
-                      class="quiz-admin-field__control"
-                      type="text"
-                      value={{submission.review_note_draft}}
-                      {{on "input" (fn this.onSubmissionReviewNoteInput submission)}}
-                    />
-                  </div>
-                {{/if}}
-                {{#if (eq submission.status "pending")}}
-                  <div class="quiz-question-card__actions quiz-admin-actions">
-                    <DButton
-                      @label="discourse_quiz.admin.question_submissions_approve"
-                      @action={{fn this.reviewSubmission submission "approve"}}
-                      @disabled={{eq this.reviewBusyId submission.id}}
-                      class="btn-primary btn-small"
-                    />
-                    <DButton
-                      @label="discourse_quiz.admin.question_submissions_reject"
-                      @action={{fn this.reviewSubmission submission "reject"}}
-                      @disabled={{eq this.reviewBusyId submission.id}}
-                      class="btn-danger btn-small"
-                    />
-                  </div>
-                {{/if}}
-              </article>
-            {{/each}}
-          </div>
-        {{else}}
-          <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.question_submissions_empty"}}</p>
-        {{/if}}
-      </section>
-
-      <section class="quiz-admin-import">
-        <h2>{{i18n "discourse_quiz.admin.import_title"}}</h2>
-        <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.import_hint"}}</p>
-
-        <div class="quiz-admin-import__toolbar">
-          <label class="btn btn-default quiz-admin-file-btn">
-            {{i18n "discourse_quiz.admin.choose_file"}}
-            <input type="file" accept=".json,.csv,text/json,text/csv" hidden {{on "change" this.onFileSelected}} />
-          </label>
-          <DButton
-            @label="discourse_quiz.admin.use_json_example"
-            @action={{this.useJsonExample}}
-            class="btn-default"
-          />
-          <DButton
-            @label="discourse_quiz.admin.use_csv_example"
-            @action={{this.useCsvExample}}
-            class="btn-default"
-          />
-          {{#if this.importFormat}}
-            <span class="quiz-admin-import__format">
-              {{i18n "discourse_quiz.admin.import_format" format=this.importFormat}}
-            </span>
-          {{/if}}
-        </div>
-
-        <textarea
-          class="quiz-import-textarea"
-          rows="12"
-          value={{this.importJson}}
-          {{on "input" this.updateImportJson}}
-        ></textarea>
-
-        <div class="quiz-admin-import__options">
-          <label class="quiz-admin-form__checkbox">
-            <input type="checkbox" checked={{this.dryRun}} {{on "change" this.toggleDryRun}} />
-            <span>{{i18n "discourse_quiz.admin.dry_run"}}</span>
-          </label>
-          <label class="quiz-admin-form__checkbox">
-            <input type="checkbox" checked={{this.upsert}} {{on "change" this.toggleUpsert}} />
-            <span>{{i18n "discourse_quiz.admin.upsert"}}</span>
-          </label>
-        </div>
-
-        <DButton
-          @label={{if this.importing "discourse_quiz.admin.importing" "discourse_quiz.admin.import_button"}}
-          @action={{this.bulkImport}}
-          @disabled={{this.importing}}
-          class="btn-primary"
-        />
-
-        {{#if this.importResult}}
-          <p class="quiz-import-result">
-            {{#if this.importResult.dry_run}}
-              {{i18n
-                "discourse_quiz.admin.dry_run_result"
-                valid=this.importResult.valid
-                skipped=this.importResult.skipped
-                total=this.importResult.total
-              }}
-            {{else}}
-              {{i18n
-                "discourse_quiz.admin.import_result_full"
-                imported=this.importResult.imported
-                updated=this.importResult.updated
-                skipped=this.importResult.skipped
-                total=this.importResult.total
-              }}
-            {{/if}}
-          </p>
-        {{/if}}
-
-        {{#if this.importWarnings.length}}
-          <table class="quiz-import-warnings table">
-            <thead>
-              <tr>
-                <th>{{i18n "discourse_quiz.admin.import_warning_row"}}</th>
-                <th>{{i18n "discourse_quiz.admin.import_warning_messages"}}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each this.importWarnings as |warning|}}
-                <tr>
-                  <td>{{warning.row}}</td>
-                  <td>{{warning.message}}</td>
-                </tr>
-              {{/each}}
-            </tbody>
-          </table>
-        {{/if}}
-
-        {{#if this.importErrors.length}}
-          <table class="quiz-import-errors table">
-            <thead>
-              <tr>
-                <th>{{i18n "discourse_quiz.admin.import_error_row"}}</th>
-                <th>{{i18n "discourse_quiz.admin.import_error_messages"}}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each this.importErrors as |error|}}
-                <tr>
-                  <td>{{error.row}}</td>
-                  <td>
-                    {{#each error.messages as |message|}}
-                      <div>{{message}}</div>
-                    {{/each}}
-                  </td>
-                </tr>
-              {{/each}}
-            </tbody>
-          </table>
-        {{/if}}
-      </section>
-
-      <section class="quiz-admin-categories">
-        <h2>{{i18n "discourse_quiz.admin.category_manage_title"}}</h2>
-        <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.category_manage_hint"}}</p>
-        <div class="quiz-admin-category-rename">
-          <div class="quiz-admin-field">
-            <label class="quiz-admin-field__label" for="quiz-rename-from">
-              {{i18n "discourse_quiz.admin.rename_from"}}
-            </label>
-            <select id="quiz-rename-from" class="quiz-admin-field__control" {{on "change" this.onRenameFromChange}}>
-              <option value="" selected={{eq this.renameFrom ""}}>
-                {{i18n "discourse_quiz.admin.rename_select"}}
-              </option>
-              {{#each this.categories as |category|}}
-                <option value={{category}} selected={{eq this.renameFrom category}}>
-                  {{category}}
-                </option>
-              {{/each}}
-            </select>
-          </div>
-          <div class="quiz-admin-field">
-            <label class="quiz-admin-field__label" for="quiz-rename-to">
-              {{i18n "discourse_quiz.admin.rename_to"}}
-            </label>
-            <input
-              id="quiz-rename-to"
-              class="quiz-admin-field__control"
-              type="text"
-              value={{this.renameTo}}
-              {{on "input" this.onRenameToChange}}
-            />
-          </div>
-          <DButton
-            @label={{if this.renaming "discourse_quiz.admin.renaming" "discourse_quiz.admin.rename_button"}}
-            @action={{this.renameCategory}}
-            @disabled={{or this.renaming (not this.renameFrom) (not this.renameTo)}}
-            class="btn-default quiz-admin-field__action"
-          />
-        </div>
-        {{#if this.renameResult}}
-          <p class="quiz-import-result">
-            {{i18n "discourse_quiz.admin.rename_result" count=this.renameResult.updated}}
-          </p>
-        {{/if}}
-      </section>
-
-      <section class="quiz-admin-list">
         {{#if this.loadError}}
           <p class="quiz-admin-error">{{this.loadError}}</p>
         {{/if}}
@@ -1011,6 +766,251 @@ export default class AdminQuizIndex extends Component {
             {{/each}}
           </tbody>
         </table>
+      </section>
+
+      <section class="quiz-admin-list">
+        <h2>{{i18n "discourse_quiz.admin.question_submissions_title"}}</h2>
+        <div class="quiz-admin-filters">
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-submission-status-filter">
+              {{i18n "discourse_quiz.admin.question_submissions_status"}}
+            </label>
+            <select
+              id="quiz-submission-status-filter"
+              class="quiz-admin-field__control"
+              {{on "change" this.onSubmissionStatusFilterChange}}
+            >
+              <option value="pending" selected={{eq this.submissionStatusFilter "pending"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_pending"}}
+              </option>
+              <option value="approved" selected={{eq this.submissionStatusFilter "approved"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_approved"}}
+              </option>
+              <option value="rejected" selected={{eq this.submissionStatusFilter "rejected"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_rejected"}}
+              </option>
+            </select>
+          </div>
+          <div class="quiz-admin-field__actions">
+            <DButton
+              @label="discourse_quiz.admin.reload"
+              @action={{this.loadSubmissions}}
+              class="btn-default"
+            />
+          </div>
+        </div>
+
+        {{#if this.submissionsLoading}}
+          <p class="quiz-admin-hint">{{i18n "discourse_quiz.loading"}}</p>
+        {{else if this.submissions.length}}
+          <div class="quiz-questions-cards">
+            {{#each this.submissions as |submission|}}
+              <article class="quiz-question-card">
+                <div class="quiz-question-card__meta">
+                  <span class="quiz-question-card__category">{{submission.category_name}}</span>
+                  <span class="quiz-question-card__status">
+                    {{submission.status}}
+                  </span>
+                </div>
+                <div class="quiz-question-card__text">{{submission.question_text}}</div>
+                <div class="quiz-admin-hint">
+                  {{i18n "discourse_quiz.admin.question_submissions_submitter" username=submission.submitter_username}}
+                </div>
+                {{#if (eq submission.status "pending")}}
+                  <div class="quiz-admin-field">
+                    <label class="quiz-admin-field__label">
+                      {{i18n "discourse_quiz.admin.question_submissions_note"}}
+                    </label>
+                    <input
+                      class="quiz-admin-field__control"
+                      type="text"
+                      value={{submission.review_note_draft}}
+                      {{on "input" (fn this.onSubmissionReviewNoteInput submission)}}
+                    />
+                  </div>
+                {{/if}}
+                {{#if (eq submission.status "pending")}}
+                  <div class="quiz-question-card__actions quiz-admin-actions">
+                    <DButton
+                      @label="discourse_quiz.admin.question_submissions_approve"
+                      @action={{fn this.reviewSubmission submission "approve"}}
+                      @disabled={{eq this.reviewBusyId submission.id}}
+                      class="btn-primary btn-small"
+                    />
+                    <DButton
+                      @label="discourse_quiz.admin.question_submissions_reject"
+                      @action={{fn this.reviewSubmission submission "reject"}}
+                      @disabled={{eq this.reviewBusyId submission.id}}
+                      class="btn-danger btn-small"
+                    />
+                  </div>
+                {{/if}}
+              </article>
+            {{/each}}
+          </div>
+        {{else}}
+          <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.question_submissions_empty"}}</p>
+        {{/if}}
+      </section>
+
+      <section class="quiz-admin-import">
+        <h2>{{i18n "discourse_quiz.admin.import_title"}}</h2>
+        <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.import_hint"}}</p>
+
+        <div class="quiz-admin-import__toolbar">
+          <label class="btn btn-default quiz-admin-file-btn">
+            {{i18n "discourse_quiz.admin.choose_file"}}
+            <input type="file" accept=".json,.csv,text/json,text/csv" hidden {{on "change" this.onFileSelected}} />
+          </label>
+          <DButton
+            @label="discourse_quiz.admin.use_json_example"
+            @action={{this.useJsonExample}}
+            class="btn-default"
+          />
+          <DButton
+            @label="discourse_quiz.admin.use_csv_example"
+            @action={{this.useCsvExample}}
+            class="btn-default"
+          />
+          {{#if this.importFormat}}
+            <span class="quiz-admin-import__format">
+              {{i18n "discourse_quiz.admin.import_format" format=this.importFormat}}
+            </span>
+          {{/if}}
+        </div>
+
+        <textarea
+          class="quiz-import-textarea"
+          rows="12"
+          value={{this.importJson}}
+          {{on "input" this.updateImportJson}}
+        ></textarea>
+
+        <div class="quiz-admin-import__options">
+          <label class="quiz-admin-form__checkbox">
+            <input type="checkbox" checked={{this.dryRun}} {{on "change" this.toggleDryRun}} />
+            <span>{{i18n "discourse_quiz.admin.dry_run"}}</span>
+          </label>
+          <label class="quiz-admin-form__checkbox">
+            <input type="checkbox" checked={{this.upsert}} {{on "change" this.toggleUpsert}} />
+            <span>{{i18n "discourse_quiz.admin.upsert"}}</span>
+          </label>
+        </div>
+
+        <DButton
+          @label={{if this.importing "discourse_quiz.admin.importing" "discourse_quiz.admin.import_button"}}
+          @action={{this.bulkImport}}
+          @disabled={{this.importing}}
+          class="btn-primary"
+        />
+
+        {{#if this.importResult}}
+          <p class="quiz-import-result">
+            {{#if this.importResult.dry_run}}
+              {{i18n
+                "discourse_quiz.admin.dry_run_result"
+                valid=this.importResult.valid
+                skipped=this.importResult.skipped
+                total=this.importResult.total
+              }}
+            {{else}}
+              {{i18n
+                "discourse_quiz.admin.import_result_full"
+                imported=this.importResult.imported
+                updated=this.importResult.updated
+                skipped=this.importResult.skipped
+                total=this.importResult.total
+              }}
+            {{/if}}
+          </p>
+        {{/if}}
+
+        {{#if this.importWarnings.length}}
+          <table class="quiz-import-warnings table">
+            <thead>
+              <tr>
+                <th>{{i18n "discourse_quiz.admin.import_warning_row"}}</th>
+                <th>{{i18n "discourse_quiz.admin.import_warning_messages"}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each this.importWarnings as |warning|}}
+                <tr>
+                  <td>{{warning.row}}</td>
+                  <td>{{warning.message}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{/if}}
+
+        {{#if this.importErrors.length}}
+          <table class="quiz-import-errors table">
+            <thead>
+              <tr>
+                <th>{{i18n "discourse_quiz.admin.import_error_row"}}</th>
+                <th>{{i18n "discourse_quiz.admin.import_error_messages"}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each this.importErrors as |error|}}
+                <tr>
+                  <td>{{error.row}}</td>
+                  <td>
+                    {{#each error.messages as |message|}}
+                      <div>{{message}}</div>
+                    {{/each}}
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{/if}}
+      </section>
+
+      <section class="quiz-admin-categories">
+        <h2>{{i18n "discourse_quiz.admin.category_manage_title"}}</h2>
+        <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.category_manage_hint"}}</p>
+        <div class="quiz-admin-category-rename">
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-rename-from">
+              {{i18n "discourse_quiz.admin.rename_from"}}
+            </label>
+            <select id="quiz-rename-from" class="quiz-admin-field__control" {{on "change" this.onRenameFromChange}}>
+              <option value="" selected={{eq this.renameFrom ""}}>
+                {{i18n "discourse_quiz.admin.rename_select"}}
+              </option>
+              {{#each this.categories as |category|}}
+                <option value={{category}} selected={{eq this.renameFrom category}}>
+                  {{category}}
+                </option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-rename-to">
+              {{i18n "discourse_quiz.admin.rename_to"}}
+            </label>
+            <input
+              id="quiz-rename-to"
+              class="quiz-admin-field__control"
+              type="text"
+              value={{this.renameTo}}
+              {{on "input" this.onRenameToChange}}
+            />
+          </div>
+          <DButton
+            @label={{if this.renaming "discourse_quiz.admin.renaming" "discourse_quiz.admin.rename_button"}}
+            @action={{this.renameCategory}}
+            @disabled={{or this.renaming (not this.renameFrom) (not this.renameTo)}}
+            class="btn-default quiz-admin-field__action"
+          />
+        </div>
+        {{#if this.renameResult}}
+          <p class="quiz-import-result">
+            {{i18n "discourse_quiz.admin.rename_result" count=this.renameResult.updated}}
+          </p>
+        {{/if}}
       </section>
     </div>
   </template>
