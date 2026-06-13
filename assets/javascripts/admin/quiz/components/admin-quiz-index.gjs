@@ -824,7 +824,7 @@ export default class AdminQuizIndex extends Component {
         {{#if this.submissionsLoading}}
           <p class="quiz-admin-hint">{{i18n "discourse_quiz.loading"}}</p>
         {{else if this.submissions.length}}
-          <div class="quiz-questions-cards">
+          <div class="quiz-questions-cards quiz-submissions-cards">
             {{#each this.submissions as |submission|}}
               <article class="quiz-question-card">
                 <div class="quiz-question-card__meta">

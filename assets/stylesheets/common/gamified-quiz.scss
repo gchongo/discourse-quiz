@@ -1150,6 +1150,12 @@ label.quiz-option-radio {
     display: none;
   }
 
+  .quiz-submissions-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+  }
+
   .quiz-questions-table {
     width: 100%;
 
