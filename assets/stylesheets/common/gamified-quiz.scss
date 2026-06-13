@@ -792,6 +792,26 @@ label.quiz-option-radio {
   }
 }
 
+.quiz-cooked-block,
+.quiz-cooked-inline {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  p {
+    margin: 0;
+  }
+}
+
+.quiz-cooked-inline {
+  display: inline;
+
+  > p,
+  > div {
+    display: inline;
+  }
+}
+
 .quiz-paywall {
   text-align: center;
   padding: 1.5em 0.5em;
@@ -1265,6 +1285,11 @@ label.quiz-option-radio {
     text-align: left;
     white-space: normal;
     overflow-wrap: anywhere;
+
+    .quiz-cooked-inline {
+      color: inherit;
+      line-height: 1.4;
+    }
 
     &.is-selected {
       background: var(--tertiary-low);

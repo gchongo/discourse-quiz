@@ -8,6 +8,7 @@ import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
 import { eq, not, or } from "discourse/truth-helpers";
 import { i18n } from "discourse-i18n";
+import DCookText from "discourse/ui-kit/d-cook-text";
 
 export default class QuizQuestionEditModal extends Component {
   @tracked categoryName;
@@ -349,7 +350,7 @@ export default class QuizQuestionEditModal extends Component {
                     class="btn btn-default quiz-admin-answer-btn {{if entry.selected 'is-selected'}}"
                     {{on "click" (fn this.selectCorrectIndex entry.index)}}
                   >
-                    {{entry.option}}
+                    <DCookText class="quiz-cooked-inline" @rawText={{entry.option}} />
                   </button>
                 {{/each}}
               </div>
@@ -368,7 +369,7 @@ export default class QuizQuestionEditModal extends Component {
                       class="btn btn-default quiz-admin-answer-btn {{if entry.selected 'is-selected'}}"
                       {{on "click" (fn this.toggleCorrectIndex entry.index)}}
                     >
-                      {{entry.option}}
+                      <DCookText class="quiz-cooked-inline" @rawText={{entry.option}} />
                     </button>
                   {{/each}}
                 </div>
@@ -391,7 +392,7 @@ export default class QuizQuestionEditModal extends Component {
                     class="btn btn-default quiz-admin-answer-btn {{if entry.selected 'is-selected'}}"
                     {{on "click" (fn this.selectCorrectIndex entry.index)}}
                   >
-                    {{entry.option}}
+                    <DCookText class="quiz-cooked-inline" @rawText={{entry.option}} />
                   </button>
                 {{/each}}
               </div>

@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.18.1)
+## Current features (v0.18.7)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Home **today's points** progress bar (earned / daily max); rules info dialog no longer shows this line
@@ -26,6 +26,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Panel loads one random active question from the bank
 - Question types: single choice (default), true/false, and multiple choice (all correct options required)
 - Question and result headers: **type** (left, tertiary) and **category** (center) on one row to avoid layout jump
+- Question text, options, and explanation support cooked Markdown rendering (including LaTeX blocks like `$$...$$` when `discourse-math` is enabled)
 - Answer UI uses radio buttons for single/true-false and checkboxes for multiple choice
 - Result page reuses the same option control styling; feedback appears below options and above the explanation
 - Correct-answer feedback shows points on the same line, right-aligned
@@ -330,13 +331,19 @@ Legacy attempts without `points_awarded` still count toward today's total using 
 - `quiz_rewards_enabled` — points redemption page and claims (default off)
 - `quiz_rewards_use_gamification_score` — use total gamification score for reward thresholds (off = quiz points only)
 - `quiz_rewards_intro` — optional intro on `/quiz/rewards`
-- `quiz_leaderboard_enabled` — quiz leaderboard page (default off)
+- `quiz_leaderboard_enabled` — quiz leaderboard page (default on)
 - `quiz_leaderboard_min_attempts` — minimum distinct questions for accuracy ranking (default 20)
 - `quiz_leaderboard_user_limit` — users per page on leaderboard (default 50, max 100)
 
 ## Quiz leaderboard (optional)
 
-Disabled by default (`quiz_leaderboard_enabled`). Link `/quiz/leaderboard` from your site nav (not shown in the quiz panel).
+Enabled by default (`quiz_leaderboard_enabled`). Link `/quiz/leaderboard` from your site nav (not shown in the quiz panel).
+
+### Math / LaTeX support
+
+- Quiz question text, answer options, and explanation are rendered through Discourse cooked Markdown.
+- Use standard markdown and math syntax in content; for block formulas use `$$...$$`.
+- Math rendering requires the official `discourse-math` plugin to be installed and enabled.
 
 ### Metrics
 
@@ -357,6 +364,16 @@ Disabled by default (`quiz_leaderboard_enabled`). Link `/quiz/leaderboard` from 
 Stats are stored in `discourse_quiz_leaderboard_stats` and refreshed hourly (`Jobs::RefreshQuizLeaderboardStats`) and after each logged-in submit when enabled.
 
 ## Changelog
+
+### v0.18.7
+
+- Add cooked Markdown rendering for quiz question text, options, and explanation
+- Support LaTeX math blocks (`$$...$$`) in quiz content when `discourse-math` is enabled
+
+### v0.18.6
+
+- Leaderboard/rewards title size and header spacing aligned with gamification leaderboard style
+- Leaderboard toolbar refined: center metric switch (`答题总数` / `正确率`) and keep `分类统计` as a right-side auxiliary action
 
 ### v0.18.1
 
