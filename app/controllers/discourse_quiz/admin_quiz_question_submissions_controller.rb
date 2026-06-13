@@ -8,9 +8,12 @@ module DiscourseQuiz
       submissions = QuizQuestionSubmission.recent_first
       status_filter = normalize_status_filter(params[:status])
       if status_filter == "pending"
-        submissions = submissions.where("status IS NULL OR status = '' OR status = 'pending'")
+        submissions =
+          submissions.where(
+            "COALESCE(NULLIF(TRIM(status), ''), 'pending') NOT IN ('approved', 'rejected')",
+          )
       elsif status_filter.present?
-        submissions = submissions.where(status: status_filter)
+        submissions = submissions.where("LOWER(TRIM(status)) = ?", status_filter)
       end
 
       render_json_dump(
