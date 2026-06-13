@@ -91,6 +91,13 @@ RSpec.describe DiscourseQuiz::QuizLeaderboardRankingService do
       expect(result[:personal][:ineligible]).to eq(true)
       expect(result[:personal][:position]).to be_nil
     end
+
+    it "returns period metadata and supports period filter" do
+      result = described_class.ranking(metric: "volume", period: "weekly", page: 1, per_page: 10)
+
+      expect(result[:period]).to eq("weekly")
+      expect(result[:period_start]).to eq(Time.zone.today.beginning_of_week)
+    end
   end
 
   describe ".user_categories" do
@@ -136,6 +143,13 @@ RSpec.describe DiscourseQuiz::QuizLeaderboardRankingService do
       expect(payload[:user][:questions_attempted]).to eq(2)
       expect(payload[:user][:questions_correct]).to eq(1)
       expect(payload[:categories].map { |c| c[:category_name] }).to contain_exactly("历史", "地理")
+    end
+
+    it "supports period filter on category stats" do
+      payload = described_class.user_categories(user, period: "daily")
+
+      expect(payload[:period]).to eq("daily")
+      expect(payload[:period_start]).to eq(Time.zone.today)
     end
   end
 end

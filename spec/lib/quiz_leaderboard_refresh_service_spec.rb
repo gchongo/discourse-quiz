@@ -40,7 +40,11 @@ RSpec.describe DiscourseQuiz::QuizLeaderboardRefreshService do
 
       described_class.refresh_all!
 
-      global = DiscourseQuiz::QuizLeaderboardStat.global_rows.find_by(user_id: user.id)
+      global =
+        DiscourseQuiz::QuizLeaderboardStat
+          .global_rows
+          .for_period("all", DiscourseQuiz::QuizLeaderboardStat::ALL_PERIOD_START)
+          .find_by(user_id: user.id)
       expect(global.questions_attempted).to eq(2)
       expect(global.questions_correct).to eq(1)
       expect(global.accuracy_rate).to eq(50.0)
@@ -56,11 +60,15 @@ RSpec.describe DiscourseQuiz::QuizLeaderboardRefreshService do
         DiscourseQuiz::QuizLeaderboardStat.category_rows.find_by(
           user_id: user.id,
           category_name: "历史",
+          period_type: "all",
+          period_start: DiscourseQuiz::QuizLeaderboardStat::ALL_PERIOD_START,
         )
       geo_row =
         DiscourseQuiz::QuizLeaderboardStat.category_rows.find_by(
           user_id: user.id,
           category_name: "地理",
+          period_type: "all",
+          period_start: DiscourseQuiz::QuizLeaderboardStat::ALL_PERIOD_START,
         )
 
       expect(history_row.questions_attempted).to eq(1)
@@ -78,7 +86,7 @@ RSpec.describe DiscourseQuiz::QuizLeaderboardRefreshService do
 
       described_class.refresh_user!(user.id)
 
-      expect(DiscourseQuiz::QuizLeaderboardStat.global_rows.count).to eq(1)
+      expect(DiscourseQuiz::QuizLeaderboardStat.global_rows.count).to eq(4)
       expect(DiscourseQuiz::QuizLeaderboardStat.global_rows.find_by(user_id: user.id)).to be_present
       expect(DiscourseQuiz::QuizLeaderboardStat.global_rows.find_by(user_id: other_user.id)).to be_nil
     end

@@ -37,6 +37,15 @@ RSpec.describe DiscourseQuiz::QuizLeaderboardController do
       expect(response.parsed_body["personal"]["position"]).to eq(1)
     end
 
+    it "accepts period filter" do
+      sign_in(user)
+
+      get "/quiz/leaderboard.json", params: { metric: "volume", period: "weekly" }
+
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["period"]).to eq("weekly")
+    end
+
     it "is hidden when leaderboard is disabled" do
       SiteSetting.quiz_leaderboard_enabled = false
 
@@ -53,6 +62,13 @@ RSpec.describe DiscourseQuiz::QuizLeaderboardController do
       expect(response.parsed_body["user"]["questions_attempted"]).to eq(1)
       expect(response.parsed_body["categories"].length).to eq(1)
       expect(response.parsed_body["categories"][0]["category_name"]).to eq("测试")
+    end
+
+    it "accepts period filter for profile stats" do
+      get "/quiz/leaderboard/user_categories.json", params: { username: user.username, period: "daily" }
+
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["period"]).to eq("daily")
     end
 
     it "returns 404 for unknown users" do

@@ -21,6 +21,7 @@ export default class QuizLeaderboardPage extends Component {
 
   @tracked activeTab = "rankings";
   @tracked metric = "volume";
+  @tracked period = "all";
   @tracked page = 1;
   @tracked loadingRankings = true;
   @tracked rankingData = null;
@@ -94,6 +95,15 @@ export default class QuizLeaderboardPage extends Component {
     return i18n("discourse_quiz.leaderboard.metric_volume");
   }
 
+  get periodOptions() {
+    return [
+      { id: "all", label: i18n("discourse_quiz.leaderboard.period_all") },
+      { id: "monthly", label: i18n("discourse_quiz.leaderboard.period_monthly") },
+      { id: "weekly", label: i18n("discourse_quiz.leaderboard.period_weekly") },
+      { id: "daily", label: i18n("discourse_quiz.leaderboard.period_daily") },
+    ];
+  }
+
   winnerPositionClass = (entry) => {
     return `-position${entry.position}`;
   };
@@ -163,13 +173,28 @@ export default class QuizLeaderboardPage extends Component {
   }
 
   @action
+  setPeriod(period) {
+    if (this.period === period) {
+      return;
+    }
+
+    this.period = period;
+    this.page = 1;
+    this.loadRankings();
+
+    if (this.activeTab === "profile" && this.profileUsername?.trim()) {
+      this.loadProfile();
+    }
+  }
+
+  @action
   async loadRankings() {
     this.loadingRankings = true;
     this.rankingError = null;
 
     try {
       const data = await ajax(
-        `/quiz/leaderboard.json?metric=${this.metric}&page=${this.page}`
+        `/quiz/leaderboard.json?metric=${this.metric}&period=${this.period}&page=${this.page}`
       );
       this.rankingData = data;
     } catch (e) {
@@ -191,7 +216,7 @@ export default class QuizLeaderboardPage extends Component {
 
     try {
       const data = await ajax(
-        `/quiz/leaderboard.json?metric=${this.metric}&page=${this.page}`
+        `/quiz/leaderboard.json?metric=${this.metric}&period=${this.period}&page=${this.page}`
       );
       this.rankingData = {
         ...data,
@@ -243,7 +268,7 @@ export default class QuizLeaderboardPage extends Component {
 
     try {
       const data = await ajax(
-        `/quiz/leaderboard/user_categories.json?username=${encodeURIComponent(username)}`
+        `/quiz/leaderboard/user_categories.json?username=${encodeURIComponent(username)}&period=${this.period}`
       );
       this.profileData = data;
     } catch (e) {
@@ -292,6 +317,18 @@ export default class QuizLeaderboardPage extends Component {
         {{/if}}
 
         {{#if (eq this.activeTab "rankings")}}
+          <div class="quiz-leaderboard-page__period-switch" role="tablist">
+            {{#each this.periodOptions as |option|}}
+              <button
+                type="button"
+                class="quiz-leaderboard-page__period-btn {{if (eq this.period option.id) 'is-active'}}"
+                {{on "click" (fn this.setPeriod option.id)}}
+              >
+                {{option.label}}
+              </button>
+            {{/each}}
+          </div>
+
           <div class="quiz-leaderboard-page__metric-switch" role="tablist">
             <button
               type="button"

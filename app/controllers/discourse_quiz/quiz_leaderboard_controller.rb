@@ -13,6 +13,7 @@ module DiscourseQuiz
       render_json_dump(
         QuizLeaderboardRankingService.ranking(
           metric: params[:metric],
+          period: params[:period],
           page: params[:page],
           per_page: params[:per_page],
           for_user_id: current_user&.id,
@@ -26,7 +27,7 @@ module DiscourseQuiz
       user = resolve_user
       raise Discourse::NotFound unless user
 
-      payload = QuizLeaderboardRankingService.user_categories(user)
+      payload = QuizLeaderboardRankingService.user_categories(user, period: params[:period])
       raise Discourse::NotFound unless payload
 
       render_json_dump(payload)

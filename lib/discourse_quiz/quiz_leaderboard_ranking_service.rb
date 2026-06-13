@@ -4,10 +4,12 @@ module DiscourseQuiz
   class QuizLeaderboardRankingService
     METRICS = %w[volume accuracy].freeze
 
-    def self.ranking(metric:, page: 1, per_page: nil, for_user_id: nil)
+    def self.ranking(metric:, period: "all", page: 1, per_page: nil, for_user_id: nil)
       return empty_payload(metric, page, per_page) unless QuizLeaderboardStat.table_ready?
 
       metric = METRICS.include?(metric.to_s) ? metric.to_s : "volume"
+      period = QuizLeaderboardStat.normalize_period(period)
+      period_start = QuizLeaderboardStat.period_start_for(period)
       page = [page.to_i, 1].max
       per_page = per_page || SiteSetting.quiz_leaderboard_user_limit.to_i
       per_page = 50 if per_page <= 0
@@ -16,7 +18,7 @@ module DiscourseQuiz
 
       ensure_cached!
 
-      scope = ranked_scope(metric, min_attempts)
+      scope = ranked_scope(metric, min_attempts, period: period, period_start: period_start)
       total = scope.count
       rows = scope.offset((page - 1) * per_page).limit(per_page).to_a
       users = load_users(rows.map(&:user_id))
@@ -24,6 +26,8 @@ module DiscourseQuiz
 
       {
         metric: metric,
+        period: period,
+        period_start: period_start,
         page: page,
         per_page: per_page,
         total: total,
@@ -32,27 +36,36 @@ module DiscourseQuiz
           rows.map.with_index(1) do |row, index|
             user_json(row, users, start_rank + index, metric: metric)
           end,
-        personal: personal_entry(metric, min_attempts, for_user_id),
-        refreshed_at: QuizLeaderboardStat.global_rows.maximum(:updated_at),
+        personal: personal_entry(metric, min_attempts, for_user_id, period: period, period_start: period_start),
+        refreshed_at: period_scope(QuizLeaderboardStat.global_rows, period: period, period_start: period_start).maximum(:updated_at),
       }
     end
 
-    def self.user_categories(user)
+    def self.user_categories(user, period: "all")
       return nil unless user && QuizLeaderboardStat.table_ready?
 
       ensure_cached!
 
+      period = QuizLeaderboardStat.normalize_period(period)
+      period_start = QuizLeaderboardStat.period_start_for(period)
+
       global =
-        QuizLeaderboardStat.global_rows.find_by(user_id: user.id)
+        period_scope(QuizLeaderboardStat.global_rows, period: period, period_start: period_start).find_by(user_id: user.id)
 
       categories =
-        QuizLeaderboardStat
-          .category_rows
+        period_scope(
+          QuizLeaderboardStat
+            .category_rows,
+          period: period,
+          period_start: period_start,
+        )
           .where(user_id: user.id)
           .where("questions_attempted > 0")
           .order(questions_attempted: :desc, category_name: :asc)
 
       {
+        period: period,
+        period_start: period_start,
         user: user_json_from_user(user, global),
         categories:
           categories.map do |row|
@@ -72,10 +85,14 @@ module DiscourseQuiz
       QuizLeaderboardRefreshService.refresh_all!
     end
 
-    def self.ranked_scope(metric, min_attempts)
+    def self.ranked_scope(metric, min_attempts, period:, period_start:)
       scope =
-        QuizLeaderboardStat
-          .global_rows
+        period_scope(
+          QuizLeaderboardStat
+            .global_rows,
+          period: period,
+          period_start: period_start,
+        )
           .joins(:user)
           .merge(User.real.activated)
           .where(
@@ -98,17 +115,17 @@ module DiscourseQuiz
       end
     end
 
-    def self.personal_entry(metric, min_attempts, user_id)
+    def self.personal_entry(metric, min_attempts, user_id, period:, period_start:)
       return nil unless user_id
 
-      row = QuizLeaderboardStat.global_rows.find_by(user_id: user_id)
+      row = period_scope(QuizLeaderboardStat.global_rows, period: period, period_start: period_start).find_by(user_id: user_id)
       return nil unless row
 
       if metric == "accuracy" && row.questions_attempted.to_i < min_attempts
         return ineligible_personal_json(row, min_attempts)
       end
 
-      scope = ranked_scope(metric, min_attempts)
+      scope = ranked_scope(metric, min_attempts, period: period, period_start: period_start)
       position =
         scope
           .where(
@@ -199,6 +216,8 @@ module DiscourseQuiz
     def self.empty_payload(metric, page, per_page)
       {
         metric: metric,
+        period: "all",
+        period_start: QuizLeaderboardStat.period_start_for("all"),
         page: page,
         per_page: per_page || 50,
         total: 0,
@@ -206,6 +225,15 @@ module DiscourseQuiz
         personal: nil,
         refreshed_at: nil,
       }
+    end
+
+    def self.period_scope(scope, period:, period_start:)
+      if ActiveRecord::Base.connection.column_exists?(:discourse_quiz_leaderboard_stats, :period_type) &&
+           ActiveRecord::Base.connection.column_exists?(:discourse_quiz_leaderboard_stats, :period_start)
+        scope.for_period(period, period_start)
+      else
+        scope
+      end
     end
   end
 end
