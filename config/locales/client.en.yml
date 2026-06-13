@@ -194,6 +194,7 @@ en:
         question_submissions_approve: "Approve"
         question_submissions_reject: "Reject"
         question_submissions_empty: "No question submissions."
+        question_submissions_load_error: "Failed to load review submissions. Please try again."
         rewards_title: "Points redemption"
         rewards_create: "Add reward"
         rewards_edit: "Edit reward"

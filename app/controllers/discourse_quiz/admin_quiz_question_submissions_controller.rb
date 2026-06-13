@@ -5,26 +5,29 @@ module DiscourseQuiz
     requires_plugin DiscourseQuiz::PLUGIN_NAME
 
     def index
-      submissions = []
+      scope = QuizQuestionSubmission.recent_first
+      status_filter = normalize_status_filter(params[:status])
 
-      DB.use_primary do
-        scope = QuizQuestionSubmission.recent_first
-        status_filter = normalize_status_filter(params[:status])
-
-        if status_filter == "pending"
-          scope =
-            scope.where(
-              "LOWER(COALESCE(NULLIF(TRIM(status), ''), 'pending')) = 'pending'",
-            )
-        elsif status_filter.present?
-          scope = scope.where("LOWER(TRIM(status)) = ?", status_filter)
-        end
-
-        submissions = scope.limit(200).to_a
+      if status_filter == "pending"
+        scope =
+          scope.where(
+            "LOWER(COALESCE(NULLIF(TRIM(status), ''), 'pending')) = 'pending'",
+          )
+      elsif status_filter.present?
+        scope = scope.where("LOWER(TRIM(status)) = ?", status_filter)
       end
 
       render_json_dump(
-        submissions: submissions.map { |submission| submission_json(submission) },
+        submissions: scope.limit(200).map { |submission| submission_json(submission) },
+      )
+    rescue StandardError => e
+      Rails.logger.error("[discourse-quiz] admin question submissions index failed: #{e.class}: #{e.message}")
+      render_json_dump(
+        {
+          submissions: [],
+          error: I18n.t("discourse_quiz.errors.database_unavailable"),
+        },
+        status: 500,
       )
     end
 

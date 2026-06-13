@@ -76,6 +76,7 @@ export default class AdminQuizIndex extends Component {
   @tracked submissions = [];
   @tracked submissionsLoading = false;
   @tracked submissionStatusFilter = "pending";
+  @tracked submissionsLoadError = null;
   @tracked reviewBusyId = null;
 
   constructor() {
@@ -145,6 +146,7 @@ export default class AdminQuizIndex extends Component {
   @action
   async loadSubmissions() {
     this.submissionsLoading = true;
+    this.submissionsLoadError = null;
 
     try {
       const data = await ajax(this.buildSubmissionsUrl());
@@ -152,8 +154,13 @@ export default class AdminQuizIndex extends Component {
         ...submission,
         review_note_draft: submission.review_note || "",
       }));
+      this.submissionsLoadError = data.error || null;
     } catch (e) {
-      popupAjaxError(e);
+      this.submissions = [];
+      this.submissionsLoadError =
+        e?.jqXHR?.responseJSON?.error ||
+        e?.jqXHR?.responseText ||
+        i18n("discourse_quiz.admin.question_submissions_load_error");
     } finally {
       this.submissionsLoading = false;
     }
@@ -809,6 +816,10 @@ export default class AdminQuizIndex extends Component {
             />
           </div>
         </div>
+
+        {{#if this.submissionsLoadError}}
+          <p class="quiz-admin-error">{{this.submissionsLoadError}}</p>
+        {{/if}}
 
         {{#if this.submissionsLoading}}
           <p class="quiz-admin-hint">{{i18n "discourse_quiz.loading"}}</p>

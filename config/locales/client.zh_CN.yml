@@ -194,6 +194,7 @@ zh_CN:
         question_submissions_approve: "通过"
         question_submissions_reject: "拒绝"
         question_submissions_empty: "暂无待审核题目。"
+        question_submissions_load_error: "加载审核列表失败，请稍后重试。"
         rewards_title: "积分兑换"
         rewards_create: "新增奖品"
         rewards_edit: "编辑奖品"
