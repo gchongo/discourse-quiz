@@ -37,6 +37,7 @@ module DiscourseQuiz
       render_json_dump(
         {
           id: question.id,
+          author_username: question.respond_to?(:author_username) ? question.author_username : nil,
           category_name: question.category_name,
           question_text: question.question_text,
           question_type: question.resolved_question_type,

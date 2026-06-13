@@ -440,3 +440,76 @@ describe DiscourseQuiz::AdminQuizQuestionsController do
     end
   end
 end
+
+describe DiscourseQuiz::AdminQuizQuestionSubmissionsController do
+  let(:admin) { Fabricate(:admin) }
+  let(:user) { Fabricate(:user) }
+
+  before do
+    SiteSetting.quiz_plugin_enabled = true
+    sign_in(admin)
+  end
+
+  describe "GET /admin/quiz/question_submissions" do
+    it "lists pending submissions" do
+      DiscourseQuiz::QuizQuestionSubmission.create!(
+        submitter_id: user.id,
+        submitter_username: user.username,
+        category_name: "数学",
+        question_text: "2+2=?",
+        question_type: "single_choice",
+        options: %w[3 4],
+        correct_index: 1,
+      )
+
+      get "/admin/quiz/question_submissions.json", params: { status: "pending" }
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["submissions"].length).to eq(1)
+    end
+  end
+
+  describe "PUT /admin/quiz/question_submissions/:id" do
+    let!(:submission) do
+      DiscourseQuiz::QuizQuestionSubmission.create!(
+        submitter_id: user.id,
+        submitter_username: user.username,
+        category_name: "数学",
+        question_text: "2+2=?",
+        question_type: "single_choice",
+        options: %w[3 4],
+        correct_index: 1,
+      )
+    end
+
+    it "approves a submission and creates question" do
+      expect {
+        put "/admin/quiz/question_submissions/#{submission.id}.json",
+            params: { review_action: "approve", review_note: "ok" }
+      }.to change { DiscourseQuiz::QuizQuestion.count }.by(1)
+
+      expect(response.status).to eq(200)
+      expect(submission.reload.status).to eq("approved")
+      expect(submission.approved_question_id).to be_present
+      question = DiscourseQuiz::QuizQuestion.find(submission.approved_question_id)
+      expect(question.author_username).to eq(user.username)
+    end
+
+    it "rejects a submission" do
+      put "/admin/quiz/question_submissions/#{submission.id}.json",
+          params: { review_action: "reject", review_note: "重复题目" }
+      expect(response.status).to eq(200)
+      expect(submission.reload.status).to eq("rejected")
+      expect(submission.review_note).to eq("重复题目")
+    end
+
+    it "does not allow reviewing a non-pending submission twice" do
+      put "/admin/quiz/question_submissions/#{submission.id}.json",
+          params: { review_action: "reject", review_note: "重复题目" }
+      expect(response.status).to eq(200)
+
+      put "/admin/quiz/question_submissions/#{submission.id}.json",
+          params: { review_action: "approve", review_note: "再次审核" }
+      expect(response.status).to eq(422)
+    end
+  end
+end

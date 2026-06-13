@@ -552,6 +552,11 @@ html.has-full-page-chat .quiz-panel-container.is-mobile.is-minimized {
     width: 100%;
     margin: 0;
   }
+
+  .quiz-home-submit-question-btn {
+    margin-top: 0.85em;
+    width: 100%;
+  }
 }
 
 .quiz-learning-notice {
@@ -565,6 +570,12 @@ html.has-full-page-chat .quiz-panel-container.is-mobile.is-minimized {
   background: var(--highlight-bg);
   border: 1px solid var(--highlight);
   border-radius: var(--d-border-radius);
+}
+
+.quiz-question-author {
+  margin: 0.75em 0 0;
+  font-size: var(--font-down-1);
+  color: var(--primary-medium);
 }
 
 .quiz-guest-notice {
@@ -1890,7 +1901,7 @@ body.quiz-rewards {
 
 body.quiz-leaderboard {
   .container .body-page {
-    max-width: 960px;
+    max-width: 100%;
     margin-inline: auto;
   }
 }
@@ -1901,7 +1912,7 @@ body.quiz-leaderboard {
   $bronze: #cd7f32;
 
   width: 100%;
-  max-width: 960px;
+  max-width: 100%;
   margin: 0 auto;
 
   &__header {
@@ -2076,7 +2087,7 @@ body.quiz-leaderboard {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: min(100%, 640px);
+    width: 60%;
     margin: 0 auto;
     padding: 2rem 1rem 5rem;
   }
@@ -2198,7 +2209,7 @@ body.quiz-leaderboard {
   }
 
   &__ranking {
-    width: min(100%, 720px);
+    width: 75%;
     margin: 0 auto 1.5em;
   }
 
@@ -2342,7 +2353,7 @@ body.quiz-leaderboard {
   }
 
   &__profile-panel {
-    width: min(100%, 720px);
+    width: 75%;
     margin: 0 auto;
   }
 
@@ -2520,6 +2531,11 @@ body.quiz-leaderboard {
     &__podium {
       width: 100%;
       padding: 1.5rem 0.5rem 4rem;
+    }
+
+    &__ranking,
+    &__profile-panel {
+      width: 100%;
     }
 
     &__winner {

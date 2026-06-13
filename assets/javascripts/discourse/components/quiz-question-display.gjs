@@ -63,6 +63,11 @@ export default class QuizQuestionDisplay extends Component {
     return `quiz-question-${this.question.id}`;
   }
 
+  get authorLabel() {
+    const username = this.question.author_username || i18n("discourse_quiz.question_author_unknown");
+    return i18n("discourse_quiz.question_author", { username });
+  }
+
   get singleChoiceOptions() {
     return (this.question.options || []).map((option, index) => ({
       option,
@@ -168,6 +173,8 @@ export default class QuizQuestionDisplay extends Component {
           {{/each}}
         {{/if}}
       </ul>
+
+      <p class="quiz-question-author">{{this.authorLabel}}</p>
 
       <DButton
         @label={{if this.quiz.submitting "discourse_quiz.submitting" "discourse_quiz.submit"}}

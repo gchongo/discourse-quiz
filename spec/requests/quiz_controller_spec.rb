@@ -22,8 +22,17 @@ describe DiscourseQuiz::QuizController do
       expect(response.status).to eq(200)
       json = response.parsed_body
       expect(json["question_text"]).to eq(question.question_text)
+      expect(json["author_username"]).to eq(nil)
       expect(json).not_to have_key("correct_index")
       expect(json["status"]).to be_present
+    end
+
+    it "returns author username when question has proposer" do
+      question.update!(author_user_id: user.id, author_username: user.username)
+
+      get "/quiz/next.json"
+      expect(response.status).to eq(200)
+      expect(response.parsed_body["author_username"]).to eq(user.username)
     end
 
     it "filters by category_name param" do
@@ -283,6 +292,44 @@ describe DiscourseQuiz::QuizController do
     it "returns not found for missing questions" do
       post "/quiz/submit.json", params: { question_id: -1, answer_index: 0 }
       expect(response.status).to eq(404)
+    end
+  end
+
+  describe "POST /quiz/question_submissions" do
+    it "requires login" do
+      post "/quiz/question_submissions.json",
+           params: {
+             question_submission: {
+               category_name: "数学",
+               question_text: "2+2=?",
+               question_type: "single_choice",
+               options: %w[3 4],
+               correct_index: 1,
+             },
+           }
+      expect(response.status).to eq(403)
+    end
+
+    it "creates a pending submission for logged-in user" do
+      sign_in(user)
+
+      expect {
+        post "/quiz/question_submissions.json",
+             params: {
+               question_submission: {
+                 category_name: "数学",
+                 question_text: "2+2=?",
+                 question_type: "single_choice",
+                 options: %w[3 4],
+                 correct_index: 1,
+               },
+             }
+      }.to change { DiscourseQuiz::QuizQuestionSubmission.count }.by(1)
+
+      expect(response.status).to eq(200)
+      submission = DiscourseQuiz::QuizQuestionSubmission.last
+      expect(submission.status).to eq("pending")
+      expect(submission.submitter_id).to eq(user.id)
     end
   end
 end

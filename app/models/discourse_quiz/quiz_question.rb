@@ -102,6 +102,11 @@ module DiscourseQuiz
       end
     end
 
+    def assign_author!(user)
+      self.author_user_id = user&.id
+      self.author_username = user&.username
+    end
+
     def correct_option_labels
       resolved_correct_indices.map { |index| options[index] }.compact
     end

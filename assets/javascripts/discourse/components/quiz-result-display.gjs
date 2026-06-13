@@ -76,6 +76,11 @@ export default class QuizResultDisplay extends Component {
     return `quiz-result-${this.question.id}`;
   }
 
+  get authorLabel() {
+    const username = this.question.author_username || i18n("discourse_quiz.question_author_unknown");
+    return i18n("discourse_quiz.question_author", { username });
+  }
+
   get singleChoiceResultOptions() {
     return (this.question.options || []).map((option, index) => {
       const classes = ["quiz-option-btn", "quiz-option-radio", "is-locked"];
@@ -148,6 +153,8 @@ export default class QuizResultDisplay extends Component {
             {{/if}}
           </ul>
         {{/if}}
+
+        <p class="quiz-question-author">{{this.authorLabel}}</p>
 
         <div
           class="quiz-result-banner {{if this.result.correct 'is-correct' 'is-incorrect'}}"

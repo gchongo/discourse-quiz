@@ -6,6 +6,7 @@ DiscourseQuiz::Engine.routes.draw do
   get "/status" => "quiz#status"
   get "/summary_stats" => "quiz#summary_stats"
   post "/submit" => "quiz#submit"
+  post "/question_submissions" => "quiz_question_submissions#create"
   get "/rewards" => "quiz_rewards#index"
   get "/rewards/claims" => "quiz_rewards#claims"
   post "/rewards/:id/claim" => "quiz_rewards#claim"
@@ -23,6 +24,8 @@ Discourse::Application.routes.draw do
     get "/admin/quiz/questions/export" => "discourse_quiz/admin_quiz_questions#export"
     get "/admin/quiz/categories" => "discourse_quiz/admin_quiz_questions#categories"
     post "/admin/quiz/questions" => "discourse_quiz/admin_quiz_questions#create"
+    get "/admin/quiz/question_submissions" => "discourse_quiz/admin_quiz_question_submissions#index"
+    put "/admin/quiz/question_submissions/:id" => "discourse_quiz/admin_quiz_question_submissions#update"
     post "/admin/quiz/questions/bulk_import" => "discourse_quiz/admin_quiz_questions#bulk_import"
     post "/admin/quiz/questions/bulk_disable_duplicates" =>
            "discourse_quiz/admin_quiz_questions#bulk_disable_duplicates"

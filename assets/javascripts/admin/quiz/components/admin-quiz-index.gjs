@@ -73,10 +73,16 @@ export default class AdminQuizIndex extends Component {
   @tracked renameResult = null;
   @tracked disablingDuplicates = false;
   @tracked duplicateDisableResult = null;
+  @tracked submissions = [];
+  @tracked submissionsLoading = false;
+  @tracked submissionStatusFilter = "pending";
+  @tracked submissionReviewNotes = {};
+  @tracked reviewBusyId = null;
 
   constructor() {
     super(...arguments);
     this.loadQuestions();
+    this.loadSubmissions();
   }
 
   get totalPages() {
@@ -118,6 +124,68 @@ export default class AdminQuizIndex extends Component {
       popupAjaxError(e);
     } finally {
       this.disablingDuplicates = false;
+    }
+  }
+
+  buildSubmissionsUrl() {
+    const params = new URLSearchParams();
+    if (this.submissionStatusFilter) {
+      params.set("status", this.submissionStatusFilter);
+    }
+
+    return `/admin/quiz/question_submissions.json?${params.toString()}`;
+  }
+
+  @action
+  async loadSubmissions() {
+    this.submissionsLoading = true;
+
+    try {
+      const data = await ajax(this.buildSubmissionsUrl());
+      this.submissions = data.submissions || [];
+    } catch (e) {
+      popupAjaxError(e);
+    } finally {
+      this.submissionsLoading = false;
+    }
+  }
+
+  @action
+  onSubmissionStatusFilterChange(event) {
+    this.submissionStatusFilter = event.target.value;
+    this.loadSubmissions();
+  }
+
+  @action
+  onSubmissionReviewNoteInput(submissionId, event) {
+    this.submissionReviewNotes = {
+      ...this.submissionReviewNotes,
+      [submissionId]: event.target.value,
+    };
+  }
+
+  @action
+  async reviewSubmission(submission, reviewAction) {
+    this.reviewBusyId = submission.id;
+
+    try {
+      await ajax(`/admin/quiz/question_submissions/${submission.id}.json`, {
+        type: "PUT",
+        data: {
+          review_action: reviewAction,
+          review_note: this.submissionReviewNotes[submission.id],
+        },
+      });
+      this.submissionReviewNotes = {
+        ...this.submissionReviewNotes,
+        [submission.id]: "",
+      };
+      this.loadSubmissions();
+      this.loadQuestions();
+    } catch (e) {
+      popupAjaxError(e);
+    } finally {
+      this.reviewBusyId = null;
     }
   }
 
@@ -427,6 +495,91 @@ export default class AdminQuizIndex extends Component {
 
   <template>
     <div class="admin-discourse-quiz">
+      <section class="quiz-admin-list">
+        <h2>{{i18n "discourse_quiz.admin.question_submissions_title"}}</h2>
+        <div class="quiz-admin-filters">
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-submission-status-filter">
+              {{i18n "discourse_quiz.admin.question_submissions_status"}}
+            </label>
+            <select
+              id="quiz-submission-status-filter"
+              class="quiz-admin-field__control"
+              {{on "change" this.onSubmissionStatusFilterChange}}
+            >
+              <option value="pending" selected={{eq this.submissionStatusFilter "pending"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_pending"}}
+              </option>
+              <option value="approved" selected={{eq this.submissionStatusFilter "approved"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_approved"}}
+              </option>
+              <option value="rejected" selected={{eq this.submissionStatusFilter "rejected"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_rejected"}}
+              </option>
+            </select>
+          </div>
+          <div class="quiz-admin-field__actions">
+            <DButton
+              @label="discourse_quiz.admin.reload"
+              @action={{this.loadSubmissions}}
+              class="btn-default"
+            />
+          </div>
+        </div>
+
+        {{#if this.submissionsLoading}}
+          <p class="quiz-admin-hint">{{i18n "discourse_quiz.loading"}}</p>
+        {{else if this.submissions.length}}
+          <div class="quiz-questions-cards">
+            {{#each this.submissions as |submission|}}
+              <article class="quiz-question-card">
+                <div class="quiz-question-card__meta">
+                  <span class="quiz-question-card__category">{{submission.category_name}}</span>
+                  <span class="quiz-question-card__status">
+                    {{submission.status}}
+                  </span>
+                </div>
+                <div class="quiz-question-card__text">{{submission.question_text}}</div>
+                <div class="quiz-admin-hint">
+                  {{i18n "discourse_quiz.admin.question_submissions_submitter" username=submission.submitter_username}}
+                </div>
+                {{#if (eq submission.status "pending")}}
+                  <div class="quiz-admin-field">
+                    <label class="quiz-admin-field__label">
+                      {{i18n "discourse_quiz.admin.question_submissions_note"}}
+                    </label>
+                    <input
+                      class="quiz-admin-field__control"
+                      type="text"
+                      value={{get this.submissionReviewNotes submission.id}}
+                      {{on "input" (fn this.onSubmissionReviewNoteInput submission.id)}}
+                    />
+                  </div>
+                {{/if}}
+                {{#if (eq submission.status "pending")}}
+                  <div class="quiz-question-card__actions quiz-admin-actions">
+                    <DButton
+                      @label="discourse_quiz.admin.question_submissions_approve"
+                      @action={{fn this.reviewSubmission submission "approve"}}
+                      @disabled={{eq this.reviewBusyId submission.id}}
+                      class="btn-primary btn-small"
+                    />
+                    <DButton
+                      @label="discourse_quiz.admin.question_submissions_reject"
+                      @action={{fn this.reviewSubmission submission "reject"}}
+                      @disabled={{eq this.reviewBusyId submission.id}}
+                      class="btn-danger btn-small"
+                    />
+                  </div>
+                {{/if}}
+              </article>
+            {{/each}}
+          </div>
+        {{else}}
+          <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.question_submissions_empty"}}</p>
+        {{/if}}
+      </section>
+
       <section class="quiz-admin-import">
         <h2>{{i18n "discourse_quiz.admin.import_title"}}</h2>
         <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.import_hint"}}</p>

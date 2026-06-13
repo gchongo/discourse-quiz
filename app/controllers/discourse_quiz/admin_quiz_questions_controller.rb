@@ -154,6 +154,8 @@ module DiscourseQuiz
         correct_index: question.correct_index,
         correct_indices: question.multiple_choice? ? question.resolved_correct_indices : [],
         explanation: question.explanation,
+        author_user_id: question.respond_to?(:author_user_id) ? question.author_user_id : nil,
+        author_username: question.respond_to?(:author_username) ? question.author_username : nil,
         active: question.active,
         created_at: question.created_at,
       }
