@@ -2,9 +2,9 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
 import { i18n } from "discourse-i18n";
-import DCookText from "discourse/ui-kit/d-cook-text";
 import DButton from "discourse/ui-kit/d-button";
 import QuizQuestionMeta from "./quiz-question-meta";
+import QuizCookedText from "./quiz-cooked-text";
 
 export default class QuizResultDisplay extends Component {
   @service quiz;
@@ -115,7 +115,10 @@ export default class QuizResultDisplay extends Component {
           @typeLabel={{this.questionTypeLabel}}
           @categoryName={{this.question.category_name}}
         />
-        <DCookText class="quiz-question-text quiz-cooked-block" @rawText={{this.question.question_text}} />
+        <QuizCookedText
+          class="quiz-question-text quiz-cooked-block"
+          @rawText={{this.question.question_text}}
+        />
 
         {{#if this.question.options}}
           <ul class="quiz-options-list">
@@ -124,7 +127,7 @@ export default class QuizResultDisplay extends Component {
                 <li>
                   <label class={{entry.className}}>
                     <input type="checkbox" checked={{entry.checked}} disabled />
-                    <DCookText class="quiz-cooked-inline" @rawText={{entry.option}} />
+                    <QuizCookedText class="quiz-cooked-inline" @rawText={{entry.option}} />
                   </label>
                 </li>
               {{/each}}
@@ -138,7 +141,7 @@ export default class QuizResultDisplay extends Component {
                       checked={{entry.checked}}
                       disabled
                     />
-                    <DCookText class="quiz-cooked-inline" @rawText={{entry.option}} />
+                    <QuizCookedText class="quiz-cooked-inline" @rawText={{entry.option}} />
                   </label>
                 </li>
               {{/each}}
@@ -166,7 +169,10 @@ export default class QuizResultDisplay extends Component {
         {{#if this.result.explanation}}
           <div class="quiz-explanation">
             <div class="quiz-explanation-label">{{i18n "discourse_quiz.explanation"}}</div>
-            <DCookText class="quiz-explanation-text quiz-cooked-block" @rawText={{this.result.explanation}} />
+            <QuizCookedText
+              class="quiz-explanation-text quiz-cooked-block"
+              @rawText={{this.result.explanation}}
+            />
           </div>
         {{/if}}
 

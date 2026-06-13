@@ -801,6 +801,12 @@ label.quiz-option-radio {
   p {
     margin: 0;
   }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--d-border-radius);
+  }
 }
 
 .quiz-cooked-inline {

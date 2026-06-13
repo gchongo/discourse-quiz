@@ -7,9 +7,9 @@ import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
 import { not } from "discourse/truth-helpers";
 import { i18n } from "discourse-i18n";
-import DCookText from "discourse/ui-kit/d-cook-text";
 import DButton from "discourse/ui-kit/d-button";
 import QuizQuestionMeta from "./quiz-question-meta";
+import QuizCookedText from "./quiz-cooked-text";
 
 export default class QuizQuestionDisplay extends Component {
   @service quiz;
@@ -127,7 +127,10 @@ export default class QuizQuestionDisplay extends Component {
         @typeLabel={{this.questionTypeLabel}}
         @categoryName={{this.question.category_name}}
       />
-      <DCookText class="quiz-question-text quiz-cooked-block" @rawText={{this.question.question_text}} />
+      <QuizCookedText
+        class="quiz-question-text quiz-cooked-block"
+        @rawText={{this.question.question_text}}
+      />
 
       {{#if this.isMultipleChoice}}
         <p class="quiz-status-hint">{{i18n "discourse_quiz.select_multiple_hint"}}</p>
@@ -144,7 +147,7 @@ export default class QuizQuestionDisplay extends Component {
                   disabled={{this.quiz.submitting}}
                   {{on "change" (fn this.toggleOption entry.index)}}
                 />
-                <DCookText class="quiz-cooked-inline" @rawText={{entry.option}} />
+                <QuizCookedText class="quiz-cooked-inline" @rawText={{entry.option}} />
               </label>
             </li>
           {{/each}}
@@ -159,7 +162,7 @@ export default class QuizQuestionDisplay extends Component {
                   disabled={{this.quiz.submitting}}
                   {{on "change" (fn this.selectOption entry.index)}}
                 />
-                <DCookText class="quiz-cooked-inline" @rawText={{entry.option}} />
+                <QuizCookedText class="quiz-cooked-inline" @rawText={{entry.option}} />
               </label>
             </li>
           {{/each}}
