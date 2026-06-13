@@ -10,6 +10,7 @@ import { eq, not } from "discourse/truth-helpers";
 import dAvatar from "discourse/ui-kit/helpers/d-avatar";
 import dIcon from "discourse/ui-kit/helpers/d-icon";
 import DButton from "discourse/ui-kit/d-button";
+import PeriodChooser from "discourse/select-kit/components/period-chooser";
 import { i18n } from "discourse-i18n";
 import QuizLeaderboardInfo from "./modal/quiz-leaderboard-info";
 
@@ -93,15 +94,6 @@ export default class QuizLeaderboardPage extends Component {
     }
 
     return i18n("discourse_quiz.leaderboard.metric_volume");
-  }
-
-  get periodOptions() {
-    return [
-      { id: "all", label: i18n("discourse_quiz.leaderboard.period_all") },
-      { id: "monthly", label: i18n("discourse_quiz.leaderboard.period_monthly") },
-      { id: "weekly", label: i18n("discourse_quiz.leaderboard.period_weekly") },
-      { id: "daily", label: i18n("discourse_quiz.leaderboard.period_daily") },
-    ];
   }
 
   winnerPositionClass = (entry) => {
@@ -317,17 +309,12 @@ export default class QuizLeaderboardPage extends Component {
         {{/if}}
 
         {{#if (eq this.activeTab "rankings")}}
-          <div class="quiz-leaderboard-page__period-switch" role="tablist">
-            {{#each this.periodOptions as |option|}}
-              <button
-                type="button"
-                class="quiz-leaderboard-page__period-btn {{if (eq this.period option.id) 'is-active'}}"
-                {{on "click" (fn this.setPeriod option.id)}}
-              >
-                {{option.label}}
-              </button>
-            {{/each}}
-          </div>
+          <PeriodChooser
+            @period={{this.period}}
+            @action={{this.setPeriod}}
+            @fullDay={{false}}
+            class="quiz-leaderboard-page__period-chooser"
+          />
 
           <div class="quiz-leaderboard-page__metric-switch" role="tablist">
             <button

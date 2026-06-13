@@ -4,6 +4,8 @@ module DiscourseQuiz
   class QuizLeaderboardRefreshService
     PERIODS = {
       "all" => nil,
+      "yearly" => "DATE_TRUNC('year', a.created_at AT TIME ZONE :timezone)::date",
+      "quarterly" => "DATE_TRUNC('quarter', a.created_at AT TIME ZONE :timezone)::date",
       "monthly" => "DATE_TRUNC('month', a.created_at AT TIME ZONE :timezone)::date",
       "weekly" => "DATE_TRUNC('week', a.created_at AT TIME ZONE :timezone)::date",
       "daily" => "DATE_TRUNC('day', a.created_at AT TIME ZONE :timezone)::date",

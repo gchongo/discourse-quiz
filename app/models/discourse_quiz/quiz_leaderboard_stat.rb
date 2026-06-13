@@ -6,7 +6,7 @@ module DiscourseQuiz
 
     GLOBAL_CATEGORY = ""
     ALL_PERIOD_START = Date.new(1970, 1, 1)
-    PERIODS = %w[all monthly weekly daily].freeze
+    PERIODS = %w[all yearly quarterly monthly weekly daily].freeze
 
     belongs_to :user
 
@@ -31,6 +31,10 @@ module DiscourseQuiz
         now.to_date.beginning_of_week
       when "monthly"
         now.to_date.beginning_of_month
+      when "quarterly"
+        now.to_date.beginning_of_quarter
+      when "yearly"
+        now.to_date.beginning_of_year
       else
         ALL_PERIOD_START
       end

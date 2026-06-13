@@ -41,7 +41,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
 - User summary stats (own profile only at `/u/:username/summary`): lifetime correct count, never-correct question count, and accuracy rate
 - **Points redemption** (optional): cumulative score thresholds, claim prizes without deducting points; admin CRUD + fulfillment queue; centered page layout; claim history with name, description, status, and `YYYY-MM-DD HH:mm:ss` timestamp
-- **Quiz leaderboard** (optional): `/quiz/leaderboard` with volume and accuracy rankings plus per-user category stats table; distinct-question counts (not attempt counts); accuracy = distinct correct ÷ distinct attempted; period filters: **all / monthly / weekly / daily**; cached stats table with hourly refresh and per-user refresh after submit
+- **Quiz leaderboard** (optional): `/quiz/leaderboard` with volume and accuracy rankings plus per-user category stats table; distinct-question counts (not attempt counts); accuracy = distinct correct ÷ distinct attempted; period filters: **all / yearly / quarterly / monthly / weekly / daily**; cached stats table with hourly refresh and per-user refresh after submit
 - Admin question bank: add/edit, search, pagination, category rename, export, dry-run import, and upsert import
 - Bulk import **auto-skips duplicate question text** (within the batch and vs. existing bank); reports `skipped` count
 - Admin duplicate-question detection with list summary, row highlighting, save/import warnings, and bulk disable (keep lowest ID per group)
@@ -358,8 +358,8 @@ Enabled by default (`quiz_leaderboard_enabled`). Link `/quiz/leaderboard` from y
 
 ### API
 
-- `GET /quiz/leaderboard.json?metric=volume|accuracy&period=all|monthly|weekly|daily&page=1`
-- `GET /quiz/leaderboard/user_categories.json?username=&period=all|monthly|weekly|daily`
+- `GET /quiz/leaderboard.json?metric=volume|accuracy&period=all|yearly|quarterly|monthly|weekly|daily&page=1`
+- `GET /quiz/leaderboard/user_categories.json?username=&period=all|yearly|quarterly|monthly|weekly|daily`
 
 Stats are stored in `discourse_quiz_leaderboard_stats` and refreshed hourly (`Jobs::RefreshQuizLeaderboardStats`) and after each logged-in submit when enabled.
 
@@ -367,7 +367,7 @@ Stats are stored in `discourse_quiz_leaderboard_stats` and refreshed hourly (`Jo
 
 ### v0.19.0
 
-- Quiz leaderboard period filters: `all`, `monthly`, `weekly`, `daily`
+- Quiz leaderboard period filters: `all`, `yearly`, `quarterly`, `monthly`, `weekly`, `daily`
 - Ranking and category stats APIs now accept `period` and return period metadata
 - Leaderboard stats table expanded with period dimensions for cached period rankings
 

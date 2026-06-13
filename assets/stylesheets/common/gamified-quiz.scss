@@ -1946,7 +1946,7 @@ body.quiz-leaderboard {
 
   &__toolbar {
     display: grid;
-    grid-template-columns: minmax(2.5em, 1fr) auto minmax(2.5em, 1fr);
+    grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 0.75em;
     margin-bottom: 1em;
@@ -1979,39 +1979,13 @@ body.quiz-leaderboard {
     background: rgb(var(--tertiary-rgb), 0.1);
   }
 
-  &__period-switch {
-    justify-self: center;
-    grid-column: 2;
-    display: inline-flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.35em;
-    margin-bottom: 0.65em;
-  }
+  &__period-chooser {
+    justify-self: start;
+    grid-column: 1;
+    margin: 0;
 
-  &__period-btn {
-    border: 1px solid var(--primary-low);
-    border-radius: 999px;
-    padding: 0.35em 0.85em;
-    background: transparent;
-    color: var(--primary-medium);
-    font-size: var(--font-down-1);
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-      border-color 0.15s ease,
-      color 0.15s ease,
-      background 0.15s ease;
-
-    &:hover {
-      border-color: var(--tertiary-medium);
-      color: var(--tertiary);
-    }
-
-    &.is-active {
-      border-color: var(--tertiary-medium);
-      background: rgb(var(--tertiary-rgb), 0.12);
-      color: var(--tertiary);
+    .selected-name {
+      margin: 0;
     }
   }
 
