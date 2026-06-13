@@ -6,7 +6,12 @@ module DiscourseQuiz
 
     def index
       submissions = QuizQuestionSubmission.recent_first
-      submissions = submissions.where(status: params[:status]) if params[:status].present?
+      status_filter = normalize_status_filter(params[:status])
+      if status_filter == "pending"
+        submissions = submissions.where("status IS NULL OR status = '' OR status = 'pending'")
+      elsif status_filter.present?
+        submissions = submissions.where(status: status_filter)
+      end
 
       render_json_dump(
         submissions: submissions.limit(200).map { |submission| submission_json(submission) },
@@ -48,6 +53,13 @@ module DiscourseQuiz
       render_json_dump({ error: I18n.t("discourse_quiz.errors.question_not_found") }, status: 404)
     end
 
+    def normalize_status_filter(status)
+      value = status.to_s.strip
+      return nil if value.blank?
+
+      %w[pending approved rejected].include?(value) ? value : nil
+    end
+
     def submission_json(submission)
       {
         id: submission.id,
@@ -61,7 +73,7 @@ module DiscourseQuiz
         correct_indices: submission.correct_indices,
         explanation: submission.explanation,
         show_author_name: submission.respond_to?(:show_author_name) ? submission.show_author_name : true,
-        status: submission.status,
+        status: submission.status.presence || "pending",
         review_note: submission.review_note,
         reviewer_id: submission.reviewer_id,
         reviewed_at: submission.reviewed_at,

@@ -1245,37 +1245,11 @@ label.quiz-option-radio {
   flex-direction: column;
   gap: 0.85em;
 
-  .quiz-question-guidelines {
-    margin: 0 0 0.2em;
-    padding: 0.7em 0.85em;
-    border-radius: var(--d-border-radius);
-    border: 1px solid var(--tertiary-low);
-    background: var(--primary-very-low);
-
-    strong {
-      display: block;
-      margin-bottom: 0.35em;
-      color: var(--primary);
-      font-size: var(--font-down-1);
-    }
-
-    ul {
-      margin: 0;
-      padding-left: 1.15em;
-    }
-
-    li {
-      margin: 0.2em 0;
-      color: var(--primary-medium);
-      font-size: var(--font-down-1);
-      line-height: 1.45;
-    }
-  }
-
-  .quiz-home-modes__buttons--triple {
+  .quiz-question-type-buttons {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.35em;
+    width: 100%;
   }
 
   .quiz-home-mode-btn {

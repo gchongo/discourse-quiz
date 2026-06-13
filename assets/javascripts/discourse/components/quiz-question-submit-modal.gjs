@@ -293,7 +293,7 @@ export default class QuizQuestionSubmitModal extends Component {
 
           <label class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.question_submission.form_question_type"}}</span>
-            <div class="quiz-home-modes__buttons quiz-home-modes__buttons--triple" role="group">
+            <div class="quiz-question-type-buttons" role="group">
               <button
                 type="button"
                 class="btn btn-default quiz-home-mode-btn {{if (eq this.questionType 'single_choice') 'active'}}"

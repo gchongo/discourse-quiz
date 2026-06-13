@@ -75,7 +75,7 @@ export default class AdminQuizIndex extends Component {
   @tracked duplicateDisableResult = null;
   @tracked submissions = [];
   @tracked submissionsLoading = false;
-  @tracked submissionStatusFilter = "";
+  @tracked submissionStatusFilter = "pending";
   @tracked reviewBusyId = null;
 
   constructor() {

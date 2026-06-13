@@ -284,15 +284,6 @@ export default class QuizQuestionEditModal extends Component {
     <DModal @title={{this.modalTitle}} @closeModal={{@closeModal}}>
       <:body>
         <div class="quiz-admin-form">
-          <div class="quiz-question-guidelines">
-            <strong>{{i18n "discourse_quiz.admin.form.guidelines_title"}}</strong>
-            <ul>
-              <li>{{i18n "discourse_quiz.admin.form.guidelines_item_1"}}</li>
-              <li>{{i18n "discourse_quiz.admin.form.guidelines_item_2"}}</li>
-              <li>{{i18n "discourse_quiz.admin.form.guidelines_item_3"}}</li>
-            </ul>
-          </div>
-
           <div class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.category"}}</span>
             {{#if this.useNewCategory}}
@@ -334,7 +325,7 @@ export default class QuizQuestionEditModal extends Component {
 
           <label class="quiz-admin-form__field">
             <span>{{i18n "discourse_quiz.admin.form.question_type"}}</span>
-            <div class="quiz-home-modes__buttons quiz-home-modes__buttons--triple" role="group">
+            <div class="quiz-question-type-buttons" role="group">
               <button
                 type="button"
                 class="btn btn-default quiz-home-mode-btn {{if (eq this.questionType 'single_choice') 'active'}}"
