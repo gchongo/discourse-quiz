@@ -19,6 +19,7 @@ Discourse::Application.routes.draw do
 
   scope constraints: AdminConstraint.new do
     get "/admin/plugins/discourse-quiz" => "admin/plugins#index"
+    get "/admin/plugins/discourse-quiz/discourse-quiz" => "admin/plugins#index"
 
     get "/admin/quiz/questions" => "discourse_quiz/admin_quiz_questions#index"
     get "/admin/quiz/questions/export" => "discourse_quiz/admin_quiz_questions#export"
