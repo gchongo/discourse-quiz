@@ -28,6 +28,8 @@ en:
         submitting: "Submitting..."
         success: "Submitted successfully. Waiting for admin review."
         save_error: "Failed to submit question. Please try again."
+        required_error: "Please fill all required fields before submitting."
+        required_hint: "* Required fields"
         form_category: "Category (required)"
         form_question_type: "Question type (required)"
         form_question: "Question (Markdown / LaTeX supported)"

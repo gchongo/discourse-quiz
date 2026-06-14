@@ -61,6 +61,22 @@ export default class QuizQuestionSubmitModal extends Component {
     return [i18n("discourse_quiz.true_false.true"), i18n("discourse_quiz.true_false.false")];
   }
 
+  get hasRequiredCategory() {
+    return Boolean(this.effectiveCategoryName);
+  }
+
+  get hasRequiredQuestionText() {
+    return Boolean(this.questionText?.trim());
+  }
+
+  get hasRequiredOptions() {
+    return this.isTrueFalse || this.parsedOptions.length > 0;
+  }
+
+  get canSubmit() {
+    return this.hasRequiredCategory && this.hasRequiredQuestionText && this.hasRequiredOptions;
+  }
+
   get baseCategories() {
     return this.args.model.categories || [];
   }
@@ -225,6 +241,12 @@ export default class QuizQuestionSubmitModal extends Component {
   @action
   async saveQuestion() {
     this.saveError = null;
+
+    if (!this.canSubmit) {
+      this.saveError = i18n("discourse_quiz.question_submission.required_error");
+      return;
+    }
+
     this.saving = true;
 
     try {
@@ -240,9 +262,9 @@ export default class QuizQuestionSubmitModal extends Component {
       this.args.closeModal();
     } catch (e) {
       this.saveError =
-        e?.jqXHR?.responseJSON?.errors?.join(", ") ||
-        e?.jqXHR?.responseJSON?.error ||
-        i18n("discourse_quiz.question_submission.save_error");
+        e?.jqXHR?.status === 422
+          ? i18n("discourse_quiz.question_submission.required_error")
+          : e?.jqXHR?.responseJSON?.error || i18n("discourse_quiz.question_submission.save_error");
     } finally {
       this.saving = false;
     }
@@ -253,7 +275,7 @@ export default class QuizQuestionSubmitModal extends Component {
       <:body>
         <div class="quiz-admin-form">
           <div class="quiz-admin-form__field">
-            <span>{{i18n "discourse_quiz.question_submission.form_category"}}</span>
+            <span>{{i18n "discourse_quiz.question_submission.form_category"}}<span class="quiz-required-star">*</span></span>
             {{#if this.useNewCategory}}
               <div class="quiz-admin-form__category-row">
                 <input
@@ -319,13 +341,13 @@ export default class QuizQuestionSubmitModal extends Component {
           </label>
 
           <label class="quiz-admin-form__field">
-            <span>{{i18n "discourse_quiz.question_submission.form_question"}}</span>
+            <span>{{i18n "discourse_quiz.question_submission.form_question"}}<span class="quiz-required-star">*</span></span>
             <textarea rows="5" value={{this.questionText}} {{on "input" this.updateQuestionText}}></textarea>
           </label>
 
           {{#if this.showOptionsEditor}}
             <label class="quiz-admin-form__field">
-              <span>{{i18n "discourse_quiz.question_submission.form_options"}}</span>
+              <span>{{i18n "discourse_quiz.question_submission.form_options"}}<span class="quiz-required-star">*</span></span>
               <textarea rows="6" value={{this.optionsText}} {{on "input" this.updateOptionsText}}></textarea>
             </label>
           {{/if}}
@@ -397,6 +419,8 @@ export default class QuizQuestionSubmitModal extends Component {
             <textarea rows="4" value={{this.explanation}} {{on "input" this.updateExplanation}}></textarea>
           </label>
 
+          <p class="quiz-admin-form__required-hint">{{i18n "discourse_quiz.question_submission.required_hint"}}</p>
+
           <label class="quiz-admin-form__checkbox">
             <input type="checkbox" checked={{this.showAuthorName}} {{on "change" this.toggleShowAuthorName}} />
             <span>{{i18n "discourse_quiz.admin.form.show_author_name"}}</span>
@@ -412,7 +436,7 @@ export default class QuizQuestionSubmitModal extends Component {
         <DButton
           @label={{if this.saving "discourse_quiz.question_submission.submitting" "discourse_quiz.question_submission.submit"}}
           @action={{this.saveQuestion}}
-          @disabled={{or this.saving (not this.effectiveCategoryName)}}
+          @disabled={{or this.saving (not this.canSubmit)}}
           class="btn-primary"
         />
       </:footer>

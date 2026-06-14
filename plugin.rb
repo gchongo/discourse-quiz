@@ -2,9 +2,9 @@
 
 # name: discourse-quiz
 # about: Quiz panel with question bank for Discourse.
-# version: 0.21.0
+# version: 0.21.1
 # authors: howhy.day
-# url: https://github.com/howhy-day/discourse-quiz
+# url: https://www.howhy.day/
 
 enabled_site_setting :quiz_plugin_enabled
 

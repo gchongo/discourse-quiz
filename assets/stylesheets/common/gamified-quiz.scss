@@ -1400,6 +1400,12 @@ label.quiz-option-radio {
     color: var(--primary-medium);
   }
 
+  &__required-hint {
+    margin: -0.2em 0 0.2em;
+    font-size: var(--font-down-1);
+    color: var(--primary-medium);
+  }
+
   &__radio {
     display: flex;
     align-items: center;
@@ -1433,6 +1439,12 @@ label.quiz-option-radio {
     align-items: center;
     gap: 0.5em;
   }
+}
+
+.quiz-required-star {
+  margin-left: 0.2em;
+  color: var(--danger);
+  font-weight: 700;
 }
 
 .quiz-rules-modal__body {

@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.19.0)
+## Current features (v0.21.1)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Home **today's points** progress bar (earned / daily max); rules info dialog no longer shows this line
