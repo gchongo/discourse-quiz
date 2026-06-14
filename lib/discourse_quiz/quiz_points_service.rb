@@ -9,6 +9,7 @@ module DiscourseQuiz
       return unless attempts_table_ready?
 
       QuizUserAttempt.transaction do
+        lock_award_scope!(user.id)
         return if already_awarded?(user, question)
         return if daily_limit_reached?(user)
 
@@ -24,6 +25,9 @@ module DiscourseQuiz
           enqueue_score_refresh
         end
       end
+    rescue ActiveRecord::RecordNotUnique
+      # Concurrent submissions for the same question can race; unique DB index is source of truth.
+      nil
     end
 
     def self.gamification_active?
@@ -66,6 +70,10 @@ module DiscourseQuiz
 
     def self.attempts_table_ready?
       ActiveRecord::Base.connection.table_exists?(:discourse_quiz_user_attempts)
+    end
+
+    def self.lock_award_scope!(user_id)
+      User.where(id: user_id).lock(true).pick(:id)
     end
   end
 end

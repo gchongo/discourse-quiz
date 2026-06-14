@@ -11,7 +11,7 @@ en:
       expand_panel: "Expand panel"
       drag_panel: "Drag to move"
     discourse_quiz:
-      loading: "Loading question..."
+      loading: "Loading..."
       home_loading_categories: "Loading categories..."
       load_error: "Failed to load question. Please try again."
       no_questions: "No questions in the bank yet. Add questions in admin."

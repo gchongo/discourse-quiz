@@ -12,6 +12,8 @@ Discourse quiz plugin with a dedicated question bank.
 - Home layout: start button below practice mode; category list below start button (optional)
 - Home category list sizes to content height; quiz panel height adapts on the home screen, then stays fixed during play/result with scrollable content (no height jump between question and result)
 - Home skeleton loading: only shown when no cached categories are available
+- Unified loading copy: short loading label (`正在加载` / `Loading...`) across quiz pages
+- Security hardening: user question submissions are rate-limited; per-user per-question awarded-score uniqueness is enforced at DB level
 - Reset button resets category selection only (labeled「重置分类」)
 - Desktop and mobile quiz panel entry with show/hide controls
 - Header icon: when the panel is minimized, clicking the icon **expands** the panel (does not close or reset progress); when expanded, clicking closes the panel

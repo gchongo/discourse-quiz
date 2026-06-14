@@ -8,6 +8,9 @@ module DiscourseQuiz
     before_action :ensure_logged_in
 
     def create
+      ensure_not_rate_limited!
+      return if performed?
+
       attrs = question_submission_params.to_h.symbolize_keys
       attrs[:status] = "pending"
       attrs[:show_author_name] = true if attrs[:show_author_name].nil?
@@ -36,6 +39,13 @@ module DiscourseQuiz
 
     def ensure_logged_in
       raise Discourse::InvalidAccess unless current_user
+    end
+
+    def ensure_not_rate_limited!
+      # Prevent submission flooding while allowing normal user contributions.
+      RateLimiter.new(current_user, "quiz-question-submission", 5, 60).performed!
+    rescue RateLimiter::LimitExceeded => e
+      render_json_error(e.description, status: 429)
     end
 
     def question_submission_params

@@ -371,5 +371,24 @@ describe DiscourseQuiz::QuizController do
         expect(submission.show_author_name).to eq(false)
       end
     end
+
+    it "rate limits repeated submissions" do
+      sign_in(user)
+      allow_any_instance_of(RateLimiter).to receive(:performed!).and_raise(
+        RateLimiter::LimitExceeded.new(60),
+      )
+
+      post "/quiz/question_submissions.json",
+           params: {
+             question_submission: {
+               category_name: "数学",
+               question_text: "2+2=?",
+               question_type: "single_choice",
+               options: %w[3 4],
+               correct_index: 1,
+             },
+           }
+      expect(response.status).to eq(429)
+    end
   end
 end
