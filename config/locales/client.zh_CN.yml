@@ -42,6 +42,8 @@ zh_CN:
       correct: "回答正确！"
       incorrect: "回答错误，正确答案是：%{answer}"
       incorrect_multiple: "回答错误，正确答案是：%{answers}"
+      incorrect_prefix: "回答错误，正确答案是："
+      incorrect_multiple_prefix: "回答错误，正确答案是："
       select_multiple_hint: "请选择所有正确选项。"
       true_false:
         true: "对"

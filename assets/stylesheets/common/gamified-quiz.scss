@@ -906,6 +906,29 @@ label.quiz-option-radio {
       min-width: 0;
       overflow-wrap: anywhere;
       word-break: break-word;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.15em;
+    }
+
+    &__prefix {
+      white-space: normal;
+    }
+
+    &__answers {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.15em;
+    }
+
+    &__answer {
+      display: inline;
+    }
+
+    &__separator {
+      margin: 0 0.05em;
     }
 
     &.is-correct {

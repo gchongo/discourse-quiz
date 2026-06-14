@@ -34,18 +34,20 @@ export default class QuizResultDisplay extends Component {
     return this.quiz.submittedAnswerIndex;
   }
 
-  get incorrectMessage() {
+  get incorrectPrefix() {
     if (this.result.correct) {
       return null;
     }
 
     if (this.isMultipleChoice) {
-      return i18n("discourse_quiz.incorrect_multiple", {
-        answers: (this.result.correct_options || []).join("、"),
-      });
+      return i18n("discourse_quiz.incorrect_multiple_prefix");
     }
 
-    return i18n("discourse_quiz.incorrect", { answer: this.result.correct_option });
+    return i18n("discourse_quiz.incorrect_prefix");
+  }
+
+  get correctOptions() {
+    return this.result.correct_options || [];
   }
 
   get multipleChoiceResultOptions() {
@@ -165,7 +167,22 @@ export default class QuizResultDisplay extends Component {
             {{#if this.result.correct}}
               {{i18n "discourse_quiz.correct"}}
             {{else}}
-              {{this.incorrectMessage}}
+              <span class="quiz-result-banner__prefix">{{this.incorrectPrefix}}</span>
+              {{#if this.isMultipleChoice}}
+                <span class="quiz-result-banner__answers">
+                  {{#each this.correctOptions as |option index|}}
+                    {{#if index}}
+                      <span class="quiz-result-banner__separator">、</span>
+                    {{/if}}
+                    <QuizCookedText class="quiz-result-banner__answer quiz-cooked-inline" @rawText={{option}} />
+                  {{/each}}
+                </span>
+              {{else}}
+                <QuizCookedText
+                  class="quiz-result-banner__answer quiz-cooked-inline"
+                  @rawText={{this.result.correct_option}}
+                />
+              {{/if}}
             {{/if}}
           </span>
           {{#if this.result.points_awarded}}

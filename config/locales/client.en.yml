@@ -42,6 +42,8 @@ en:
       correct: "Correct!"
       incorrect: "Incorrect. The correct answer is: %{answer}"
       incorrect_multiple: "Incorrect. The correct answers are: %{answers}"
+      incorrect_prefix: "Incorrect. The correct answer is:"
+      incorrect_multiple_prefix: "Incorrect. The correct answers are:"
       select_multiple_hint: "Select all correct options."
       true_false:
         true: "True"
