@@ -57,6 +57,8 @@ zh_CN:
       rewards_link: "积分兑换"
       rewards:
         title: "积分兑换"
+        info_button: "积分兑换是如何运作的？"
+        info_modal_title: "积分兑换是如何运作的？"
         intro_default: "累计积分达到门槛即可领取奖品，积分不会被扣除。"
         points_rules_title: "积分来源说明"
         points_rule_quiz: "答题：按答题规则获得积分。"

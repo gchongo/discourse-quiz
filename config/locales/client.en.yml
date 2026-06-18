@@ -57,6 +57,8 @@ en:
       rewards_link: "Points redemption"
       rewards:
         title: "Points redemption"
+        info_button: "How does points redemption work?"
+        info_modal_title: "How does points redemption work?"
         intro_default: "Claim prizes when your cumulative score reaches each threshold. Points are never deducted."
         points_rules_title: "How to earn points"
         points_rule_quiz: "Quiz answers: earn points according to quiz scoring rules."

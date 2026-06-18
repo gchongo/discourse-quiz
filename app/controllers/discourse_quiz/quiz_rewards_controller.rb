@@ -9,7 +9,7 @@ module DiscourseQuiz
 
     def index
       unless rewards_tables_ready?
-        return render_json_dump(rewards_payload(rewards: [], intro: intro_text))
+        return render_json_dump(rewards_payload(rewards: []))
       end
 
       rewards = QuizReward.active.ordered
@@ -64,14 +64,9 @@ module DiscourseQuiz
       QuizReward.table_ready? && QuizRewardClaim.table_ready?
     end
 
-    def intro_text
-      SiteSetting.quiz_rewards_intro.presence
-    end
-
-    def rewards_payload(rewards:, intro: intro_text)
+    def rewards_payload(rewards:)
       {
         rewards: rewards,
-        intro: intro,
         cumulative_points: current_user ? QuizRewardPointsService.cumulative_points_for(current_user) : 0,
         points_source: QuizRewardPointsService.use_gamification_score? ? "gamification" : "quiz",
         logged_in: current_user.present?,

@@ -2,18 +2,20 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
-import { LinkTo } from "@ember/routing";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import moment from "moment";
 import { i18n } from "discourse-i18n";
+import DButton from "discourse/ui-kit/d-button";
+import QuizRewardsInfoModal from "./quiz-rewards-info-modal";
 
 export default class QuizRewardsPage extends Component {
   @service currentUser;
   @service siteSettings;
   @service router;
+  @service modal;
 
   @tracked claimingId = null;
   @tracked claimMessage = null;
@@ -30,14 +32,6 @@ export default class QuizRewardsPage extends Component {
     return this.model.claims || [];
   }
 
-  get introText() {
-    return (
-      this.siteSettings.quiz_rewards_intro?.trim() ||
-      this.model.intro?.trim() ||
-      i18n("discourse_quiz.rewards.intro_default")
-    );
-  }
-
   get isLoggedIn() {
     return Boolean(this.currentUser || this.model.logged_in);
   }
@@ -48,22 +42,6 @@ export default class QuizRewardsPage extends Component {
     }
 
     return i18n("discourse_quiz.rewards.points_source_gamification");
-  }
-
-  get showSubmissionRewardRule() {
-    return (
-      this.siteSettings.quiz_submission_reward_enabled &&
-      this.siteSettings.quiz_submission_reward_points > 0 &&
-      this.siteSettings.quiz_submission_reward_daily_cap > 0
-    );
-  }
-
-  get customPointsRulesText() {
-    return this.siteSettings.quiz_rewards_points_rules_help?.trim() || "";
-  }
-
-  get useCustomPointsRules() {
-    return this.customPointsRulesText.length > 0;
   }
 
   stockLabel = (reward) => {
@@ -158,36 +136,21 @@ export default class QuizRewardsPage extends Component {
     }
   }
 
+  @action
+  showInfoModal() {
+    this.modal.show(QuizRewardsInfoModal);
+  }
+
   <template>
     <section class="quiz-rewards-page">
       <div class="quiz-rewards-page__header">
         <h1 class="quiz-rewards-page__title page__title">{{i18n "discourse_quiz.rewards.title"}}</h1>
-        <LinkTo @route="quiz" class="btn btn-default btn-small">
-          {{i18n "gamified_quiz.button_title"}}
-        </LinkTo>
-      </div>
-
-      <p class="quiz-rewards-page__intro">{{this.introText}}</p>
-
-      <div class="quiz-rewards-page__points-rules">
-        <h2>{{i18n "discourse_quiz.rewards.points_rules_title"}}</h2>
-        {{#if this.useCustomPointsRules}}
-          <div class="quiz-rewards-page__points-rules-custom">{{this.customPointsRulesText}}</div>
-        {{else}}
-          <ul>
-            <li>{{i18n "discourse_quiz.rewards.points_rule_quiz"}}</li>
-            {{#if this.showSubmissionRewardRule}}
-              <li>
-                {{i18n
-                  "discourse_quiz.rewards.points_rule_submission_reward"
-                  points=this.siteSettings.quiz_submission_reward_points
-                  cap=this.siteSettings.quiz_submission_reward_daily_cap
-                }}
-              </li>
-            {{/if}}
-            <li>{{i18n "discourse_quiz.rewards.points_rule_forum_interaction"}}</li>
-          </ul>
-        {{/if}}
+        <DButton
+          @icon="circle-info"
+          @label="discourse_quiz.rewards.info_button"
+          @action={{this.showInfoModal}}
+          class="-ghost quiz-rewards-page__info-btn"
+        />
       </div>
 
       <div class="quiz-rewards-page__score-card">

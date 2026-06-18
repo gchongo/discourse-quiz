@@ -89,7 +89,7 @@ Independent module — does **not** change quiz submit, scoring, or daily caps. 
 ### Enable
 
 1. Set `quiz_rewards_enabled` to **true**.
-2. Optionally set `quiz_rewards_intro` (shown at top of `/quiz/rewards`).
+2. Optionally set `quiz_rewards_help` (custom help text shown in the rewards info modal on `/quiz/rewards`).
 3. Choose score source:
    - `quiz_rewards_use_gamification_score` **true** (default): total `discourse-gamification` score.
    - **false**: sum of quiz `points_awarded` from scored correct answers only.
@@ -344,7 +344,7 @@ Legacy attempts without `points_awarded` still count toward today's total using 
 - `quiz_enable_guest_demo` / `quiz_guest_attempt_limit` — guest try limit
 - `quiz_rewards_enabled` — points redemption page and claims (default off)
 - `quiz_rewards_use_gamification_score` — use total gamification score for reward thresholds (off = quiz points only)
-- `quiz_rewards_intro` — optional intro on `/quiz/rewards`
+- `quiz_rewards_help` — optional custom help text for the rewards info modal on `/quiz/rewards`
 - `quiz_submission_reward_enabled` — enable point rewards for approved user submissions
 - `quiz_submission_reward_points` — points per approved user submission
 - `quiz_submission_reward_daily_cap` — per-user daily cap for approved-submission rewards

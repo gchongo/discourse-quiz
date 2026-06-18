@@ -54,11 +54,7 @@ plugins:
   quiz_rewards_use_gamification_score:
     default: true
     client: true
-  quiz_rewards_intro:
-    default: ""
-    client: true
-    textarea: true
-  quiz_rewards_points_rules_help:
+  quiz_rewards_help:
     default: ""
     client: true
     textarea: true
