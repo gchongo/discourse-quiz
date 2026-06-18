@@ -8,7 +8,7 @@ module DiscourseQuiz
     CREATED_WINDOWS = %w[all today 7d 30d 90d].freeze
 
     def index
-      DB.use_primary do
+      with_primary_read do
         scope = filtered_submissions_scope
         page = [params[:page].to_i, 1].max
         per_page = per_page_param
@@ -93,6 +93,14 @@ module DiscourseQuiz
       render_json_dump({ error: I18n.t("discourse_quiz.errors.question_not_found") }, status: 404)
     end
 
+    def with_primary_read(&block)
+      if defined?(DB) && DB.respond_to?(:use_primary)
+        DB.use_primary(&block)
+      else
+        yield
+      end
+    end
+
     def filtered_submissions_scope
       scope = QuizQuestionSubmission.recent_first
       status_filter = normalize_status_filter(params[:status])
@@ -107,8 +115,9 @@ module DiscourseQuiz
         scope = scope.where(category_name: params[:category_name].to_s.strip)
       end
 
-      if QuestionTypes::ALL.include?(params[:question_type].to_s)
-        scope = scope.where(question_type: params[:question_type].to_s)
+      question_type = params[:question_type].to_s
+      if %w[single_choice true_false multiple_choice].include?(question_type)
+        scope = scope.where(question_type: question_type)
       end
 
       created_window = normalize_created_window(params[:created_window])
