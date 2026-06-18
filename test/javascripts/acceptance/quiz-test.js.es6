@@ -1,12 +1,13 @@
 import { acceptance } from "discourse/tests/helpers/qunit-helpers";
 import { parsePostData } from "discourse/tests/helpers/create-pretender";
-import { click, visit } from "@ember/test-helpers";
+import { click, currentURL, visit } from "@ember/test-helpers";
 import { test } from "qunit";
 
 acceptance("Discourse Quiz - Panel visibility", function (needs) {
   needs.user();
   needs.settings({
     quiz_plugin_enabled: true,
+    quiz_rewards_enabled: true,
   });
 
   needs.pretender((server) => {
@@ -49,6 +50,40 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
           correct_option: "2",
           points_awarded: correct ? 10 : 0,
           status: { is_guest: false, mode: "normal" },
+        },
+      ];
+    });
+
+    server.get("/quiz/rewards.json", () => {
+      return [
+        200,
+        { "Content-Type": "application/json" },
+        {
+          logged_in: true,
+          cumulative_points: 20,
+          rewards: [
+            {
+              id: 1,
+              name: "奖励示例",
+              category: "虚拟",
+              description: "用于样式测试",
+              points_threshold: 10,
+              in_stock: true,
+              remaining_stock: 5,
+              claimable: true,
+            },
+          ],
+        },
+      ];
+    });
+
+    server.get("/quiz/rewards/claims.json", () => {
+      return [
+        200,
+        { "Content-Type": "application/json" },
+        {
+          cumulative_points: 20,
+          claims: [],
         },
       ];
     });
@@ -101,5 +136,33 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
     await click(".quiz-submit-btn");
     assert.dom(".quiz-result-banner.is-correct").exists();
     assert.dom(".quiz-explanation-text").hasText("1 + 1 = 2");
+  });
+
+  test("clicking sidebar quiz link opens panel without route jump", async function (assert) {
+    await visit("/latest");
+    await click(
+      ".sidebar-section[data-section-name='community'] .sidebar-more-section-trigger"
+    );
+
+    assert.strictEqual(currentURL(), "/latest", "starts on latest route");
+
+    await click(".sidebar-section-link[data-link-name='discourse-quiz']");
+
+    assert.strictEqual(currentURL(), "/latest", "keeps current route");
+    assert.dom(".quiz-panel-container").hasClass("is-visible");
+  });
+
+  test("rewards info button uses shared ghost style classes", async function (assert) {
+    await visit("/quiz/rewards");
+
+    assert
+      .dom(".quiz-rewards-page__info-btn")
+      .hasClass("quiz-info-ghost-btn", "uses shared info ghost class");
+    assert
+      .dom(".quiz-rewards-page__info-btn")
+      .hasClass("btn-icon-text", "uses icon-text ghost button shape");
+    assert
+      .dom(".quiz-rewards-page__info-btn .d-button-label")
+      .exists("shows label text on desktop");
   });
 });

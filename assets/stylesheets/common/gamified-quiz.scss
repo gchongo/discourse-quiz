@@ -1535,6 +1535,32 @@ label.quiz-option-radio {
   line-height: var(--line-height-large);
 }
 
+.quiz-info-ghost-btn.btn.btn-icon-text.-ghost,
+.quiz-info-ghost-btn.btn-icon-text.-ghost {
+  padding: 0;
+  color: var(--tertiary);
+  background-color: transparent;
+  border: 0;
+  box-shadow: none;
+  font-size: var(--font-0);
+
+  .d-icon {
+    color: var(--tertiary);
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--tertiary);
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+
+    .d-icon {
+      color: var(--tertiary);
+    }
+  }
+}
+
 body.quiz-rewards {
   .container .body-page {
     max-width: 100%;
@@ -1575,30 +1601,8 @@ body.quiz-rewards {
 
   &__info-btn.btn {
     margin: 0;
-    padding: 0;
     white-space: nowrap;
     flex-shrink: 0;
-    color: var(--tertiary);
-    background-color: transparent;
-    border: 0;
-    box-shadow: none;
-    font-size: var(--font-0);
-
-    .d-icon {
-      color: var(--tertiary);
-    }
-
-    &:hover,
-    &:focus-visible {
-      color: var(--tertiary);
-      background-color: transparent;
-      border-color: transparent;
-      box-shadow: none;
-
-      .d-icon {
-        color: var(--tertiary);
-      }
-    }
   }
 
   @media screen and (width <= 768px) {

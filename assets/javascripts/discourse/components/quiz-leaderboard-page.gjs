@@ -280,7 +280,7 @@ export default class QuizLeaderboardPage extends Component {
         </h1>
         <DButton
           @action={{this.showLeaderboardInfo}}
-          class="-ghost"
+          class="btn-icon-text -ghost quiz-info-ghost-btn quiz-leaderboard-page__info-btn"
           @icon="circle-info"
           @label={{unless this.site.mobileView "discourse_quiz.leaderboard.info"}}
           @title={{if this.site.mobileView "discourse_quiz.leaderboard.info"}}
