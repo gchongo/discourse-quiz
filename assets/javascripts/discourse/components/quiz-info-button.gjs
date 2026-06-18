@@ -6,6 +6,10 @@ import dConcatClass from "discourse/ui-kit/helpers/d-concat-class";
 export default class QuizInfoButton extends Component {
   @service site;
 
+  get icon() {
+    return this.args.icon || "circle-info";
+  }
+
   get shouldHideLabelOnMobile() {
     return this.args.hideLabelOnMobile !== false;
   }
@@ -33,7 +37,7 @@ export default class QuizInfoButton extends Component {
   <template>
     <DButton
       @action={{@action}}
-      @icon={{or @icon "circle-info"}}
+      @icon={{this.icon}}
       @label={{this.labelKey}}
       @title={{this.titleKey}}
       @ariaLabel={{this.ariaLabelKey}}
