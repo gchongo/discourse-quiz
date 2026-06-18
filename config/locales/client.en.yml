@@ -55,6 +55,9 @@ en:
       points_today_label: "Today's points"
       points_today_value: "%{earned} / %{max}"
       rewards_link: "Points redemption"
+      info_button:
+        leaderboard: "How does the leaderboard work?"
+        rewards: "How does points redemption work?"
       rewards:
         title: "Points redemption"
         info_button: "How does points redemption work?"

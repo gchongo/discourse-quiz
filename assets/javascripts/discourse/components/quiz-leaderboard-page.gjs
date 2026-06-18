@@ -9,10 +9,10 @@ import { on } from "@ember/modifier";
 import { eq, not } from "discourse/truth-helpers";
 import dAvatar from "discourse/ui-kit/helpers/d-avatar";
 import dIcon from "discourse/ui-kit/helpers/d-icon";
-import DButton from "discourse/ui-kit/d-button";
 import PeriodChooser from "discourse/select-kit/components/period-chooser";
 import { i18n } from "discourse-i18n";
 import QuizLeaderboardInfo from "./modal/quiz-leaderboard-info";
+import QuizInfoButton from "./quiz-info-button";
 
 export default class QuizLeaderboardPage extends Component {
   @service currentUser;
@@ -278,12 +278,10 @@ export default class QuizLeaderboardPage extends Component {
         <h1 class="quiz-leaderboard-page__title page__title">
           {{i18n "discourse_quiz.leaderboard.title"}}
         </h1>
-        <DButton
+        <QuizInfoButton
           @action={{this.showLeaderboardInfo}}
-          class="btn-icon-text -ghost quiz-info-ghost-btn quiz-leaderboard-page__info-btn"
-          @icon="circle-info"
-          @label={{unless this.site.mobileView "discourse_quiz.leaderboard.info"}}
-          @title={{if this.site.mobileView "discourse_quiz.leaderboard.info"}}
+          @labelKey="discourse_quiz.info_button.leaderboard"
+          @className="quiz-leaderboard-page__info-btn"
         />
       </div>
 

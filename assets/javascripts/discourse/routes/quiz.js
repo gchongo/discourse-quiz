@@ -5,18 +5,9 @@ export default class QuizRoute extends Route {
   @service quiz;
   @service router;
 
-  beforeModel(transition) {
+  beforeModel() {
     if (this.quiz.isEnabled) {
       this.quiz.openPanel();
-    }
-
-    const fromRouteName = transition?.from?.name;
-
-    // Clicking the sidebar link should behave like the header icon:
-    // open panel without navigating away from current page.
-    if (fromRouteName && fromRouteName !== "application") {
-      transition.abort();
-      return;
     }
 
     this.router.replaceWith("discovery.latest");

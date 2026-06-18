@@ -1537,7 +1537,8 @@ label.quiz-option-radio {
 
 .quiz-info-ghost-btn.btn.btn-icon-text.-ghost,
 .quiz-info-ghost-btn.btn-icon-text.-ghost {
-  padding: 0;
+  padding: 0.15em 0;
+  min-height: 2.5em;
   color: var(--tertiary);
   background-color: transparent;
   border: 0;
@@ -1558,6 +1559,11 @@ label.quiz-option-radio {
     .d-icon {
       color: var(--tertiary);
     }
+  }
+
+  @media screen and (width <= 768px) {
+    min-width: 2.5em;
+    justify-content: center;
   }
 }
 
@@ -1603,17 +1609,6 @@ body.quiz-rewards {
     margin: 0;
     white-space: nowrap;
     flex-shrink: 0;
-  }
-
-  @media screen and (width <= 768px) {
-    &__info-btn.btn.btn-icon-text.-ghost {
-      min-width: 2.25em;
-      justify-content: center;
-
-      .d-button-label {
-        display: none;
-      }
-    }
   }
 
   &__intro {

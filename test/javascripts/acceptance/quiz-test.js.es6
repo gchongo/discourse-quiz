@@ -152,6 +152,20 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
     assert.dom(".quiz-panel-container").hasClass("is-visible");
   });
 
+  test("clicking sidebar quiz link from categories keeps current route", async function (assert) {
+    await visit("/categories");
+    await click(
+      ".sidebar-section[data-section-name='community'] .sidebar-more-section-trigger"
+    );
+
+    assert.strictEqual(currentURL(), "/categories", "starts on categories route");
+
+    await click(".sidebar-section-link[data-link-name='discourse-quiz']");
+
+    assert.strictEqual(currentURL(), "/categories", "keeps categories route");
+    assert.dom(".quiz-panel-container").hasClass("is-visible");
+  });
+
   test("rewards info button uses shared ghost style classes", async function (assert) {
     await visit("/quiz/rewards");
 
@@ -161,6 +175,9 @@ acceptance("Discourse Quiz - Panel visibility", function (needs) {
     assert
       .dom(".quiz-rewards-page__info-btn")
       .hasClass("btn-icon-text", "uses icon-text ghost button shape");
+    assert
+      .dom(".quiz-rewards-page__info-btn")
+      .hasAttribute("aria-label", "How does points redemption work?");
     assert
       .dom(".quiz-rewards-page__info-btn .d-button-label")
       .exists("shows label text on desktop");

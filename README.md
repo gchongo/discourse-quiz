@@ -100,6 +100,13 @@ Independent module — does **not** change quiz submit, scoring, or daily caps. 
 - Public page: `/quiz/rewards` (add your own nav link, e.g. sidebar or header menu)
 - Logged-in users see cumulative score, available rewards, and **My claims** (name + description on one line; status and time on the right)
 
+### Info button style rules
+
+- Leaderboard and points-redemption info buttons share one UI class: `quiz-info-ghost-btn`
+- Visual style is fixed: tertiary text/icon color, transparent background, no border/shadow
+- Mobile behavior is unified: icon-only label with `aria-label` preserved for accessibility
+- Touch target is preserved on mobile (`min-height`/`min-width` 2.5em)
+
 ### Admin fulfillment
 
 - Admin → Plugins → **Community quiz** → **Points redemption** tab

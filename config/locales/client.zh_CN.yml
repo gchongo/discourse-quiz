@@ -55,6 +55,9 @@ zh_CN:
       points_today_label: "今日积分"
       points_today_value: "%{earned} / %{max}"
       rewards_link: "积分兑换"
+      info_button:
+        leaderboard: "排行榜是如何运作的？"
+        rewards: "积分兑换是如何运作的？"
       rewards:
         title: "积分兑换"
         info_button: "积分兑换是如何运作的？"

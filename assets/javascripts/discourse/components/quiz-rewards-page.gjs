@@ -8,8 +8,8 @@ import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import moment from "moment";
 import { i18n } from "discourse-i18n";
-import DButton from "discourse/ui-kit/d-button";
 import QuizRewardsInfoModal from "./quiz-rewards-info-modal";
+import QuizInfoButton from "./quiz-info-button";
 
 export default class QuizRewardsPage extends Component {
   @service currentUser;
@@ -145,11 +145,10 @@ export default class QuizRewardsPage extends Component {
     <section class="quiz-rewards-page">
       <div class="quiz-rewards-page__header">
         <h1 class="quiz-rewards-page__title page__title">{{i18n "discourse_quiz.rewards.title"}}</h1>
-        <DButton
-          @icon="circle-info"
-          @label="discourse_quiz.rewards.info_button"
+        <QuizInfoButton
           @action={{this.showInfoModal}}
-          class="btn-icon-text -ghost quiz-info-ghost-btn quiz-rewards-page__info-btn"
+          @labelKey="discourse_quiz.info_button.rewards"
+          @className="quiz-rewards-page__info-btn"
         />
       </div>
 
