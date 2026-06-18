@@ -223,7 +223,31 @@ export default class QuizService extends Service {
     this.isDocked = true;
     this.panelLeft = null;
     this.panelTop = null;
-    this.isMinimized = false;
+    this.isMinimized = this.isMobile;
+  }
+
+  expandMobilePanelAfterOpen() {
+    if (!this.isMobile || !this.panelVisible) {
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      this.isMinimized = false;
+      return;
+    }
+
+    // Let the minimized state render first, then expand on next paint
+    // so mobile open uses the same drawer animation as minimize/expand.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        if (!this.panelVisible || !this.isMobile) {
+          return;
+        }
+
+        this.isMinimized = false;
+        this.syncLayoutClasses();
+      });
+    });
   }
 
   @action
@@ -233,6 +257,7 @@ export default class QuizService extends Service {
     this.loadCategoryPreference();
     this.panelVisible = true;
     this.syncLayoutClasses();
+    this.expandMobilePanelAfterOpen();
     this.showHome();
   }
 
@@ -252,6 +277,10 @@ export default class QuizService extends Service {
       this.showHome();
     }
     this.syncLayoutClasses();
+
+    if (this.panelVisible) {
+      this.expandMobilePanelAfterOpen();
+    }
   }
 
   @action
