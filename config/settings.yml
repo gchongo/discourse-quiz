@@ -58,8 +58,12 @@ plugins:
     default: ""
     client: true
     textarea: true
+  quiz_rewards_points_rules_help:
+    default: ""
+    client: true
+    textarea: true
   quiz_submission_reward_enabled:
-    default: false
+    default: true
     client: true
   quiz_submission_reward_points:
     default: 5

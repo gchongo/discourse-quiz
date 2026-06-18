@@ -58,6 +58,14 @@ export default class QuizRewardsPage extends Component {
     );
   }
 
+  get customPointsRulesText() {
+    return this.siteSettings.quiz_rewards_points_rules_help?.trim() || "";
+  }
+
+  get useCustomPointsRules() {
+    return this.customPointsRulesText.length > 0;
+  }
+
   stockLabel = (reward) => {
     if (!reward.in_stock) {
       return i18n("discourse_quiz.rewards.out_of_stock");
@@ -163,19 +171,23 @@ export default class QuizRewardsPage extends Component {
 
       <div class="quiz-rewards-page__points-rules">
         <h2>{{i18n "discourse_quiz.rewards.points_rules_title"}}</h2>
-        <ul>
-          <li>{{i18n "discourse_quiz.rewards.points_rule_quiz"}}</li>
-          {{#if this.showSubmissionRewardRule}}
-            <li>
-              {{i18n
-                "discourse_quiz.rewards.points_rule_submission_reward"
-                points=this.siteSettings.quiz_submission_reward_points
-                cap=this.siteSettings.quiz_submission_reward_daily_cap
-              }}
-            </li>
-          {{/if}}
-          <li>{{i18n "discourse_quiz.rewards.points_rule_forum_interaction"}}</li>
-        </ul>
+        {{#if this.useCustomPointsRules}}
+          <div class="quiz-rewards-page__points-rules-custom">{{this.customPointsRulesText}}</div>
+        {{else}}
+          <ul>
+            <li>{{i18n "discourse_quiz.rewards.points_rule_quiz"}}</li>
+            {{#if this.showSubmissionRewardRule}}
+              <li>
+                {{i18n
+                  "discourse_quiz.rewards.points_rule_submission_reward"
+                  points=this.siteSettings.quiz_submission_reward_points
+                  cap=this.siteSettings.quiz_submission_reward_daily_cap
+                }}
+              </li>
+            {{/if}}
+            <li>{{i18n "discourse_quiz.rewards.points_rule_forum_interaction"}}</li>
+          </ul>
+        {{/if}}
       </div>
 
       <div class="quiz-rewards-page__score-card">
