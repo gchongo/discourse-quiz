@@ -58,6 +58,10 @@ en:
       rewards:
         title: "Points redemption"
         intro_default: "Claim prizes when your cumulative score reaches each threshold. Points are never deducted."
+        points_rules_title: "How to earn points"
+        points_rule_quiz: "Quiz answers: earn points according to quiz scoring rules."
+        points_rule_submission_reward: "Question submissions: when your submission is approved, you earn %{points} points each, up to %{cap} points per day."
+        points_rule_forum_interaction: "Forum interaction: posting, replying, likes, and other activity can also earn points (based on your forum gamification rules)."
         cumulative_label: "Cumulative score"
         points_source_gamification: "Thresholds use your total gamification score"
         points_source_quiz: "Thresholds use quiz points earned from correct answers"
@@ -183,6 +187,8 @@ en:
         scoring_daily_cap: "You can earn up to %{count} quiz points per day."
         scoring_once_per_question: "The same question only awards points once, even if you answer it correctly again later."
         scoring_learning_only: "After the daily cap, you can keep practicing but won't earn more points until tomorrow."
+        scoring_submission_reward: "Submission reward: when a user-submitted question is approved, each one earns %{points} points, up to %{cap} points per day."
+        scoring_forum_interaction: "Forum interaction (posting, replying, likes, etc.) can also earn points, based on your community gamification rules."
         cooldown: "Wait at least %{seconds} seconds between answer submissions."
       admin:
         title: "Community quiz"

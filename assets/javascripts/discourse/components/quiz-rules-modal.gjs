@@ -33,6 +33,14 @@ export default class QuizRulesModal extends Component {
     return this.siteSettings.quiz_submit_cooldown_seconds > 0;
   }
 
+  get showSubmissionRewardRule() {
+    return (
+      this.siteSettings.quiz_submission_reward_enabled &&
+      this.siteSettings.quiz_submission_reward_points > 0 &&
+      this.siteSettings.quiz_submission_reward_daily_cap > 0
+    );
+  }
+
   <template>
     <DModal
       @title={{i18n "discourse_quiz.rules_modal.title"}}
@@ -92,6 +100,16 @@ export default class QuizRulesModal extends Component {
               </li>
               <li>{{i18n "discourse_quiz.rules_modal.scoring_once_per_question"}}</li>
               <li>{{i18n "discourse_quiz.rules_modal.scoring_learning_only"}}</li>
+              {{#if this.showSubmissionRewardRule}}
+                <li>
+                  {{i18n
+                    "discourse_quiz.rules_modal.scoring_submission_reward"
+                    points=this.siteSettings.quiz_submission_reward_points
+                    cap=this.siteSettings.quiz_submission_reward_daily_cap
+                  }}
+                </li>
+              {{/if}}
+              <li>{{i18n "discourse_quiz.rules_modal.scoring_forum_interaction"}}</li>
             </ul>
           {{/if}}
 

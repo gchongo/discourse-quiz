@@ -1612,6 +1612,29 @@ body.quiz-rewards {
     }
   }
 
+  &__points-rules {
+    margin-bottom: 1em;
+    padding: 0.75em 0.9em;
+    border: 1px solid var(--primary-low);
+    border-radius: var(--d-border-radius);
+    background: var(--primary-very-low);
+
+    h2 {
+      margin: 0 0 0.45em;
+      font-size: var(--font-0);
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.2em;
+      color: var(--primary-medium);
+    }
+
+    li + li {
+      margin-top: 0.25em;
+    }
+  }
+
   &__score-label {
     font-size: var(--font-0);
     color: var(--primary-medium);

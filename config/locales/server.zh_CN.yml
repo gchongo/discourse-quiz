@@ -36,6 +36,8 @@ zh_CN:
         reward_inactive: "该奖品已下架。"
         rewards_unavailable: "奖品功能暂不可用。"
         invalid_status: "无效状态。"
+    notifications:
+      no_review_note: "无"
     true_false:
       true: "对"
       false: "错"
@@ -57,6 +59,33 @@ zh_CN:
     quiz_rewards_enabled: "启用积分兑换页：用户累计积分达到门槛后可领取，积分不会被扣除。"
     quiz_rewards_use_gamification_score: "兑换门槛使用 gamification 总积分。关闭后仅统计答题获得的积分。"
     quiz_rewards_intro: "积分兑换页（/quiz/rewards）顶部可选说明文案。"
+    quiz_submission_reward_enabled: "启用“用户出题审核通过”奖励积分。"
+    quiz_submission_reward_points: "每条审核通过的用户投稿奖励积分。"
+    quiz_submission_reward_daily_cap: "用户每日通过“审核通过投稿”最多可获得的积分。"
     quiz_leaderboard_enabled: "启用答题排行页（/quiz/leaderboard）。"
     quiz_leaderboard_min_attempts: "正确率榜最低答题总数（不同题目数），默认 20。"
     quiz_leaderboard_user_limit: "排行榜每页显示人数（10–100）。"
+  system_messages:
+    quiz_submission_review_approved:
+      title: "你提交的题目已通过审核"
+      subject_template: "你提交的题目已通过审核"
+      text_body_template: |
+        你好，你提交的题目已通过审核并加入题库。
+
+        - 分类：%{category_name}
+        - 题目：%{question_excerpt}
+        - 审核备注：%{review_note}
+        - 本次奖励积分：%{points_awarded}
+
+        投稿奖励规则：每条通过可得积分，且每日上限为 %{daily_cap} 分。
+    quiz_submission_review_rejected:
+      title: "你提交的题目未通过审核"
+      subject_template: "你提交的题目未通过审核"
+      text_body_template: |
+        你好，你提交的题目未通过审核。
+
+        - 分类：%{category_name}
+        - 题目：%{question_excerpt}
+        - 审核备注：%{review_note}
+
+        你可以根据备注调整后重新提交，感谢你的参与。

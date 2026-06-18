@@ -36,6 +36,8 @@ en:
         reward_inactive: "This reward is no longer available."
         rewards_unavailable: "Rewards are temporarily unavailable."
         invalid_status: "Invalid status."
+    notifications:
+      no_review_note: "None"
     true_false:
       true: "True"
       false: "False"
@@ -57,6 +59,33 @@ en:
     quiz_rewards_enabled: "Enable the points redemption page where logged-in users can claim prizes when their cumulative score reaches each threshold. Points are never deducted."
     quiz_rewards_use_gamification_score: "Use total gamification score for reward thresholds. When disabled, only quiz points earned from correct answers count."
     quiz_rewards_intro: "Optional intro text shown at the top of the rewards page (/quiz/rewards)."
+    quiz_submission_reward_enabled: "Enable point rewards when user-submitted questions are approved."
+    quiz_submission_reward_points: "Points awarded per approved user submission."
+    quiz_submission_reward_daily_cap: "Daily cap for points earned via approved user submissions."
     quiz_leaderboard_enabled: "Enable the quiz leaderboard page (/quiz/leaderboard)."
     quiz_leaderboard_min_attempts: "Minimum distinct questions attempted to appear on the accuracy leaderboard (default 20)."
     quiz_leaderboard_user_limit: "Users shown per leaderboard page (10–100)."
+  system_messages:
+    quiz_submission_review_approved:
+      title: "Your submitted question was approved"
+      subject_template: "Your submitted question was approved"
+      text_body_template: |
+        Your submitted question has been approved and added to the question bank.
+
+        - Category: %{category_name}
+        - Question: %{question_excerpt}
+        - Review note: %{review_note}
+        - Points awarded this time: %{points_awarded}
+
+        Submission reward rule: each approved submission can earn points, up to %{daily_cap} points per day.
+    quiz_submission_review_rejected:
+      title: "Your submitted question was rejected"
+      subject_template: "Your submitted question was rejected"
+      text_body_template: |
+        Your submitted question was not approved.
+
+        - Category: %{category_name}
+        - Question: %{question_excerpt}
+        - Review note: %{review_note}
+
+        You can revise based on this feedback and submit again.

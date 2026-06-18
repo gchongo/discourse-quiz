@@ -47,14 +47,15 @@ module DiscourseQuiz
       QuizPointsTierService.points_earned_today(user.id) >= QuizPointsTierService.daily_max_points
     end
 
-    def self.award_via_gamification(user, points, question)
+    def self.award_via_gamification(user, points, question_or_description)
       return false unless defined?(::DiscourseGamification::GamificationScoreEvent)
 
+      description = score_description(question_or_description)
       ::DiscourseGamification::GamificationScoreEvent.create!(
         user_id: user.id,
         points: points,
         date: Time.zone.today,
-        description: "Quiz: #{question.category_name}",
+        description: description,
       )
       true
     rescue StandardError => e
@@ -74,6 +75,13 @@ module DiscourseQuiz
 
     def self.lock_award_scope!(user_id)
       User.where(id: user_id).lock(true).pick(:id)
+    end
+
+    def self.score_description(question_or_description)
+      return question_or_description if question_or_description.is_a?(String)
+
+      category_name = question_or_description.respond_to?(:category_name) ? question_or_description.category_name : nil
+      "Quiz: #{category_name.presence || 'quiz'}"
     end
   end
 end

@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.22.0)
+## Current features (v0.23.0)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Home **today's points** progress bar (earned / daily max); rules info dialog no longer shows this line
@@ -51,6 +51,9 @@ Discourse quiz plugin with a dedicated question bank.
 - Admin question list duplicate filter: all / duplicates only / unique only
 - Admin user-submission review table: pagination, status/time/category/type filters, keyword search, compact table, and inline review-note column at the end
 - Admin user-submission review supports editing pending submissions before approve/reject
+- User-submission review now sends a system message to the submitter on approve/reject (with review note)
+- Optional approved-submission reward points: grant `x` points per approved submission with per-user daily cap `y` (configurable)
+- Rules and redemption pages now include point-source guidance (quiz, approved submissions, and forum interaction)
 - Admin mobile question list uses card layout; desktop keeps the table with ID, question type, and compact active indicators; bulk-disable-duplicates control is a small button after Search
 - Optional site setting `quiz_categories` to limit panel questions by category name
 
@@ -342,6 +345,9 @@ Legacy attempts without `points_awarded` still count toward today's total using 
 - `quiz_rewards_enabled` — points redemption page and claims (default off)
 - `quiz_rewards_use_gamification_score` — use total gamification score for reward thresholds (off = quiz points only)
 - `quiz_rewards_intro` — optional intro on `/quiz/rewards`
+- `quiz_submission_reward_enabled` — enable point rewards for approved user submissions
+- `quiz_submission_reward_points` — points per approved user submission
+- `quiz_submission_reward_daily_cap` — per-user daily cap for approved-submission rewards
 - `quiz_leaderboard_enabled` — quiz leaderboard page (default on)
 - `quiz_leaderboard_min_attempts` — minimum distinct questions for accuracy ranking (default 20)
 - `quiz_leaderboard_user_limit` — users per page on leaderboard (default 50, max 100)
@@ -384,6 +390,13 @@ Enabled by default (`quiz_leaderboard_enabled`). Link `/quiz/leaderboard` from y
 Stats are stored in `discourse_quiz_leaderboard_stats` and refreshed hourly (`Jobs::RefreshQuizLeaderboardStats`) and after each logged-in submit when enabled.
 
 ## Changelog
+
+### v0.23.0
+
+- Add system messages for submission review outcomes (approved / rejected)
+- Add optional approved-submission reward points with configurable per-submission amount and daily cap
+- Add reward log table to enforce idempotent one-time awarding per submission
+- Show submission-reward and forum-interaction point rules in quiz rules modal and rewards page
 
 ### v0.19.0
 

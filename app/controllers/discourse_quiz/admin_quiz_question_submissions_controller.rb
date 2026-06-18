@@ -55,12 +55,21 @@ module DiscourseQuiz
       case action
       when "approve"
         question = submission.approve!(reviewer: current_user, review_note: note)
+        reward_result = QuizSubmissionRewardService.reward_for_approved_submission(submission)
+        QuizSubmissionNotificationService.notify_approved(
+          submission: submission,
+          review_note: note,
+          points_awarded: reward_result[:awarded_points],
+        )
         render_json_dump(
           submission: submission_json(submission),
           question_id: question.id,
+          submission_reward_points_awarded: reward_result[:awarded_points].to_i,
+          submission_reward_reason: reward_result[:reason].to_s,
         )
       when "reject"
         submission.reject!(reviewer: current_user, review_note: note)
+        QuizSubmissionNotificationService.notify_rejected(submission: submission, review_note: note)
         render_json_dump(submission: submission_json(submission))
       else
         render_json_dump({ error: I18n.t("discourse_quiz.errors.invalid_status") }, status: 422)

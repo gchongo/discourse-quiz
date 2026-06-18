@@ -58,6 +58,10 @@ zh_CN:
       rewards:
         title: "积分兑换"
         intro_default: "累计积分达到门槛即可领取奖品，积分不会被扣除。"
+        points_rules_title: "积分来源说明"
+        points_rule_quiz: "答题：按答题规则获得积分。"
+        points_rule_submission_reward: "出题：提交题目并通过审核后，每题奖励 %{points} 积分，每日最多 %{cap} 积分。"
+        points_rule_forum_interaction: "论坛互动：发帖、回复、点赞等行为也可获得积分（以社区积分规则为准）。"
         cumulative_label: "累计积分"
         points_source_gamification: "按社区总积分计算门槛"
         points_source_quiz: "按答题获得积分计算门槛"
@@ -183,6 +187,8 @@ zh_CN:
         scoring_daily_cap: "每日最多可通过答题获得 %{count} 积分。"
         scoring_once_per_question: "同一道题只计分一次，之后答对不再重复加分。"
         scoring_learning_only: "达到每日上限后仍可继续练习，但当日不再获得积分。"
+        scoring_submission_reward: "出题奖励：用户提交题目并通过审核后，每题奖励 %{points} 积分，每日最多 %{cap} 积分。"
+        scoring_forum_interaction: "论坛互动（发帖、回复、点赞等）也可获得积分，具体以社区积分规则为准。"
         cooldown: "两次提交答案之间至少间隔 %{seconds} 秒。"
       admin:
         title: "社区竞答"

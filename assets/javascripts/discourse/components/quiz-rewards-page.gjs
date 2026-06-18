@@ -50,6 +50,14 @@ export default class QuizRewardsPage extends Component {
     return i18n("discourse_quiz.rewards.points_source_gamification");
   }
 
+  get showSubmissionRewardRule() {
+    return (
+      this.siteSettings.quiz_submission_reward_enabled &&
+      this.siteSettings.quiz_submission_reward_points > 0 &&
+      this.siteSettings.quiz_submission_reward_daily_cap > 0
+    );
+  }
+
   stockLabel = (reward) => {
     if (!reward.in_stock) {
       return i18n("discourse_quiz.rewards.out_of_stock");
@@ -152,6 +160,23 @@ export default class QuizRewardsPage extends Component {
       </div>
 
       <p class="quiz-rewards-page__intro">{{this.introText}}</p>
+
+      <div class="quiz-rewards-page__points-rules">
+        <h2>{{i18n "discourse_quiz.rewards.points_rules_title"}}</h2>
+        <ul>
+          <li>{{i18n "discourse_quiz.rewards.points_rule_quiz"}}</li>
+          {{#if this.showSubmissionRewardRule}}
+            <li>
+              {{i18n
+                "discourse_quiz.rewards.points_rule_submission_reward"
+                points=this.siteSettings.quiz_submission_reward_points
+                cap=this.siteSettings.quiz_submission_reward_daily_cap
+              }}
+            </li>
+          {{/if}}
+          <li>{{i18n "discourse_quiz.rewards.points_rule_forum_interaction"}}</li>
+        </ul>
+      </div>
 
       <div class="quiz-rewards-page__score-card">
         <div class="quiz-rewards-page__score-label">{{i18n "discourse_quiz.rewards.cumulative_label"}}</div>
