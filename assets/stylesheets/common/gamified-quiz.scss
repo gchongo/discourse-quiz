@@ -1537,7 +1537,7 @@ label.quiz-option-radio {
 
 body.quiz-rewards {
   .container .body-page {
-    max-width: 960px;
+    max-width: 100%;
     margin-inline: auto;
 
     // Override global .body-page ul { margin-left: 40px } (faqs.scss)
@@ -1551,7 +1551,7 @@ body.quiz-rewards {
 
 .quiz-rewards-page {
   width: 100%;
-  max-width: 960px;
+  max-width: 100%;
   margin: 0 auto;
 
   &__header {
@@ -1577,18 +1577,6 @@ body.quiz-rewards {
     margin: 0;
     white-space: nowrap;
     flex-shrink: 0;
-  }
-
-  @media screen and (width <= 768px) {
-    &__info-btn.btn {
-      min-width: 2.25em;
-      padding: 0.45em;
-      justify-content: center;
-
-      .d-button-label {
-        display: none;
-      }
-    }
   }
 
   &__intro {
