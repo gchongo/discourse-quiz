@@ -116,10 +116,6 @@ export default class QuizResultDisplay extends Component {
       <div
         class="quiz-result-display {{if this.isTrueFalse 'quiz-result-display--true-false'}}"
       >
-        {{#if this.quiz.isLearningOnly}}
-          <p class="quiz-learning-notice">{{i18n "discourse_quiz.learning_only"}}</p>
-        {{/if}}
-
         <QuizQuestionMeta
           @typeLabel={{this.questionTypeLabel}}
           @categoryName={{this.question.category_name}}

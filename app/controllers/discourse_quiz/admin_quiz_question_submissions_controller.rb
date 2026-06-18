@@ -3,28 +3,35 @@
 module DiscourseQuiz
   class AdminQuizQuestionSubmissionsController < ::Admin::AdminController
     requires_plugin DiscourseQuiz::PLUGIN_NAME
+    DEFAULT_PER_PAGE = 20
+    MAX_PER_PAGE = 100
+    CREATED_WINDOWS = %w[all today 7d 30d 90d].freeze
 
     def index
-      scope = QuizQuestionSubmission.recent_first
-      status_filter = normalize_status_filter(params[:status])
+      DB.use_primary do
+        scope = filtered_submissions_scope
+        page = [params[:page].to_i, 1].max
+        per_page = per_page_param
+        total = scope.count
+        offset = (page - 1) * per_page
 
-      if status_filter == "pending"
-        scope =
-          scope.where(
-            "LOWER(COALESCE(NULLIF(TRIM(status), ''), 'pending')) = 'pending'",
-          )
-      elsif status_filter.present?
-        scope = scope.where("LOWER(TRIM(status)) = ?", status_filter)
+        render_json_dump(
+          submissions: scope.offset(offset).limit(per_page).map { |submission| submission_json(submission) },
+          categories: QuizQuestionSubmission.distinct.order(:category_name).pluck(:category_name),
+          total: total,
+          page: page,
+          per_page: per_page,
+        )
       end
-
-      render_json_dump(
-        submissions: scope.limit(200).map { |submission| submission_json(submission) },
-      )
     rescue StandardError => e
       Rails.logger.error("[discourse-quiz] admin question submissions index failed: #{e.class}: #{e.message}")
       render_json_dump(
         {
           submissions: [],
+          categories: [],
+          total: 0,
+          page: 1,
+          per_page: DEFAULT_PER_PAGE,
           error: I18n.t("discourse_quiz.errors.database_unavailable"),
         },
         status: 500,
@@ -60,10 +67,62 @@ module DiscourseQuiz
       end
     end
 
+    def edit_submission
+      submission = QuizQuestionSubmission.find_by(id: params[:id])
+      return render_not_found unless submission
+
+      if submission.status != "pending"
+        return render_json_dump(
+                 { error: I18n.t("discourse_quiz.errors.invalid_status") },
+                 status: 422,
+               )
+      end
+
+      submission.assign_attributes(submission_attributes)
+
+      if submission.save
+        render_json_dump(submission: submission_json(submission))
+      else
+        render_json_dump({ errors: submission.errors.full_messages }, status: 422)
+      end
+    end
+
     private
 
     def render_not_found
       render_json_dump({ error: I18n.t("discourse_quiz.errors.question_not_found") }, status: 404)
+    end
+
+    def filtered_submissions_scope
+      scope = QuizQuestionSubmission.recent_first
+      status_filter = normalize_status_filter(params[:status])
+
+      if status_filter == "pending"
+        scope = scope.where("LOWER(COALESCE(NULLIF(TRIM(status), ''), 'pending')) = 'pending'")
+      elsif status_filter.present?
+        scope = scope.where("LOWER(TRIM(status)) = ?", status_filter)
+      end
+
+      if params[:category_name].present?
+        scope = scope.where(category_name: params[:category_name].to_s.strip)
+      end
+
+      if QuestionTypes::ALL.include?(params[:question_type].to_s)
+        scope = scope.where(question_type: params[:question_type].to_s)
+      end
+
+      created_window = normalize_created_window(params[:created_window])
+      scope = scope.where("created_at >= ?", created_window_start(created_window)) if created_window != "all"
+
+      query_text = params[:q].to_s.strip
+      if query_text.present?
+        scope = scope.where(
+          "question_text ILIKE :query OR category_name ILIKE :query OR submitter_username ILIKE :query",
+          query: "%#{query_text}%",
+        )
+      end
+
+      scope
     end
 
     def normalize_status_filter(status)
@@ -71,6 +130,58 @@ module DiscourseQuiz
       return nil if value.blank?
 
       %w[pending approved rejected].include?(value) ? value : nil
+    end
+
+    def normalize_created_window(window)
+      value = window.to_s.strip
+      return "all" if value.blank?
+
+      CREATED_WINDOWS.include?(value) ? value : "all"
+    end
+
+    def created_window_start(window)
+      case window
+      when "today"
+        Time.zone.now.beginning_of_day
+      when "7d"
+        7.days.ago
+      when "30d"
+        30.days.ago
+      when "90d"
+        90.days.ago
+      else
+        100.years.ago
+      end
+    end
+
+    def per_page_param
+      per_page = params[:per_page].to_i
+      per_page = DEFAULT_PER_PAGE if per_page <= 0
+      [per_page, MAX_PER_PAGE].min
+    end
+
+    def submission_attributes
+      attrs =
+        params.require(:submission).permit(
+          :category_name,
+          :question_text,
+          :question_type,
+          :correct_index,
+          :explanation,
+          :show_author_name,
+          options: [],
+          correct_indices: [],
+        )
+
+      if attrs[:options].is_a?(String)
+        attrs[:options] = attrs[:options].split(/\r?\n/).map(&:strip).reject(&:blank?)
+      end
+
+      unless QuizQuestionSubmission.column_names.include?("show_author_name")
+        attrs.delete(:show_author_name)
+      end
+
+      attrs
     end
 
     def submission_json(submission)
@@ -89,10 +200,16 @@ module DiscourseQuiz
         status: submission.status.presence || "pending",
         review_note: submission.review_note,
         reviewer_id: submission.reviewer_id,
-        reviewed_at: submission.reviewed_at,
+        reviewed_at: format_datetime(submission.reviewed_at),
         approved_question_id: submission.approved_question_id,
-        created_at: submission.created_at,
+        created_at: format_datetime(submission.created_at),
       }
+    end
+
+    def format_datetime(value)
+      return nil unless value
+
+      value.in_time_zone.strftime("%Y-%m-%d %H:%M:%S")
     end
   end
 end

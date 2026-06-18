@@ -10,6 +10,7 @@ import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
 import { eq, not, or } from "discourse/truth-helpers";
 import QuizQuestionEditModal from "./quiz-question-edit-modal";
+import QuizSubmissionEditModal from "./quiz-submission-edit-modal";
 
 const IMPORT_EXAMPLE = `[
   {
@@ -43,6 +44,7 @@ const CSV_EXAMPLE = `id,category_name,question_text,question_type,options,correc
 ,历史,下列哪些属于战国七雄？,multiple_choice,齐|晋|秦|楚,,0|2|3,战国七雄不含晋。,true`;
 
 const PER_PAGE = 25;
+const SUBMISSIONS_PER_PAGE = 20;
 
 export default class AdminQuizIndex extends Component {
   @service modal;
@@ -51,6 +53,7 @@ export default class AdminQuizIndex extends Component {
   @tracked categories = [];
   @tracked selectedCategory = "";
   @tracked selectedQuestionType = "";
+  @tracked duplicateFilter = "all";
   @tracked searchQuery = "";
   @tracked page = 1;
   @tracked total = 0;
@@ -76,6 +79,13 @@ export default class AdminQuizIndex extends Component {
   @tracked submissions = [];
   @tracked submissionsLoading = false;
   @tracked submissionStatusFilter = "pending";
+  @tracked submissionCategoryFilter = "";
+  @tracked submissionQuestionTypeFilter = "";
+  @tracked submissionCreatedWindow = "all";
+  @tracked submissionSearchQuery = "";
+  @tracked submissionPage = 1;
+  @tracked submissionsTotal = 0;
+  @tracked submissionCategories = [];
   @tracked submissionsLoadError = null;
   @tracked reviewBusyId = null;
 
@@ -95,6 +105,18 @@ export default class AdminQuizIndex extends Component {
 
   get canGoNext() {
     return this.page < this.totalPages;
+  }
+
+  get submissionTotalPages() {
+    return Math.max(1, Math.ceil(this.submissionsTotal / SUBMISSIONS_PER_PAGE));
+  }
+
+  get canGoSubmissionPrev() {
+    return this.submissionPage > 1;
+  }
+
+  get canGoSubmissionNext() {
+    return this.submissionPage < this.submissionTotalPages;
   }
 
   get saveDuplicateWarningIds() {
@@ -136,8 +158,27 @@ export default class AdminQuizIndex extends Component {
 
   buildSubmissionsUrl() {
     const params = new URLSearchParams();
+    params.set("page", String(this.submissionPage));
+    params.set("per_page", String(SUBMISSIONS_PER_PAGE));
+
     if (this.submissionStatusFilter) {
       params.set("status", this.submissionStatusFilter);
+    }
+
+    if (this.submissionCategoryFilter) {
+      params.set("category_name", this.submissionCategoryFilter);
+    }
+
+    if (this.submissionQuestionTypeFilter) {
+      params.set("question_type", this.submissionQuestionTypeFilter);
+    }
+
+    if (this.submissionCreatedWindow) {
+      params.set("created_window", this.submissionCreatedWindow);
+    }
+
+    if (this.submissionSearchQuery.trim()) {
+      params.set("q", this.submissionSearchQuery.trim());
     }
 
     return `/admin/quiz/question_submissions.json?${params.toString()}`;
@@ -154,9 +195,13 @@ export default class AdminQuizIndex extends Component {
         ...submission,
         review_note_draft: submission.review_note || "",
       }));
+      this.submissionsTotal = data.total || 0;
+      this.submissionPage = data.page || this.submissionPage;
       this.submissionsLoadError = data.error || null;
+      this.submissionCategories = data.categories || [];
     } catch (e) {
       this.submissions = [];
+      this.submissionsTotal = 0;
       this.submissionsLoadError =
         e?.jqXHR?.responseJSON?.error ||
         e?.jqXHR?.responseText ||
@@ -169,6 +214,66 @@ export default class AdminQuizIndex extends Component {
   @action
   onSubmissionStatusFilterChange(event) {
     this.submissionStatusFilter = event.target.value;
+    this.submissionPage = 1;
+    this.loadSubmissions();
+  }
+
+  @action
+  onSubmissionCategoryFilterChange(event) {
+    this.submissionCategoryFilter = event.target.value;
+    this.submissionPage = 1;
+    this.loadSubmissions();
+  }
+
+  @action
+  onSubmissionQuestionTypeFilterChange(event) {
+    this.submissionQuestionTypeFilter = event.target.value;
+    this.submissionPage = 1;
+    this.loadSubmissions();
+  }
+
+  @action
+  onSubmissionCreatedWindowChange(event) {
+    this.submissionCreatedWindow = event.target.value;
+    this.submissionPage = 1;
+    this.loadSubmissions();
+  }
+
+  @action
+  onSubmissionSearchInput(event) {
+    this.submissionSearchQuery = event.target.value;
+  }
+
+  @action
+  applySubmissionSearch() {
+    this.submissionPage = 1;
+    this.loadSubmissions();
+  }
+
+  @action
+  clearSubmissionSearch() {
+    this.submissionSearchQuery = "";
+    this.submissionPage = 1;
+    this.loadSubmissions();
+  }
+
+  @action
+  goSubmissionPrevPage() {
+    if (!this.canGoSubmissionPrev) {
+      return;
+    }
+
+    this.submissionPage -= 1;
+    this.loadSubmissions();
+  }
+
+  @action
+  goSubmissionNextPage() {
+    if (!this.canGoSubmissionNext) {
+      return;
+    }
+
+    this.submissionPage += 1;
     this.loadSubmissions();
   }
 
@@ -223,6 +328,10 @@ export default class AdminQuizIndex extends Component {
       params.set("q", this.searchQuery.trim());
     }
 
+    if (this.duplicateFilter) {
+      params.set("duplicate_filter", this.duplicateFilter);
+    }
+
     return `/admin/quiz/questions.json?${params.toString()}`;
   }
 
@@ -240,6 +349,10 @@ export default class AdminQuizIndex extends Component {
 
     if (this.searchQuery.trim()) {
       params.set("q", this.searchQuery.trim());
+    }
+
+    if (this.duplicateFilter) {
+      params.set("duplicate_filter", this.duplicateFilter);
     }
 
     return `/admin/quiz/questions/export.json?${params.toString()}`;
@@ -282,6 +395,13 @@ export default class AdminQuizIndex extends Component {
   @action
   onQuestionTypeChange(event) {
     this.selectedQuestionType = event.target.value;
+    this.page = 1;
+    this.loadQuestions();
+  }
+
+  @action
+  onDuplicateFilterChange(event) {
+    this.duplicateFilter = event.target.value;
     this.page = 1;
     this.loadQuestions();
   }
@@ -462,6 +582,19 @@ export default class AdminQuizIndex extends Component {
   }
 
   @action
+  editSubmission(submission) {
+    this.modal.show(QuizSubmissionEditModal, {
+      model: {
+        submission,
+        categories: this.submissionCategories,
+        onSaved: () => {
+          this.loadSubmissions();
+        },
+      },
+    });
+  }
+
+  @action
   async deleteQuestion(id) {
     if (!confirm(i18n("discourse_quiz.admin.confirm_delete"))) {
       return;
@@ -603,6 +736,27 @@ export default class AdminQuizIndex extends Component {
               </option>
               <option value="multiple_choice" selected={{eq this.selectedQuestionType "multiple_choice"}}>
                 {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
+              </option>
+            </select>
+          </div>
+
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-duplicate-filter">
+              {{i18n "discourse_quiz.admin.duplicate_filter"}}
+            </label>
+            <select
+              id="quiz-duplicate-filter"
+              class="quiz-admin-field__control"
+              {{on "change" this.onDuplicateFilterChange}}
+            >
+              <option value="all" selected={{eq this.duplicateFilter "all"}}>
+                {{i18n "discourse_quiz.admin.duplicate_filter_all"}}
+              </option>
+              <option value="duplicates_only" selected={{eq this.duplicateFilter "duplicates_only"}}>
+                {{i18n "discourse_quiz.admin.duplicate_filter_only"}}
+              </option>
+              <option value="unique_only" selected={{eq this.duplicateFilter "unique_only"}}>
+                {{i18n "discourse_quiz.admin.duplicate_filter_unique"}}
               </option>
             </select>
           </div>
@@ -808,7 +962,102 @@ export default class AdminQuizIndex extends Component {
               </option>
             </select>
           </div>
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-submission-created-window-filter">
+              {{i18n "discourse_quiz.admin.question_submissions_created_window"}}
+            </label>
+            <select
+              id="quiz-submission-created-window-filter"
+              class="quiz-admin-field__control"
+              {{on "change" this.onSubmissionCreatedWindowChange}}
+            >
+              <option value="all" selected={{eq this.submissionCreatedWindow "all"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_created_window_all"}}
+              </option>
+              <option value="today" selected={{eq this.submissionCreatedWindow "today"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_created_window_today"}}
+              </option>
+              <option value="7d" selected={{eq this.submissionCreatedWindow "7d"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_created_window_7d"}}
+              </option>
+              <option value="30d" selected={{eq this.submissionCreatedWindow "30d"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_created_window_30d"}}
+              </option>
+              <option value="90d" selected={{eq this.submissionCreatedWindow "90d"}}>
+                {{i18n "discourse_quiz.admin.question_submissions_created_window_90d"}}
+              </option>
+            </select>
+          </div>
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-submission-category-filter">
+              {{i18n "discourse_quiz.admin.category_filter"}}
+            </label>
+            <select
+              id="quiz-submission-category-filter"
+              class="quiz-admin-field__control"
+              {{on "change" this.onSubmissionCategoryFilterChange}}
+            >
+              <option value="" selected={{eq this.submissionCategoryFilter ""}}>
+                {{i18n "discourse_quiz.admin.all_categories"}}
+              </option>
+              {{#each this.submissionCategories as |category|}}
+                <option value={{category}} selected={{eq this.submissionCategoryFilter category}}>
+                  {{category}}
+                </option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="quiz-admin-field">
+            <label class="quiz-admin-field__label" for="quiz-submission-question-type-filter">
+              {{i18n "discourse_quiz.admin.question_type_filter"}}
+            </label>
+            <select
+              id="quiz-submission-question-type-filter"
+              class="quiz-admin-field__control"
+              {{on "change" this.onSubmissionQuestionTypeFilterChange}}
+            >
+              <option value="" selected={{eq this.submissionQuestionTypeFilter ""}}>
+                {{i18n "discourse_quiz.admin.all_question_types"}}
+              </option>
+              <option value="single_choice" selected={{eq this.submissionQuestionTypeFilter "single_choice"}}>
+                {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
+              </option>
+              <option value="true_false" selected={{eq this.submissionQuestionTypeFilter "true_false"}}>
+                {{i18n "discourse_quiz.admin.form.question_types.true_false"}}
+              </option>
+              <option
+                value="multiple_choice"
+                selected={{eq this.submissionQuestionTypeFilter "multiple_choice"}}
+              >
+                {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
+              </option>
+            </select>
+          </div>
+          <div class="quiz-admin-field quiz-admin-field--grow">
+            <label class="quiz-admin-field__label" for="quiz-submission-search-query">
+              {{i18n "discourse_quiz.admin.search"}}
+            </label>
+            <input
+              id="quiz-submission-search-query"
+              class="quiz-admin-field__control"
+              type="text"
+              value={{this.submissionSearchQuery}}
+              {{on "input" this.onSubmissionSearchInput}}
+            />
+          </div>
           <div class="quiz-admin-field__actions">
+            <DButton
+              @label="discourse_quiz.admin.search_button"
+              @action={{this.applySubmissionSearch}}
+              class="btn-default"
+            />
+            {{#if this.submissionSearchQuery}}
+              <DButton
+                @label="discourse_quiz.admin.clear_search"
+                @action={{this.clearSubmissionSearch}}
+                class="btn-default"
+              />
+            {{/if}}
             <DButton
               @label="discourse_quiz.admin.reload"
               @action={{this.loadSubmissions}}
@@ -821,6 +1070,29 @@ export default class AdminQuizIndex extends Component {
           <p class="quiz-admin-error">{{this.submissionsLoadError}}</p>
         {{/if}}
 
+        <div class="quiz-admin-pagination">
+          <span>
+            {{i18n
+              "discourse_quiz.admin.pagination"
+              page=this.submissionPage
+              total_pages=this.submissionTotalPages
+              total=this.submissionsTotal
+            }}
+          </span>
+          <DButton
+            @label="discourse_quiz.admin.prev_page"
+            @action={{this.goSubmissionPrevPage}}
+            @disabled={{not this.canGoSubmissionPrev}}
+            class="btn-default btn-small"
+          />
+          <DButton
+            @label="discourse_quiz.admin.next_page"
+            @action={{this.goSubmissionNextPage}}
+            @disabled={{not this.canGoSubmissionNext}}
+            class="btn-default btn-small"
+          />
+        </div>
+
         {{#if this.submissionsLoading}}
           <p class="quiz-admin-hint">{{i18n "discourse_quiz.loading"}}</p>
         {{else if this.submissions.length}}
@@ -828,37 +1100,42 @@ export default class AdminQuizIndex extends Component {
             <table class="quiz-questions-table table quiz-submissions-table">
               <thead>
                 <tr>
+                  <th>{{i18n "discourse_quiz.admin.question_submissions_created_at"}}</th>
                   <th>{{i18n "discourse_quiz.admin.table.category"}}</th>
+                  <th>{{i18n "discourse_quiz.admin.table.question_type"}}</th>
                   <th>{{i18n "discourse_quiz.admin.table.question"}}</th>
                   <th>{{i18n "discourse_quiz.admin.question_submissions_submitter_label"}}</th>
                   <th>{{i18n "discourse_quiz.admin.question_submissions_status"}}</th>
-                  <th>{{i18n "discourse_quiz.admin.question_submissions_note"}}</th>
                   <th>{{i18n "discourse_quiz.admin.table.actions"}}</th>
+                  <th>{{i18n "discourse_quiz.admin.question_submissions_note"}}</th>
                 </tr>
               </thead>
               <tbody>
                 {{#each this.submissions as |submission|}}
                   <tr>
+                    <td>{{submission.created_at}}</td>
                     <td>{{submission.category_name}}</td>
+                    <td>
+                      {{#if (eq submission.question_type "multiple_choice")}}
+                        {{i18n "discourse_quiz.admin.form.question_types.multiple_choice"}}
+                      {{else if (eq submission.question_type "true_false")}}
+                        {{i18n "discourse_quiz.admin.form.question_types.true_false"}}
+                      {{else}}
+                        {{i18n "discourse_quiz.admin.form.question_types.single_choice"}}
+                      {{/if}}
+                    </td>
                     <td>{{this.imageLabelPreview submission.question_text}}</td>
                     <td>{{submission.submitter_username}}</td>
                     <td>{{submission.status}}</td>
                     <td>
                       {{#if (eq submission.status "pending")}}
-                        <input
-                          class="quiz-admin-field__control quiz-submissions-table__note-input"
-                          type="text"
-                          value={{submission.review_note_draft}}
-                          placeholder={{i18n "discourse_quiz.admin.question_submissions_note"}}
-                          {{on "input" (fn this.onSubmissionReviewNoteInput submission)}}
-                        />
-                      {{else}}
-                        <span class="quiz-submissions-table__note-text">{{submission.review_note}}</span>
-                      {{/if}}
-                    </td>
-                    <td>
-                      {{#if (eq submission.status "pending")}}
                         <div class="quiz-admin-actions">
+                          <DButton
+                            @label="discourse_quiz.admin.edit"
+                            @action={{fn this.editSubmission submission}}
+                            @disabled={{eq this.reviewBusyId submission.id}}
+                            class="btn-default btn-small"
+                          />
                           <DButton
                             @label="discourse_quiz.admin.question_submissions_approve"
                             @action={{fn this.reviewSubmission submission "approve"}}
@@ -876,56 +1153,23 @@ export default class AdminQuizIndex extends Component {
                         <span>—</span>
                       {{/if}}
                     </td>
+                    <td>
+                      {{#if (eq submission.status "pending")}}
+                        <input
+                          class="quiz-admin-field__control quiz-submissions-table__note-input"
+                          type="text"
+                          value={{submission.review_note_draft}}
+                          placeholder={{i18n "discourse_quiz.admin.question_submissions_note"}}
+                          {{on "input" (fn this.onSubmissionReviewNoteInput submission)}}
+                        />
+                      {{else}}
+                        <span class="quiz-submissions-table__note-text">{{submission.review_note}}</span>
+                      {{/if}}
+                    </td>
                   </tr>
                 {{/each}}
               </tbody>
             </table>
-          </div>
-
-          <div class="quiz-questions-cards quiz-submissions-cards">
-            {{#each this.submissions as |submission|}}
-              <article class="quiz-question-card">
-                <div class="quiz-question-card__meta">
-                  <span class="quiz-question-card__category">{{submission.category_name}}</span>
-                  <span class="quiz-question-card__status">
-                    {{submission.status}}
-                  </span>
-                </div>
-                <div class="quiz-question-card__text">{{this.imageLabelPreview submission.question_text}}</div>
-                <div class="quiz-admin-hint">
-                  {{i18n "discourse_quiz.admin.question_submissions_submitter" username=submission.submitter_username}}
-                </div>
-                {{#if (eq submission.status "pending")}}
-                  <div class="quiz-admin-field">
-                    <label class="quiz-admin-field__label">
-                      {{i18n "discourse_quiz.admin.question_submissions_note"}}
-                    </label>
-                    <input
-                      class="quiz-admin-field__control"
-                      type="text"
-                      value={{submission.review_note_draft}}
-                      {{on "input" (fn this.onSubmissionReviewNoteInput submission)}}
-                    />
-                  </div>
-                {{/if}}
-                {{#if (eq submission.status "pending")}}
-                  <div class="quiz-question-card__actions quiz-admin-actions">
-                    <DButton
-                      @label="discourse_quiz.admin.question_submissions_approve"
-                      @action={{fn this.reviewSubmission submission "approve"}}
-                      @disabled={{eq this.reviewBusyId submission.id}}
-                      class="btn-primary btn-small"
-                    />
-                    <DButton
-                      @label="discourse_quiz.admin.question_submissions_reject"
-                      @action={{fn this.reviewSubmission submission "reject"}}
-                      @disabled={{eq this.reviewBusyId submission.id}}
-                      class="btn-danger btn-small"
-                    />
-                  </div>
-                {{/if}}
-              </article>
-            {{/each}}
           </div>
         {{else}}
           <p class="quiz-admin-hint">{{i18n "discourse_quiz.admin.question_submissions_empty"}}</p>

@@ -27,6 +27,8 @@ Discourse::Application.routes.draw do
     post "/admin/quiz/questions" => "discourse_quiz/admin_quiz_questions#create"
     get "/admin/quiz/question_submissions" => "discourse_quiz/admin_quiz_question_submissions#index"
     put "/admin/quiz/question_submissions/:id" => "discourse_quiz/admin_quiz_question_submissions#update"
+    put "/admin/quiz/question_submissions/:id/edit" =>
+          "discourse_quiz/admin_quiz_question_submissions#edit_submission"
     post "/admin/quiz/questions/bulk_import" => "discourse_quiz/admin_quiz_questions#bulk_import"
     post "/admin/quiz/questions/bulk_disable_duplicates" =>
            "discourse_quiz/admin_quiz_questions#bulk_disable_duplicates"

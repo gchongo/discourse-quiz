@@ -137,7 +137,32 @@ module DiscourseQuiz
       scope = scope.by_category(params[:category_name]) if params[:category_name].present?
       scope = scope.by_question_type(params[:question_type]) if params[:question_type].present?
       scope = scope.search_query(params[:q]) if params[:q].present?
+      scope = apply_duplicate_filter(scope)
       scope
+    end
+
+    def apply_duplicate_filter(scope)
+      filter = params[:duplicate_filter].to_s
+      return scope if filter.blank? || filter == "all"
+
+      duplicate_ids = QuizDuplicateDetector.summary[:question_ids]
+
+      case filter
+      when "duplicates_only"
+        if duplicate_ids.present?
+          scope.where(id: duplicate_ids)
+        else
+          scope.none
+        end
+      when "unique_only"
+        if duplicate_ids.present?
+          scope.where.not(id: duplicate_ids)
+        else
+          scope
+        end
+      else
+        scope
+      end
     end
 
     def per_page_param

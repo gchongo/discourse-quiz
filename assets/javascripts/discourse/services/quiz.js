@@ -45,6 +45,7 @@ export default class QuizService extends Service {
   @tracked quizStatus = null;
   @tracked paywallActive = false;
   @tracked errorMessage = null;
+  @tracked errorCode = null;
   @tracked practiceMode = "normal";
   @tracked typeFilterSingleChoice = true;
   @tracked typeFilterTrueFalse = true;
@@ -464,6 +465,7 @@ export default class QuizService extends Service {
     this.submittedAnswerIndex = null;
     this.submittedAnswerIndices = null;
     this.errorMessage = null;
+    this.errorCode = null;
     this.paywallActive = false;
     this.sessionSeenQuestionIds = [];
 
@@ -503,6 +505,7 @@ export default class QuizService extends Service {
       if (!cached?.categories?.length) {
         this.availableCategories = [];
         this.errorMessage = i18n("discourse_quiz.load_error");
+        this.errorCode = "load_error";
       }
     } finally {
       this.homeLoading = false;
@@ -521,10 +524,13 @@ export default class QuizService extends Service {
     if (this.quizStatus?.mode === "paywall") {
       this.paywallActive = true;
       this.errorMessage = null;
+      this.errorCode = null;
     } else if (!fromCache && this.availableCategories.length === 0) {
       this.errorMessage = i18n("discourse_quiz.no_questions");
+      this.errorCode = "no_questions";
     } else if (!fromCache) {
       this.errorMessage = null;
+      this.errorCode = null;
     }
   }
 
@@ -622,6 +628,7 @@ export default class QuizService extends Service {
   async loadQuestion() {
     this.loading = true;
     this.errorMessage = null;
+    this.errorCode = null;
     this.answerResult = null;
     this.submittedAnswerIndex = null;
     this.submittedAnswerIndices = null;
@@ -646,6 +653,7 @@ export default class QuizService extends Service {
 
         if (errorCode === "practice_mode_requires_login") {
           this.errorMessage = i18n("discourse_quiz.practice_mode_requires_login");
+          this.errorCode = "practice_mode_requires_login";
           this.panelPhase = "home";
           return;
         }
@@ -655,9 +663,11 @@ export default class QuizService extends Service {
       }
 
       if (e?.jqXHR?.status === 404) {
+        this.errorCode = errorCode || "no_questions_in_range";
         this.errorMessage = this.emptyRangeMessage(errorCode);
       } else {
         this.errorMessage = i18n("discourse_quiz.load_error");
+        this.errorCode = "load_error";
       }
     } finally {
       this.loading = false;
@@ -682,6 +692,7 @@ export default class QuizService extends Service {
 
     this.submitting = true;
     this.errorMessage = null;
+    this.errorCode = null;
 
     try {
       this.submittedAnswerIndex = answerIndex;
@@ -704,8 +715,10 @@ export default class QuizService extends Service {
       if (e?.jqXHR?.status === 429) {
         this.errorMessage =
           e.jqXHR.responseJSON?.errors?.[0] || i18n("discourse_quiz.submit_error");
+        this.errorCode = "submit_rate_limited";
       } else {
         this.errorMessage = i18n("discourse_quiz.submit_error");
+        this.errorCode = "submit_error";
       }
     } finally {
       this.submitting = false;

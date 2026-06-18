@@ -158,6 +158,22 @@ export default class QuizPanel extends Component {
     this.modal.show(QuizRulesModal);
   }
 
+  get isRangeEmptyNotice() {
+    return (
+      this.quiz.errorCode === "no_questions_in_range" ||
+      this.quiz.errorCode === "no_wrong_questions" ||
+      this.quiz.errorCode === "no_unseen_questions"
+    );
+  }
+
+  get errorNoticeClass() {
+    if (this.isRangeEmptyNotice) {
+      return "quiz-panel-notice is-empty-range";
+    }
+
+    return "quiz-panel-notice is-error";
+  }
+
   <template>
     {{#if this.quiz.isEnabled}}
       <div
@@ -225,12 +241,12 @@ export default class QuizPanel extends Component {
               <p class="quiz-panel-placeholder">{{i18n "discourse_quiz.loading"}}</p>
             {{else if (eq this.quiz.panelPhase "home")}}
               {{#if this.quiz.errorMessage}}
-                <p class="quiz-panel-error">{{this.quiz.errorMessage}}</p>
+                <p class={{this.errorNoticeClass}}>{{this.quiz.errorMessage}}</p>
               {{else}}
                 <QuizHome />
               {{/if}}
             {{else if this.quiz.errorMessage}}
-              <p class="quiz-panel-error">{{this.quiz.errorMessage}}</p>
+              <p class={{this.errorNoticeClass}}>{{this.quiz.errorMessage}}</p>
               <DButton
                 @label="discourse_quiz.back_to_home"
                 @action={{this.quiz.showHome}}

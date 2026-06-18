@@ -2,7 +2,7 @@
 
 Discourse quiz plugin with a dedicated question bank.
 
-## Current features (v0.21.1)
+## Current features (v0.22.0)
 
 - Quiz home screen with question-type filter, practice mode, and optional category selection
 - Home **today's points** progress bar (earned / daily max); rules info dialog no longer shows this line
@@ -38,6 +38,7 @@ Discourse quiz plugin with a dedicated question bank.
 - Gamification points for correct answers (when `discourse-gamification` is enabled)
 - Flat or **tiered daily scoring** (optional): first N scored answers, then tier 2 up to M, then tier 3; daily cap still applies
 - Daily point cap with learning-only mode after the cap
+- Daily-cap learning notice appears on the home panel (below points progress, above filters), not on question/result pages
 - Practice modes (logged-in): random, wrong-answer review, unseen questions
 - Session de-duplication: while practicing, avoids repeating questions until the selected range is exhausted
 - Recent-correct down-weighting: in random mode, questions answered correctly in the last 30 minutes are less likely to reappear
@@ -47,6 +48,9 @@ Discourse quiz plugin with a dedicated question bank.
 - Admin question bank: add/edit, search, pagination, category rename, export, dry-run import, and upsert import
 - Bulk import **auto-skips duplicate question text** (within the batch and vs. existing bank); reports `skipped` count
 - Admin duplicate-question detection with list summary, row highlighting, save/import warnings, and bulk disable (keep lowest ID per group)
+- Admin question list duplicate filter: all / duplicates only / unique only
+- Admin user-submission review table: pagination, status/time/category/type filters, keyword search, compact table, and inline review-note column at the end
+- Admin user-submission review supports editing pending submissions before approve/reject
 - Admin mobile question list uses card layout; desktop keeps the table with ID, question type, and compact active indicators; bulk-disable-duplicates control is a small button after Search
 - Optional site setting `quiz_categories` to limit panel questions by category name
 
@@ -167,9 +171,11 @@ id,category_name,question_text,question_type,options,correct_index,correct_indic
 - **Upsert**: update existing rows when `id` is present (not skipped as duplicates)
 - **Rename category**: rename a category across all questions in the bank
 - **Search / pagination**: find questions by text, category, or question type in large banks
+- **Duplicate filter**: quickly switch between all questions, duplicate-only, and unique-only
 - **Duplicate detection**: normalized question-text duplicates are highlighted in the list; save/import responses include warnings
 - **Bulk import skip**: duplicate rows in the file or matching existing question text are skipped automatically; import result shows `skipped` count
 - **Bulk disable duplicates**: disable all but the lowest-ID question in each duplicate group
+- **Submission review upgrades**: filter by status/time/category/type, keyword search, paginated table, edit pending submissions, then approve/reject
 
 ## Testing
 
@@ -287,13 +293,16 @@ Then run `rake db:migrate` again after pulling the fixed plugin code.
 | GET | `/quiz/rewards.json` | Active rewards + cumulative points (requires `quiz_rewards_enabled`) |
 | GET | `/quiz/rewards/claims.json` | Logged-in user's claim history + cumulative points |
 | POST | `/quiz/rewards/:id/claim.json` | Claim a reward (no point deduction) |
-| GET | `/admin/quiz/questions.json` | Admin question list (`page`, `per_page`, `q`, `category_name`, `question_type`) + duplicate summary |
+| GET | `/admin/quiz/questions.json` | Admin question list (`page`, `per_page`, `q`, `category_name`, `question_type`, `duplicate_filter`) + duplicate summary |
 | GET | `/admin/quiz/questions/export.json` | Export JSON or CSV (`export_format`) |
 | POST | `/admin/quiz/questions.json` | Create one question (may include `duplicate_warning`) |
 | PUT | `/admin/quiz/questions/:id.json` | Update one question (may include `duplicate_warning`) |
 | PUT | `/admin/quiz/categories/rename.json` | Rename a category across the bank |
 | POST | `/admin/quiz/questions/bulk_import.json` | Bulk import JSON or CSV (`import_format`, `dry_run`, `upsert`); duplicates skipped; returns `skipped` |
 | POST | `/admin/quiz/questions/bulk_disable_duplicates.json` | Disable duplicate questions, keeping the lowest ID in each group |
+| GET | `/admin/quiz/question_submissions.json` | Admin submission list (`page`, `per_page`, `status`, `created_window`, `category_name`, `question_type`, `q`) |
+| PUT | `/admin/quiz/question_submissions/:id/edit.json` | Edit one pending submission before final review |
+| PUT | `/admin/quiz/question_submissions/:id.json` | Approve or reject one pending submission (`review_action`, `review_note`) |
 | GET | `/admin/quiz/rewards.json` | Admin rewards list + recent claims |
 | POST | `/admin/quiz/rewards.json` | Create reward |
 | PUT | `/admin/quiz/rewards/:id.json` | Update reward |

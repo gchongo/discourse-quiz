@@ -62,6 +62,10 @@ export default class QuizHome extends Component {
         />
       {{/if}}
 
+      {{#if this.quiz.isLearningOnly}}
+        <p class="quiz-learning-notice">{{i18n "discourse_quiz.learning_only"}}</p>
+      {{/if}}
+
       <div class="quiz-home-modes">
         <span class="quiz-home-modes__label">{{i18n "discourse_quiz.home_question_type"}}</span>
         <div class="quiz-home-modes__buttons quiz-home-modes__buttons--triple" role="group">
@@ -121,10 +125,6 @@ export default class QuizHome extends Component {
       <div class="quiz-home-actions">
         {{#if this.quiz.quizStatus.is_guest}}
           <QuizGuestNotice @attemptsLeft={{this.quiz.quizStatus.attempts_left}} />
-        {{/if}}
-
-        {{#if this.quiz.isLearningOnly}}
-          <p class="quiz-learning-notice">{{i18n "discourse_quiz.learning_only"}}</p>
         {{/if}}
 
         <DButton
