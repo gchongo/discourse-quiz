@@ -149,7 +149,7 @@ export default class QuizRewardsPage extends Component {
           @icon="circle-info"
           @label="discourse_quiz.rewards.info_button"
           @action={{this.showInfoModal}}
-          class="-ghost quiz-rewards-page__info-btn"
+          class="btn-icon-text -ghost quiz-rewards-page__info-btn"
         />
       </div>
 

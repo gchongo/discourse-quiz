@@ -1579,6 +1579,17 @@ body.quiz-rewards {
     flex-shrink: 0;
   }
 
+  @media screen and (width <= 768px) {
+    &__info-btn.btn.btn-icon-text.-ghost {
+      min-width: 2.25em;
+      justify-content: center;
+
+      .d-button-label {
+        display: none;
+      }
+    }
+  }
+
   &__intro {
     color: var(--primary-medium);
     line-height: var(--line-height-large);
