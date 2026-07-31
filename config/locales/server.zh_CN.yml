@@ -43,6 +43,7 @@ zh_CN:
       false: "错"
   site_settings:
     quiz_plugin_enabled: "启用答题面板与题库。"
+    quiz_header_icon_enabled: "在顶部菜单栏显示答题面板入口按钮。"
     quiz_categories: "答题面板可选分类过滤（留空表示全部）。"
     quiz_points_per_question: "未启用阶梯时，每道首次答对题目的固定积分（quiz_tier1_upto_count 为 0 时生效）。"
     quiz_tier1_upto_count: "阶梯积分：第一档每日计分题数上限 N。设为 0 则使用上方固定每题积分。"

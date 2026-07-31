@@ -9,7 +9,7 @@ export default class QuizButton extends Component {
   @service quiz;
 
   <template>
-    {{#if this.quiz.isEnabled}}
+    {{#if this.quiz.showHeaderIcon}}
       <li class="header-dropdown-toggle quiz-header-icon">
         <DButton
           @action={{this.quiz.togglePanel}}

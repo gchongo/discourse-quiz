@@ -58,6 +58,10 @@ export default class QuizService extends Service {
     return this.siteSettings.quiz_plugin_enabled;
   }
 
+  get showHeaderIcon() {
+    return this.isEnabled && this.siteSettings.quiz_header_icon_enabled;
+  }
+
   get isMobile() {
     return this.capabilities.isMobileDevice;
   }

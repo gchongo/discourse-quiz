@@ -55,9 +55,11 @@ export default {
     }
 
     withPluginApi((api) => {
-      api.headerIcons.add("discourse-quiz", QuizButton, {
-        before: "search",
-      });
+      if (siteSettings.quiz_header_icon_enabled) {
+        api.headerIcons.add("discourse-quiz", QuizButton, {
+          before: "search",
+        });
+      }
       registerSidebarQuizClickHandler(container);
 
       api.addCommunitySectionLink((BaseSectionLink) => {

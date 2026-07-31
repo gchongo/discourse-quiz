@@ -43,6 +43,7 @@ en:
       false: "False"
   site_settings:
     quiz_plugin_enabled: "Enable the quiz panel and question bank."
+    quiz_header_icon_enabled: "Show the quiz entry button in the top header bar."
     quiz_categories: "Optional category name filter for the quiz panel (leave blank for all)."
     quiz_points_per_question: "Points per correct answer when tier scoring is off (quiz_tier1_upto_count = 0)."
     quiz_tier1_upto_count: "Tiered scoring: number of daily scored answers in tier 1. Set to 0 to use flat quiz_points_per_question."
