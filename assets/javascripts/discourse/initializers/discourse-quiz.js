@@ -17,29 +17,34 @@ function registerSidebarQuizClickHandler(container) {
     return;
   }
 
-  document.addEventListener("click", (event) => {
-    if (event.defaultPrevented) {
-      return;
-    }
+  // Capture phase so we stop Discourse/Ember routing before navigation starts.
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (event.defaultPrevented) {
+        return;
+      }
 
-    if (event.button !== undefined && event.button !== 0) {
-      return;
-    }
+      if (event.button !== undefined && event.button !== 0) {
+        return;
+      }
 
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-      return;
-    }
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
 
-    const target = event.target;
-    const link = target?.closest?.(SIDEBAR_QUIZ_LINK_SELECTOR);
+      const target = event.target;
+      const link = target?.closest?.(SIDEBAR_QUIZ_LINK_SELECTOR);
 
-    if (!link) {
-      return;
-    }
+      if (!link) {
+        return;
+      }
 
-    event.preventDefault();
-    quiz.openPanel();
-  });
+      event.preventDefault();
+      quiz.openPanel();
+    },
+    true
+  );
 
   sidebarQuizClickHandlerRegistered = true;
 }
@@ -68,8 +73,10 @@ export default {
             return "discourse-quiz";
           }
 
-          get route() {
-            return "quiz";
+          // Use href (not route) so this is a plain <a>, not Ember LinkTo.
+          // Navigation is fully handled by the capture-phase click interceptor.
+          get href() {
+            return "#";
           }
 
           get title() {
