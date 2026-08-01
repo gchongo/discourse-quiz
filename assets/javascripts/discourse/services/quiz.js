@@ -100,6 +100,11 @@ export default class QuizService extends Service {
     return this.panelPhase === "playing";
   }
 
+  // Mid-quiz (question or result): summoning the panel should not reset progress.
+  get hasInProgressSession() {
+    return this.panelPhase === "playing";
+  }
+
   get canStart() {
     return (
       (this.selectAllMode || this.selectedCategories.length > 0) &&
@@ -256,6 +261,11 @@ export default class QuizService extends Service {
 
   @action
   openPanel() {
+    if (this.hasInProgressSession) {
+      this.revealPanelPreservingSession();
+      return;
+    }
+
     this.resetPanelLayoutForOpen();
     this.loadQuestionTypePreference();
     this.loadCategoryPreference();
@@ -275,16 +285,26 @@ export default class QuizService extends Service {
 
     this.panelVisible = !this.panelVisible;
     if (this.panelVisible) {
-      this.resetPanelLayoutForOpen();
-      this.loadQuestionTypePreference();
-      this.loadCategoryPreference();
-      this.showHome();
+      if (this.hasInProgressSession) {
+        this.isMinimized = false;
+      } else {
+        this.resetPanelLayoutForOpen();
+        this.loadQuestionTypePreference();
+        this.loadCategoryPreference();
+        this.showHome();
+      }
     }
     this.syncLayoutClasses();
 
-    if (this.panelVisible) {
+    if (this.panelVisible && !this.hasInProgressSession) {
       this.expandMobilePanelAfterOpen();
     }
+  }
+
+  revealPanelPreservingSession() {
+    this.panelVisible = true;
+    this.isMinimized = false;
+    this.syncLayoutClasses();
   }
 
   @action
